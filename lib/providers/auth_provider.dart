@@ -1,0 +1,1 @@
+//Keeps login status, role

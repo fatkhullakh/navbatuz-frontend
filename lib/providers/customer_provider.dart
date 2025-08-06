@@ -1,0 +1,1 @@
+//Keeps customer-related state
