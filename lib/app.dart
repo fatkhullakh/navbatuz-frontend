@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/customer/customer_home.dart';
+import 'screens/provider/provider_dashboard.dart';
+
 // import 'screens/register_screen.dart';
 
 class NavbatUzApp extends StatelessWidget {
@@ -16,6 +19,8 @@ class NavbatUzApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/customers': (context) => const CustomerHome(),
+        '/providers': (context) => const ProviderDashboard(),
         //'/register': (context) => const RegisterScreen(),
       },
     );
