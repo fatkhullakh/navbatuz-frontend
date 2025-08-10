@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
-  final storage = FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   void handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -37,10 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacementNamed(context, '/customers');
         } else if (role == 'OWNER') {
           Navigator.pushReplacementNamed(context, '/providers');
-          } else if (role == 'WORKER') {
-            Navigator.pushReplacementNamed(context, '/workers');
-          } else {
-            Navigator.pushReplacementNamed(context, '/customers');
+          // } else if (role == 'WORKER') {
+          //   Navigator.pushReplacementNamed(context, '/workers');
+        } else {
+          Navigator.pushReplacementNamed(context, '/customers');
         }
       } on DioException catch (dioErr) {
         print(
@@ -108,6 +108,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.pushNamed(context, '/register');
                   },
                   child: const Text("Don't have an account? Register"),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/change-password');
+                  },
+                  child: const Text("Forgot password?"),
                 ),
               ],
             ),
