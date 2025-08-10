@@ -3,8 +3,6 @@ import 'package:frontend/screens/test/test_customer_home.dart';
 import '../../models/provider.dart';
 import '../../services/provider_service.dart';
 
-// === REUSED Food UI shell (kept) ===
-
 class FoodAppHomeScreen extends StatelessWidget {
   const FoodAppHomeScreen({super.key});
 

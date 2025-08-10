@@ -6,6 +6,8 @@ import 'screens/provider/provider_dashboard.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/change_password_screen.dart';
 import 'screens/test/test_customer_home.dart';
+import 'navigation/nav_root.dart';
+import 'navigation/test_nav_root.dart';
 
 // import 'screens/register_screen.dart';
 
@@ -24,7 +26,7 @@ class NavbatUzApp extends StatelessWidget {
       routes: {
         '/onboarding': (context) => const LanguageSelectionScreen(),
         '/login': (context) => const LoginScreen(),
-        '/customers': (context) => const FoodAppHomeScreen(),
+        '/customers': (context) => const NavRoot(),
         '/providers': (context) => const ProviderDashboard(),
         '/register': (context) => const RegisterScreen(),
         '/change-password': (context) => ChangePasswordScreen(),
