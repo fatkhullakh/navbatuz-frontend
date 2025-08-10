@@ -24,11 +24,11 @@ class NavbatUzApp extends StatelessWidget {
       routes: {
         '/onboarding': (context) => const LanguageSelectionScreen(),
         '/login': (context) => const LoginScreen(),
-        '/customers': (context) => const CustomerHome(),
+        '/customers': (context) => const FoodAppHomeScreen(),
         '/providers': (context) => const ProviderDashboard(),
         '/register': (context) => const RegisterScreen(),
         '/change-password': (context) => ChangePasswordScreen(),
-        '/test-customer-home': (context) => FoodAppHomeScreen(),
+        '/test-customer-home': (context) => FoodAppHomeScreen1(),
       },
     );
   }

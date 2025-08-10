@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
-import '../models/page_response.dart';
+import '../core/dio_client.dart';
 import '../models/provider.dart';
-import 'api_service.dart';
 
 class ProviderService {
-  final Dio _dio = ApiService.client;
+  final Dio _dio = DioClient.build();
 
   Future<PageResponse<ProviderItem>> getProviders({
     int page = 0,
@@ -12,15 +11,11 @@ class ProviderService {
     String sortBy = 'name',
   }) async {
     final res = await _dio.get(
+      // FIXED PATH:
       '/providers/public/all',
-      queryParameters: {
-        'page': page,
-        'size': size,
-        'sortBy': sortBy,
-      },
+      queryParameters: {'page': page, 'size': size, 'sortBy': sortBy},
     );
-
-    return PageResponse<ProviderItem>.fromJson(
+    return PageResponse.fromJson(
       res.data as Map<String, dynamic>,
       (json) => ProviderItem.fromJson(json),
     );
