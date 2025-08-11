@@ -32,22 +32,22 @@ class _NavRootState extends State<NavRoot> {
     TabItem.home: (
       icon: Icons.home_rounded,
       title: 'Home',
-      color: Colors.purple
+      color: Color(0xFF6A89A7)
     ),
     TabItem.appointments: (
       icon: Icons.event_note_rounded,
       title: 'Appointments',
-      color: Colors.pink
+      color: Color(0xFF6A89A7)
     ),
     TabItem.search: (
       icon: Icons.search_rounded,
       title: 'Search',
-      color: Colors.orange
+      color: Color(0xFF6A89A7)
     ),
     TabItem.account: (
       icon: Icons.person_rounded,
       title: 'Account',
-      color: Colors.teal
+      color: Color(0xFF6A89A7)
     ),
   };
 
