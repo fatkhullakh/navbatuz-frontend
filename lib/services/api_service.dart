@@ -23,15 +23,13 @@ class ApiService {
   }
 
   static Future<Response> login(String email, String password) async {
-    return await _dio.post(
+    return _dio.post(
       '/auth/login',
       data: {
         'email': email,
         'password': password,
       },
-      options: Options(
-        headers: {'Content-Type': 'application/json'},
-      ),
+      options: Options(headers: {'Content-Type': 'application/json'}),
     );
   }
 
