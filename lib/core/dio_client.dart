@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DioClient {
-  static const _storage = FlutterSecureStorage();
+  static final _storage = FlutterSecureStorage(); // <-- fixed
 
   static Dio build() {
     final dio = Dio(
@@ -16,7 +16,6 @@ class DioClient {
       ),
     );
 
-    // Attach JWT to every request if present
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'jwt_token');
@@ -34,7 +33,6 @@ class DioClient {
       },
     ));
 
-    // TEMP logging – leave on until stable
     dio.interceptors.add(LogInterceptor(
       requestBody: true,
       responseBody: true,
@@ -46,9 +44,8 @@ class DioClient {
   }
 
   static String _baseUrl() {
-    if (kIsWeb) return 'http://localhost:8080/api'; // Web runs in browser
-    if (Platform.isAndroid)
-      return 'http://10.0.2.2:8080/api'; // Android emulator
-    return 'http://localhost:8080/api'; // iOS simulator / desktop
+    if (kIsWeb) return 'http://localhost:8080/api';
+    if (Platform.isAndroid) return 'http://10.0.2.2:8080/api';
+    return 'http://localhost:8080/api';
   }
 }
