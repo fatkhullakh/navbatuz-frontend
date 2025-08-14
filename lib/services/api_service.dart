@@ -59,4 +59,20 @@ class ApiService {
       },
     );
   }
+
+  static Future<Response> forgotPassword(String email) {
+    return _dio.post('/auth/forgot-password', data: {'email': email});
+  }
+
+  static Future<Response> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) {
+    return _dio.post('/auth/reset-password', data: {
+      'email': email,
+      'code': code,
+      'newPassword': newPassword,
+    });
+  }
 }

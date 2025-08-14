@@ -1,8 +1,7 @@
-// lib/navigation/nav_root.dart
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-// YOUR SCREENS
+// SCREENS
 import '../screens/customer/customer_home.dart';
 import '../screens/appointments/appointments_screen.dart';
 import '../screens/search/search_screen.dart';
@@ -27,27 +26,29 @@ class _NavRootState extends State<NavRoot> {
     TabItem.account: GlobalKey<NavigatorState>(),
   };
 
-  // tab metadata (icon/title/color)
+  // bump this to force AppointmentsScreen to remount (triggers initState -> reload)
+  int _appointmentsKeySeed = 0;
+
   final _tabs = <TabItem, ({IconData icon, String title, Color color})>{
     TabItem.home: (
       icon: Icons.home_rounded,
       title: 'Home',
-      color: Color(0xFF6A89A7)
+      color: const Color(0xFF6A89A7)
     ),
     TabItem.appointments: (
       icon: Icons.event_note_rounded,
       title: 'Appointments',
-      color: Color(0xFF6A89A7)
+      color: const Color(0xFF6A89A7)
     ),
     TabItem.search: (
       icon: Icons.search_rounded,
       title: 'Search',
-      color: Color(0xFF6A89A7)
+      color: const Color(0xFF6A89A7)
     ),
     TabItem.account: (
       icon: Icons.person_rounded,
       title: 'Account',
-      color: Color(0xFF6A89A7)
+      color: const Color(0xFF6A89A7)
     ),
   };
 
@@ -55,21 +56,19 @@ class _NavRootState extends State<NavRoot> {
     final nav = _navKeys[_current]!.currentState!;
     if (nav.canPop()) {
       nav.pop();
-      return false; // handled inside tab
+      return false;
     }
     if (_current != TabItem.home) {
       setState(() => _current = TabItem.home);
-      return false; // go back to Home instead of exiting
+      return false;
     }
-    return true; // allow system back to exit
+    return true;
   }
 
   void _onTap(int index) {
     final tapped = TabItem.values[index];
     if (tapped == _current) {
-      _navKeys[tapped]!
-          .currentState!
-          .popUntil((r) => r.isFirst); // pop to root of current tab
+      _navKeys[tapped]!.currentState!.popUntil((r) => r.isFirst);
     } else {
       setState(() => _current = tapped);
     }
@@ -92,9 +91,31 @@ class _NavRootState extends State<NavRoot> {
         body: IndexedStack(
           index: _current.index,
           children: [
-            _buildTabNavigator(TabItem.home, const FoodAppHomeScreen()),
+            // Home → can switch tabs via callbacks
             _buildTabNavigator(
-                TabItem.appointments, const AppointmentsScreen()),
+              TabItem.home,
+              CustomerHomeScreen(
+                onOpenSearch: () {
+                  _navKeys[TabItem.search]!
+                      .currentState!
+                      .popUntil((r) => r.isFirst);
+                  setState(() => _current = TabItem.search);
+                },
+                onOpenAppointments: () {
+                  _navKeys[TabItem.appointments]!
+                      .currentState!
+                      .popUntil((r) => r.isFirst);
+                  setState(() {
+                    _current = TabItem.appointments;
+                    _appointmentsKeySeed++; // force remount -> fetch fresh
+                  });
+                },
+              ),
+            ),
+            _buildTabNavigator(
+              TabItem.appointments,
+              AppointmentsScreen(key: ValueKey(_appointmentsKeySeed)),
+            ),
             _buildTabNavigator(TabItem.search, const SearchScreen()),
             _buildTabNavigator(TabItem.account, const AccountScreen()),
           ],

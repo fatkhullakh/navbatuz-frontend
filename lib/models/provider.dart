@@ -13,25 +13,32 @@ class ProviderLocation {
 }
 
 class ProviderItem {
+  final String id;
   final String name;
   final String? description;
   final double rating;
   final ProviderLocation location;
+  final String category;
 
   ProviderItem({
+    required this.id,
     required this.name,
     this.description,
     required this.rating,
     required this.location,
+    required this.category,
   });
 
   factory ProviderItem.fromJson(Map<String, dynamic> json) {
     return ProviderItem(
-      name: (json['name'] ?? '') as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
       description: json['description'] as String?,
       rating: (json['avgRating'] as num?)?.toDouble() ?? 0.0,
       location:
           ProviderLocation.fromJson(json['location'] as Map<String, dynamic>?),
+      // accept either "category" or "categoryName"
+      category: (json['category'] ?? json['categoryName'] ?? '').toString(),
     );
   }
 }
