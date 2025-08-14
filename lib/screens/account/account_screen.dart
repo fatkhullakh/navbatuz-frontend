@@ -6,6 +6,8 @@ import 'change_password_screen.dart';
 import 'support_screen.dart';
 import 'other_screen.dart';
 
+// TODO: user can change email and phone number in seperate section cause we need to send SMS to verify
+
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
   @override
