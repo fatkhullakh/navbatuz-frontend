@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
 
+// TODO: Maybe keep only the beginning of appointment not the interval of start - end
+
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
 

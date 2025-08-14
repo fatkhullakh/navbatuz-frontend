@@ -5,8 +5,6 @@ import '../models/appointment.dart';
 import '../models/provider.dart' as models;
 import 'appointment_service.dart';
 
-// TODO: Last visited appointment
-
 class HomeData {
   final List<CategoryItem> categories;
   final AppointmentItem? upcomingAppointment;

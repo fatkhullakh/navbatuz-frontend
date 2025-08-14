@@ -6,6 +6,7 @@ import 'screens/auth/register_screen.dart';
 import 'screens/auth/change_password_screen.dart';
 import 'screens/test/test_customer_home.dart';
 import 'navigation/nav_root.dart';
+import 'screens/appointments/appointments_screen.dart';
 
 // import 'screens/register_screen.dart';
 
@@ -29,6 +30,7 @@ class NavbatUzApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/change-password': (context) => ChangePasswordScreen(),
         '/test-customer-home': (context) => FoodAppHomeScreen1(),
+        '/customer-appointments': (_) => const AppointmentsScreen(),
       },
     );
   }
