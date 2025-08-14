@@ -23,12 +23,13 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      final updated = await _svc.updateSettings(
-          id: widget.initial.id, language: _language, country: _country);
+      await _svc.updateSettings(
+        id: widget.initial.id,
+        language: _language,
+        country: _country,
+      );
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Settings updated')));
-      Navigator.pop(context, updated);
+      Navigator.pop(context, true); // tell caller to reload
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

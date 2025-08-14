@@ -3,14 +3,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/dio_client.dart';
 
 class Me {
-  final String id; // now required
+  final String id;
   final String name;
   final String surname;
   final String phoneNumber;
   final String email;
   final DateTime? dateOfBirth;
-  final String? gender;
-  final String? language;
+  final String? gender; // MALE/FEMALE/OTHER
+  final String? language; // EN/UZ/RU/...
   final String? country;
 
   const Me({
@@ -57,7 +57,7 @@ class ProfileService {
       '/users/me',
       queryParameters:
           force ? {'_': DateTime.now().millisecondsSinceEpoch} : null,
-      options: Options(headers: {
+      options: Options(headers: const {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',

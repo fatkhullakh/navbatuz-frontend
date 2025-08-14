@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/profile_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  final String userId; // UUID required by backend
+  final String userId; // UUID
   const ChangePasswordScreen({super.key, required this.userId});
 
   @override
@@ -17,9 +17,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _svc = ProfileService();
 
   bool _saving = false;
-  bool _showCurrent = false;
-  bool _showNew = false;
-  bool _showConfirm = false;
+  bool _showCurrent = false, _showNew = false, _showConfirm = false;
 
   @override
   void dispose() {
@@ -37,7 +35,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
       return;
     }
-
     setState(() => _saving = true);
     try {
       await _svc.changePassword(
@@ -46,12 +43,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         newPassword: _new.text,
       );
       if (!mounted) return;
-      Navigator.pop(context, true); // indicate success to caller
+      Navigator.pop(context, true); // indicate success
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -91,11 +87,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
               obscureText: !_showNew,
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Required';
-                if (v.length < 6) return 'Min 6 characters';
-                return null;
-              },
+              validator: (v) =>
+                  (v == null || v.length < 6) ? 'Min 6 characters' : null,
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -109,10 +102,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
               obscureText: !_showConfirm,
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Required';
-                return null;
-              },
+              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -123,8 +113,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ? const SizedBox(
                         height: 18,
                         width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                        child: CircularProgressIndicator(strokeWidth: 2))
                     : const Text('Save'),
               ),
             ),

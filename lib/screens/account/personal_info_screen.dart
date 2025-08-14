@@ -43,8 +43,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     if (!_form.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
-      final updated = await _svc.updatePersonal(
-        id: widget.initial.id, // <-- pass id
+      await _svc.updatePersonal(
+        id: widget.initial.id,
         name: _name.text.trim(),
         surname: _surname.text.trim(),
         phoneNumber: _phone.text.trim(),
@@ -53,9 +53,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         gender: _gender,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Personal info updated')));
-      Navigator.pop(context, updated);
+      Navigator.pop(context, true); // tell caller to reload
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

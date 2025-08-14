@@ -1,4 +1,3 @@
-// lib/screens/account/account_screen.dart
 import 'package:flutter/material.dart';
 import '../../services/profile_service.dart';
 import 'personal_info_screen.dart';
@@ -15,45 +14,67 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final _svc = ProfileService();
-  late Future<Me> _future;
+
+  Me? _me;
+  bool _loading = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _future = _svc.getMe(force: true);
+    _load(force: true);
   }
 
-  Future<void> _reload() async {
-    setState(() => _future = _svc.getMe(force: true));
-    await _future;
+  Future<void> _load({bool force = false}) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final me = await _svc.getMe(force: force);
+      if (!mounted) return;
+      setState(() {
+        _me = me;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted)
+        setState(() {
+          _loading = false;
+        });
+    }
   }
 
-  Future<void> _openPersonal(Me me) async {
-    await Navigator.push(
+  Future<void> _openPersonal() async {
+    if (_me == null) return;
+    final changed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => PersonalInfoScreen(initial: me)),
+      MaterialPageRoute(builder: (_) => PersonalInfoScreen(initial: _me!)),
     );
-    if (!mounted) return;
-    await _reload();
+    if (changed == true) await _load(force: true);
   }
 
-  Future<void> _openSettings(Me me) async {
-    await Navigator.push(
+  Future<void> _openSettings() async {
+    if (_me == null) return;
+    final changed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => AccountSettingsScreen(initial: me)),
+      MaterialPageRoute(builder: (_) => AccountSettingsScreen(initial: _me!)),
     );
-    if (!mounted) return;
-    await _reload();
+    if (changed == true) await _load(force: true);
   }
 
-  Future<void> _openChangePassword(String userId) async {
-    await Navigator.push(
+  Future<void> _openChangePassword() async {
+    if (_me == null) return;
+    final changed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => ChangePasswordScreen(userId: userId)),
+      MaterialPageRoute(builder: (_) => ChangePasswordScreen(userId: _me!.id)),
     );
-    // no data to pull back; just refresh to be safe
-    if (!mounted) return;
-    await _reload();
+    // no user fields change here, but keep behavior consistent
+    if (changed == true) await _load(force: true);
   }
 
   Future<void> _logout() async {
@@ -65,125 +86,117 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final body = () {
+      if (_loading && _me == null && _error == null) {
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 120),
+            Center(child: CircularProgressIndicator()),
+          ],
+        );
+      }
+      if (_error != null) {
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SizedBox(height: 120),
+            Center(child: Text('Failed to load: $_error')),
+            const SizedBox(height: 12),
+            Center(
+              child: OutlinedButton(
+                onPressed: () => _load(force: true),
+                child: const Text('Retry'),
+              ),
+            ),
+          ],
+        );
+      }
+      final me = _me!;
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Header with user's info (kept)
+          Card(
+            elevation: 0,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Text(
+                  (me.fullName.isNotEmpty ? me.fullName[0] : '?').toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              title: Text(me.fullName,
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(me.phoneNumber),
+                  if (me.email.isNotEmpty) Text(me.email),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sections only (tap to navigate)
+          _SectionTile(
+            title: 'Personal Info',
+            subtitle: 'Name, Surname, Email, Phone, Birthday, Gender',
+            onTap: _openPersonal,
+          ),
+          const SizedBox(height: 12),
+          _SectionTile(
+            title: 'Account Settings',
+            subtitle: 'Language, Country',
+            onTap: _openSettings,
+          ),
+          const SizedBox(height: 12),
+          _SectionTile(
+            title: 'Change Password',
+            subtitle: 'Update your password',
+            onTap: _openChangePassword,
+          ),
+          const SizedBox(height: 12),
+          _SectionTile(
+            title: 'Support',
+            subtitle: 'FAQ, Contact Us, Report a problem',
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const SupportScreen())),
+          ),
+          const SizedBox(height: 12),
+          _SectionTile(
+            title: 'Other',
+            subtitle: 'About, Terms, Privacy',
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const OtherScreen())),
+          ),
+
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: _logout,
+              child: const Text('Log out'),
+            ),
+          ),
+        ],
+      );
+    }();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Account')),
-      body: RefreshIndicator(
-        onRefresh: _reload,
-        child: FutureBuilder<Me>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 120),
-                    Center(child: CircularProgressIndicator()),
-                  ]);
-            }
-            if (snap.hasError) {
-              return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const SizedBox(height: 120),
-                    Center(child: Text('Failed to load: ${snap.error}')),
-                  ]);
-            }
-            final me = snap.data!;
-
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              children: [
-                // --- Header with user info (kept) ---
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      child: Text(
-                        (me.fullName.isNotEmpty ? me.fullName[0] : '?')
-                            .toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    title: Text(
-                      me.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(me.phoneNumber),
-                        if (me.email.isNotEmpty) Text(me.email),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // --- Sections only ---
-                _SectionTile(
-                  title: 'Personal Info',
-                  subtitle: 'Name, Surname, Email, Phone, Birthday, Gender',
-                  onTap: () => _openPersonal(me),
-                ),
-                const SizedBox(height: 12),
-                _SectionTile(
-                  title: 'Account Settings',
-                  subtitle: 'Language, Country',
-                  onTap: () => _openSettings(me),
-                ),
-                const SizedBox(height: 12),
-                _SectionTile(
-                  title: 'Change Password',
-                  subtitle: 'Update your password',
-                  onTap: () => _openChangePassword(me.id),
-                ),
-                const SizedBox(height: 12),
-                _SectionTile(
-                  title: 'Support',
-                  subtitle: 'FAQ, Contact Us, Report a problem',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SupportScreen()),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _SectionTile(
-                  title: 'Other',
-                  subtitle: 'About, Terms, Privacy',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const OtherScreen()),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // --- Logout ---
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade600,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: _logout,
-                    child: const Text('Log out'),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+      body: RefreshIndicator(onRefresh: () => _load(force: true), child: body),
     );
   }
 }
@@ -192,23 +205,20 @@ class _SectionTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
-  const _SectionTile({
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
+  const _SectionTile(
+      {required this.title, required this.subtitle, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text(subtitle, style: const TextStyle(color: Colors.black54)),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ListTile(
+          title:
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle:
+              Text(subtitle, style: const TextStyle(color: Colors.black54)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onTap,
+        ),
+      );
 }
