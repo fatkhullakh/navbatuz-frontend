@@ -31,7 +31,9 @@ class _ForgotPasswordRequestScreenState
       await ApiService.forgotPassword(_email.text.trim());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('If the email exists, a code was sent.')),
+        const SnackBar(
+            content: Text(
+                'If the email exists, a code was sent.')), // TODO: maybe just say like code was sent, just enter
       );
       Navigator.pushReplacement(
         context,
