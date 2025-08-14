@@ -20,7 +20,14 @@ class AppointmentService {
   }
 
   Future<void> cancel(String id) async {
-    await _dio
-        .post('/appointments/$id/cancel'); // adjust if your backend differs
+    final res = await _dio.put('/appointments/$id/cancel');
+    if (res.statusCode != 200 && res.statusCode != 204) {
+      throw DioException(
+        requestOptions: res.requestOptions,
+        response: res,
+        error: 'Cancel failed (${res.statusCode})',
+        type: DioExceptionType.badResponse,
+      );
+    }
   }
 }
