@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../core/dio_client.dart';
 import '../models/appointment.dart';
+import '../models/appointment_detail.dart';
 
 class AppointmentService {
   final Dio _dio = DioClient.build();
@@ -66,5 +67,11 @@ class AppointmentService {
     }).toList()
       ..sort((a, b) => a.start.compareTo(b.start));
     return future.isNotEmpty ? future.first : null;
+  }
+
+  Future<AppointmentDetail> getDetails(String id) async {
+    final r = await _dio.get('/appointments/$id');
+    final map = (r.data as Map).cast<String, dynamic>();
+    return AppointmentDetail.fromJson(map);
   }
 }
