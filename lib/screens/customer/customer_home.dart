@@ -6,12 +6,9 @@ import '../../models/appointment.dart';
 import '../../models/provider.dart' as models;
 import '../search/search_screen.dart';
 
-// TODO: Last visited appointment
-// when pressed on category implement search based on category(like redirect to search screen and automatically maybe select category)
-
 class CustomerHomeScreen extends StatefulWidget {
   final VoidCallback onOpenSearch;
-  final VoidCallback onOpenAppointments; // <-- add
+  final VoidCallback onOpenAppointments;
   const CustomerHomeScreen({
     super.key,
     required this.onOpenSearch,
@@ -20,12 +17,6 @@ class CustomerHomeScreen extends StatefulWidget {
 
   @override
   State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
-}
-
-void openSearch(BuildContext context) {
-  Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const SearchScreen()),
-  );
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
@@ -39,19 +30,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Future<void> _refresh() async {
-    setState(() => _future = _svc.loadAll());
-    await _future;
+    final f = _svc.loadAll(); // async work outside setState
+    setState(() {
+      _future = f; // setState returns void
+    });
+    await f;
   }
-
-  // FIX: method inside State so `context` exists
-  void _openSearch() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SearchScreen()),
-    );
-  }
-
-  // void _openSearch() => Navigator.of(context).pushNamed('/search');
-  void _openAppointments() => Navigator.of(context).pushNamed('/appointments');
 
   @override
   Widget build(BuildContext context) {
@@ -80,44 +64,42 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: _SearchBar(
-                      onTap: widget.onOpenSearch), // <-- use callback
+                  child: _SearchBar(onTap: widget.onOpenSearch),
                 ),
-                // Categories
                 SliverToBoxAdapter(
                   child: _Section(
                     title: 'Categories',
                     child: _CategoryChips(
                       categories: data.categories,
-                      onTap: (c) => Navigator.of(context).pushNamed(
-                          '/providers',
-                          arguments: {'categoryId': c.id}),
+                      onTap: (c) {
+                        // TODO: wire filtered search by category
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const SearchScreen()),
+                        );
+                      },
                     ),
                   ),
                 ),
-                // Upcoming
                 SliverToBoxAdapter(
                   child: _Section(
                     title: 'Upcoming appointment',
                     child: data.upcomingAppointment != null
                         ? _UpcomingCard(
                             item: data.upcomingAppointment!,
-                            onTap: widget
-                                .onOpenAppointments, // <-- switch to Appointments tab
+                            onTap: widget.onOpenAppointments,
                           )
-                        : _NoUpcoming(
-                            onTap: widget.onOpenAppointments), // <-- CTA
+                        : _NoUpcoming(onTap: widget.onOpenAppointments),
                   ),
                 ),
-                // Favorites
                 SliverToBoxAdapter(
                   child: _Section(
                     title: 'Favorites',
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () => Navigator.of(context).pushNamed(
-                                '/providers',
-                                arguments: {'filter': 'favorites'}),
+                            onPressed: () {
+                              // TODO: wire to favorites list
+                            },
                             child: const Text('See all'),
                           )
                         : null,
@@ -126,15 +108,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         : const _MutedNote('No favorites yet.'),
                   ),
                 ),
-                // Recommended
                 SliverToBoxAdapter(
                   child: _Section(
                     title: 'Recommended',
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () => Navigator.of(context).pushNamed(
-                                '/providers',
-                                arguments: {'filter': 'recommended'}),
+                            onPressed: () {
+                              // TODO: wire to recommended list
+                            },
                             child: const Text('See all'),
                           )
                         : null,
@@ -153,7 +134,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
-/// Search input that navigates to Search screen when tapped
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
   const _SearchBar({required this.onTap});
@@ -165,7 +145,7 @@ class _SearchBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: GestureDetector(
-          onTap: onTap, // <-- no Navigator here
+          onTap: onTap,
           child: Container(
             height: 48,
             decoration: BoxDecoration(
@@ -194,7 +174,6 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-/// Generic section wrapper to keep spacing consistent
 class _Section extends StatelessWidget {
   final String title;
   final Widget child;
@@ -290,7 +269,7 @@ class _UpcomingCard extends StatelessWidget {
     return Card(
       elevation: 0,
       child: ListTile(
-        onTap: onTap, // <-- switch bottom bar
+        onTap: onTap,
         leading: const Icon(Icons.event_available),
         title: Text(item.serviceName ?? 'Service',
             maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -309,13 +288,14 @@ class _ProviderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 170,
+      height: 180,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: shops.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
           final s = shops[i];
+          final address = s.location.compact; // may be empty
           return SizedBox(
             width: 240,
             child: Card(
@@ -337,7 +317,6 @@ class _ProviderRow extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             color: const Color(0xFFF2F4F7),
                           ),
-                          // Add image if you have s.imageUrl
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -346,6 +325,13 @@ class _ProviderRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 15)),
+                      if (address.isNotEmpty)
+                        Text(
+                          address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                       Row(
                         children: [
                           const Icon(Icons.star_rate_rounded, size: 16),
@@ -416,6 +402,6 @@ class _Skeleton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         );
-    return ListView(children: [box(48), box(56), box(96), box(170), box(170)]);
+    return ListView(children: [box(48), box(56), box(96), box(180), box(180)]);
   }
 }

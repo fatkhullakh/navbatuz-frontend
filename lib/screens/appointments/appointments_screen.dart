@@ -1,10 +1,11 @@
+// lib/screens/appointments/appointments_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
+
 import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
-
-// TODO: Maybe keep only the beginning of appointment not the interval of start - end
+import 'appointment_details_screen.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
@@ -50,10 +51,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         }
       }
 
-      // Sort: upcoming by date ASC, past by date DESC
-      upcoming.sort((a, b) => a.start.compareTo(b.start));
-      past.sort((a, b) => b.start.compareTo(a.start));
+      upcoming.sort((a, b) => a.start.compareTo(b.start)); // ASC
+      past.sort((a, b) => b.start.compareTo(a.start)); // DESC
 
+      if (!mounted) return;
       setState(() {
         _upcoming = upcoming;
         _past = past;
@@ -64,7 +65,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         SnackBar(content: Text('Failed to load appointments: $e')),
       );
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (!mounted) return;
+      setState(() => _loading = false);
     }
   }
 
@@ -92,10 +94,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Appointment canceled')),
       );
-      await _load(); // refresh list
+      await _load();
     } on DioException catch (e) {
       if (!mounted) return;
-      // Optional: handle 401 → force login
       if (e.response?.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Session expired. Please login again.')),
@@ -117,10 +118,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   void _bookAgain(AppointmentItem a) {
-    // Navigate to provider/service — wire this to your routes.
-    // Example:
-    // Navigator.pushNamed(context, '/provider',
-    //   arguments: {'providerId': a.providerId, 'serviceId': a.serviceId});
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('TODO: open provider to book again')),
     );
@@ -137,7 +134,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       case 'CONFIRMED':
       case 'BOOKED':
       default:
-        return const Color(0xFF6C5CE7); // lavender-ish primary
+        return const Color(0xFF6C5CE7);
     }
   }
 
@@ -147,50 +144,83 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       appBar: AppBar(title: const Text('Appointments')),
       body: RefreshIndicator(
         onRefresh: _load,
-        child: _loading && _upcoming.isEmpty && _past.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                children: [
-                  if (_upcoming.isNotEmpty)
-                    _Section(
-                      title: 'Upcoming Appointments',
-                      children: _upcoming
-                          .map((a) => _AppointmentCard(
-                                item: a,
-                                dateFmt: _dateFmt,
-                                timeFmt: _timeFmt,
-                                statusColor: _statusColor(a.status),
-                                primaryActionText: 'Cancel',
-                                onPrimaryAction: () => _cancel(a.id),
-                              ))
-                          .toList(),
-                    ),
-                  if (_past.isNotEmpty) const SizedBox(height: 12),
-                  if (_past.isNotEmpty)
-                    _Section(
-                      title: 'Finished Appointments',
-                      children: _past
-                          .map((a) => _AppointmentCard(
-                                item: a,
-                                dateFmt: _dateFmt,
-                                timeFmt: _timeFmt,
-                                statusColor: _statusColor(a.status),
-                                primaryActionText: 'Book again',
-                                onPrimaryAction: () => _bookAgain(a),
-                              ))
-                          .toList(),
-                    ),
-                  if (_upcoming.isEmpty && _past.isEmpty)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 48.0),
-                        child: Text("You don't have any appointments yet."),
-                      ),
-                    ),
-                ],
-              ),
+        child: _buildBody(),
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    // Make loading & error states scrollable for pull-to-refresh
+    if (_loading && _upcoming.isEmpty && _past.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 120),
+          Center(child: CircularProgressIndicator()),
+        ],
+      );
+    }
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      children: [
+        if (_upcoming.isNotEmpty)
+          _Section(
+            title: 'Upcoming Appointments',
+            children: _upcoming
+                .map(
+                  (a) => _AppointmentCard(
+                    item: a,
+                    dateFmt: _dateFmt,
+                    timeFmt: _timeFmt,
+                    statusColor: _statusColor(a.status),
+                    primaryActionText: 'Cancel',
+                    onPrimaryAction: () => _cancel(a.id),
+                    onTap: () async {
+                      final changed = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AppointmentDetailsScreen(id: a.id),
+                        ),
+                      );
+                      if (changed == true && mounted) refresh();
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+        if (_past.isNotEmpty) const SizedBox(height: 12),
+        if (_past.isNotEmpty)
+          _Section(
+            title: 'Finished Appointments',
+            children: _past
+                .map(
+                  (a) => _AppointmentCard(
+                    item: a,
+                    dateFmt: _dateFmt,
+                    timeFmt: _timeFmt,
+                    statusColor: _statusColor(a.status),
+                    primaryActionText: 'Book again',
+                    onPrimaryAction: () => _bookAgain(a),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AppointmentDetailsScreen(id: a.id),
+                        ),
+                      );
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+        if (_upcoming.isEmpty && _past.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 48.0),
+            child: Center(child: Text("You don't have any appointments yet.")),
+          ),
+      ],
     );
   }
 }
@@ -206,16 +236,18 @@ class _Section extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700)),
+        Text(
+          title,
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
         ...children.expand((w) sync* {
           yield w;
           yield const SizedBox(height: 12);
-        })
+        }),
       ],
     );
   }
@@ -228,6 +260,7 @@ class _AppointmentCard extends StatelessWidget {
   final Color statusColor;
   final String primaryActionText;
   final VoidCallback onPrimaryAction;
+  final VoidCallback? onTap; // NEW
 
   const _AppointmentCard({
     required this.item,
@@ -236,6 +269,7 @@ class _AppointmentCard extends StatelessWidget {
     required this.statusColor,
     required this.primaryActionText,
     required this.onPrimaryAction,
+    this.onTap,
   });
 
   @override
@@ -252,117 +286,118 @@ class _AppointmentCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Leading icon
-            Container(
-              height: 46,
-              width: 46,
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 46,
+                width: 46,
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.event_rounded, size: 24),
               ),
-              child: const Icon(Icons.event_rounded, size: 24),
-            ),
-            const SizedBox(width: 12),
-            // Main text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Status chip aligned to top-right on small screens? keep here top-left inside column
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        item.status.toUpperCase(),
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                          letterSpacing: .3,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          item.status.toUpperCase(),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                            letterSpacing: .3,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (worker != null)
+                    const SizedBox(height: 8),
+                    Text(
+                      title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (worker != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          worker,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        worker,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        provider,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color
+                                  ?.withOpacity(.8),
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      provider,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color
-                                ?.withOpacity(.8),
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(dateText,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        const SizedBox(width: 8),
+                        const Text("•"),
+                        const SizedBox(width: 8),
+                        Text(timeText,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(dateText,
-                          style: Theme.of(context).textTheme.bodyMedium),
-                      const SizedBox(width: 8),
-                      const Text("•"),
-                      const SizedBox(width: 8),
-                      Text(timeText,
-                          style: Theme.of(context).textTheme.bodyMedium),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .surfaceVariant
-                            .withOpacity(.6),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceVariant
+                              .withOpacity(.6),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: onPrimaryAction,
+                        child: Text(primaryActionText),
                       ),
-                      onPressed: onPrimaryAction,
-                      child: Text(primaryActionText),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
