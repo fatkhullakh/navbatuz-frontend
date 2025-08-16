@@ -118,4 +118,61 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_generic => 'Что-то пошло не так.';
+
+  @override
+  String get provider_tab_services => 'Услуги';
+
+  @override
+  String get provider_tab_reviews => 'Отзывы';
+
+  @override
+  String get provider_tab_details => 'Детали';
+
+  @override
+  String get provider_about => 'О заведении';
+
+  @override
+  String get provider_category => 'Категория';
+
+  @override
+  String get provider_address => 'Адрес';
+
+  @override
+  String get provider_contacts => 'Контакты';
+
+  @override
+  String get provider_email_label => 'Email';
+
+  @override
+  String get provider_phone_label => 'Телефон';
+
+  @override
+  String get provider_team => 'Сотрудники';
+
+  @override
+  String get provider_hours => 'Время работы';
+
+  @override
+  String get provider_closed => 'Выходной';
+
+  @override
+  String get provider_retry => 'Повторить';
+
+  @override
+  String get provider_no_services => 'Нет услуг.';
+
+  @override
+  String get provider_no_reviews => 'Пока нет отзывов.';
+
+  @override
+  String get provider_book => 'Записаться';
+
+  @override
+  String get provider_free => 'БЕСПЛАТНО';
+
+  @override
+  String get provider_favourite => 'В избранное';
+
+  @override
+  String get provider_favourited => 'В избранном';
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import '../../l10n/app_localizations.dart';
 import '../../services/provider_public_service.dart';
 import '../../services/service_catalog_service.dart';
 
@@ -69,29 +71,31 @@ class _ProviderScreenState extends State<ProviderScreen>
 
   @override
   Widget build(BuildContext context) {
-    final header = _buildHeader();
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
           SliverAppBar(
             pinned: true,
             expandedHeight: 200,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                  color: const Color(0xFFF2F4F7)), // placeholder image
+            flexibleSpace: const FlexibleSpaceBar(
+              background: ColoredBox(color: Color(0xFFF2F4F7)), // placeholder
             ),
             bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(104), child: header),
+              preferredSize: const Size.fromHeight(104),
+              child: _buildHeader(t),
+            ),
           ),
           SliverPersistentHeader(
             pinned: true,
             delegate: _TabBarDelegate(
               TabBar(
                 controller: _tabs,
-                tabs: const [
-                  Tab(text: 'SERVICES'),
-                  Tab(text: 'REVIEWS'),
-                  Tab(text: 'DETAILS'),
+                tabs: [
+                  Tab(text: t.provider_tab_services),
+                  Tab(text: t.provider_tab_reviews),
+                  Tab(text: t.provider_tab_details),
                 ],
               ),
             ),
@@ -101,7 +105,7 @@ class _ProviderScreenState extends State<ProviderScreen>
           controller: _tabs,
           children: [
             _ServicesTab(future: _futureServices),
-            const _ReviewsTab(), // placeholder
+            const _ReviewsTab(),
             _DetailsTab(details: _details),
           ],
         ),
@@ -111,12 +115,13 @@ class _ProviderScreenState extends State<ProviderScreen>
           : FloatingActionButton.extended(
               onPressed: _favBusy ? null : _toggleFav,
               icon: Icon(_isFav ? Icons.favorite : Icons.favorite_border),
-              label: Text(_isFav ? 'Favourited' : 'Favourite'),
+              label:
+                  Text(_isFav ? t.provider_favourited : t.provider_favourite),
             ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppLocalizations t) {
     if (_error != null) {
       return Container(
         color: Colors.white,
@@ -125,22 +130,24 @@ class _ProviderScreenState extends State<ProviderScreen>
           children: [
             Text('Failed to load: $_error'),
             const SizedBox(height: 8),
-            OutlinedButton(onPressed: _loadHeader, child: const Text('Retry')),
+            OutlinedButton(
+                onPressed: _loadHeader, child: Text(t.provider_retry)),
           ],
         ),
       );
     }
     if (_details == null) {
-      return Container(
-        color: Colors.white,
+      return const SizedBox(
         height: 104,
-        alignment: Alignment.center,
-        child: const Padding(
-          padding: EdgeInsets.all(12),
-          child: CircularProgressIndicator(),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: CircularProgressIndicator(),
+          ),
         ),
       );
     }
+
     final d = _details!;
     return Container(
       color: Colors.white,
@@ -148,16 +155,18 @@ class _ProviderScreenState extends State<ProviderScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + rating + share + fav (the FAB also toggles fav)
+          // Title + rating + share
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(d.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w800)),
+                child: Text(
+                  d.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w800),
+                ),
               ),
               const Icon(Icons.star_rate_rounded, size: 18),
               const SizedBox(width: 4),
@@ -175,8 +184,12 @@ class _ProviderScreenState extends State<ProviderScreen>
                 const Icon(Icons.place_outlined, size: 16),
                 const SizedBox(width: 4),
                 Expanded(
-                    child: Text(d.location!.compact,
-                        maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  child: Text(
+                    d.location!.compact,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
         ],
@@ -206,8 +219,11 @@ class _ServicesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
     final priceFmt =
-        NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: 0);
+        NumberFormat.currency(locale: localeTag, symbol: '', decimalDigits: 0);
+
     return FutureBuilder<List<ServiceSummary>>(
       future: future,
       builder: (context, snap) {
@@ -219,12 +235,13 @@ class _ServicesTab extends StatelessWidget {
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Text('Failed to load: ${snap.error}'),
               const SizedBox(height: 8),
-              OutlinedButton(onPressed: () {}, child: const Text('Retry')),
+              OutlinedButton(onPressed: () {}, child: Text(t.provider_retry)),
             ]),
           );
         }
         final items = snap.data ?? const [];
-        if (items.isEmpty) return const Center(child: Text('No services.'));
+        if (items.isEmpty) return Center(child: Text(t.provider_no_services));
+
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           itemBuilder: (_, i) {
@@ -242,27 +259,33 @@ class _ServicesTab extends StatelessWidget {
               else
                 parts.add('${m}m');
             }
+            final priceText =
+                s.price == 0 ? t.provider_free : priceFmt.format(s.price);
+
             return Card(
               elevation: 0,
               child: ListTile(
                 title:
                     Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text(parts.join(' • ')),
+                subtitle: parts.isNotEmpty ? Text(parts.join(' • ')) : null,
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(s.price == 0 ? 'FREE' : priceFmt.format(s.price),
+                    Text(priceText,
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     SizedBox(
-                      width: 76,
+                      width: 88,
                       height: 28,
                       child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Book',
-                              style: TextStyle(fontSize: 12))),
-                    )
+                        onPressed: () {
+                          // TODO: go to choose time
+                        },
+                        child: Text(t.provider_book,
+                            style: const TextStyle(fontSize: 12)),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -280,65 +303,73 @@ class _ReviewsTab extends StatelessWidget {
   const _ReviewsTab();
   @override
   Widget build(BuildContext context) =>
-      const Center(child: Text('No reviews yet.'));
+      Center(child: Text(AppLocalizations.of(context)!.provider_no_reviews));
 }
 
 class _DetailsTab extends StatelessWidget {
   final ProvidersDetails? details;
   const _DetailsTab({required this.details});
 
+  // Localize server day name ("MONDAY") to full day name in current locale.
+  String _localizedDay(BuildContext context, String serverDay) {
+    final map = {
+      'MONDAY': 1,
+      'TUESDAY': 2,
+      'WEDNESDAY': 3,
+      'THURSDAY': 4,
+      'FRIDAY': 5,
+      'SATURDAY': 6,
+      'SUNDAY': 7,
+    };
+    final wd = map[serverDay.toUpperCase()];
+    if (wd == null) return serverDay;
+    final now = DateTime.now();
+    final diff = (wd - now.weekday) % 7;
+    final ref = now.add(Duration(days: diff));
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    String day = DateFormat('EEEE', locale).format(ref);
+    return day[0].toUpperCase() + day.substring(1);
+  }
+
+  String _trimHHmm(String? hhmmss) {
+    if (hhmmss == null || hhmmss.isEmpty) return '';
+    final p = hhmmss.split(':');
+    return p.length >= 2 ? '${p[0]}:${p[1]}' : hhmmss;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final d = details;
     if (d == null) {
       return const Center(
-          child: Padding(
-        padding: EdgeInsets.all(12.0),
-        child: CircularProgressIndicator(),
-      ));
-    }
-    final tf = DateFormat('HH:mm');
-    String trim(String s) {
-      final p = s.split(':');
-      if (p.length >= 2) return '${p[0]}:${p[1]}';
-      return s;
-    }
-
-    String niceDay(String serverDay) {
-      switch (serverDay.toUpperCase()) {
-        case 'MONDAY':
-          return 'Mon';
-        case 'TUESDAY':
-          return 'Tue';
-        case 'WEDNESDAY':
-          return 'Wed';
-        case 'THURSDAY':
-          return 'Thu';
-        case 'FRIDAY':
-          return 'Fri';
-        case 'SATURDAY':
-          return 'Sat';
-        case 'SUNDAY':
-          return 'Sun';
-      }
-      return serverDay;
+        child: Padding(
+          padding: EdgeInsets.all(12.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: [
         if ((d.description ?? '').isNotEmpty) ...[
-          const Text('About', style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(t.provider_about,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(d.description!),
           const SizedBox(height: 16),
         ],
-        const Text('Category', style: TextStyle(fontWeight: FontWeight.w700)),
+
+        Text(t.provider_category,
+            style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
         Text(d.category),
         const SizedBox(height: 16),
+
         if ((d.location?.compact ?? '').isNotEmpty) ...[
-          const Text('Address', style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(t.provider_address,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Row(children: [
             const Icon(Icons.place_outlined, size: 18),
@@ -347,9 +378,53 @@ class _DetailsTab extends StatelessWidget {
           ]),
           const SizedBox(height: 16),
         ],
+
+        // Contacts
+        if (d.email.isNotEmpty || d.phone.isNotEmpty) ...[
+          Text(t.provider_contacts,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          if (d.email.isNotEmpty)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.email_outlined),
+              title: Text(t.provider_email_label),
+              subtitle: Text(d.email),
+            ),
+          if (d.phone.isNotEmpty)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.phone_outlined),
+              title: Text(t.provider_phone_label),
+              subtitle: Text(d.phone),
+            ),
+          const SizedBox(height: 8),
+        ],
+
+        // Workers
+        if (d.workers.isNotEmpty) ...[
+          Text(t.provider_team,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: d.workers.map((w) {
+              return Chip(
+                label: Text(w.name, overflow: TextOverflow.ellipsis),
+                avatar: const Icon(Icons.person, size: 16),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Working hours
         if (d.businessHours.isNotEmpty) ...[
-          const Text('Working hours',
-              style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(t.provider_hours,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           for (final h in d.businessHours)
             Padding(
@@ -357,10 +432,17 @@ class _DetailsTab extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                      width: 90,
-                      child: Text(niceDay(h.day),
-                          style: const TextStyle(fontWeight: FontWeight.w600))),
-                  Text('${trim(h.start)} – ${trim(h.end)}'),
+                    width: 160,
+                    child: Text(
+                      _localizedDay(context, h.day),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  Expanded(
+                    child: (h.start == null || h.end == null)
+                        ? Text(t.provider_closed)
+                        : Text('${_trimHHmm(h.start)} – ${_trimHHmm(h.end)}'),
+                  ),
                 ],
               ),
             ),

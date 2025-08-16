@@ -41,5 +41,27 @@
   "action_save": "Сохранить",
   "action_retry": "Повторить",
   "action_reload": "Обновить",
-  "error_generic": "Что-то пошло не так."
+  "error_generic": "Что-то пошло не так.",
+  
+  "provider_tab_services": "Услуги",
+  "provider_tab_reviews": "Отзывы",
+  "provider_tab_details": "Детали",
+
+  "provider_about": "О заведении",
+  "provider_category": "Категория",
+  "provider_address": "Адрес",
+  "provider_contacts": "Контакты",
+  "provider_email_label": "Email",
+  "provider_phone_label": "Телефон",
+  "provider_team": "Сотрудники",
+  "provider_hours": "Время работы",
+  "provider_closed": "Выходной",
+
+  "provider_retry": "Повторить",
+  "provider_no_services": "Нет услуг.",
+  "provider_no_reviews": "Пока нет отзывов.",
+  "provider_book": "Записаться",
+  "provider_free": "БЕСПЛАТНО",
+  "provider_favourite": "В избранное",
+  "provider_favourited": "В избранном"
 }

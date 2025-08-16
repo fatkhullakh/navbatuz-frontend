@@ -41,5 +41,27 @@
   "action_save": "Saqlash",
   "action_retry": "Qayta urinish",
   "action_reload": "Yangilash",
-  "error_generic": "Nimadir xato ketdi."
+  "error_generic": "Nimadir xato ketdi.",
+
+  "provider_tab_services": "Xizmatlar",
+  "provider_tab_reviews": "Sharhlar",
+  "provider_tab_details": "Tafsilotlar",
+
+  "provider_about": "Haqida",
+  "provider_category": "Kategoriya",
+  "provider_address": "Manzil",
+  "provider_contacts": "Kontaktlar",
+  "provider_email_label": "Email",
+  "provider_phone_label": "Telefon",
+  "provider_team": "Xodimlar",
+  "provider_hours": "Ish vaqti",
+  "provider_closed": "Yopiq",
+
+  "provider_retry": "Qayta urinish",
+  "provider_no_services": "Xizmatlar yo‘q.",
+  "provider_no_reviews": "Hozircha sharhlar yo‘q.",
+  "provider_book": "Band qilish",
+  "provider_free": "BEKORGA",
+  "provider_favourite": "Sevimlilarga",
+  "provider_favourited": "Sevimlida"
 }

@@ -118,4 +118,61 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get error_generic => 'Nimadir xato ketdi.';
+
+  @override
+  String get provider_tab_services => 'Xizmatlar';
+
+  @override
+  String get provider_tab_reviews => 'Sharhlar';
+
+  @override
+  String get provider_tab_details => 'Tafsilotlar';
+
+  @override
+  String get provider_about => 'Haqida';
+
+  @override
+  String get provider_category => 'Kategoriya';
+
+  @override
+  String get provider_address => 'Manzil';
+
+  @override
+  String get provider_contacts => 'Kontaktlar';
+
+  @override
+  String get provider_email_label => 'Email';
+
+  @override
+  String get provider_phone_label => 'Telefon';
+
+  @override
+  String get provider_team => 'Xodimlar';
+
+  @override
+  String get provider_hours => 'Ish vaqti';
+
+  @override
+  String get provider_closed => 'Yopiq';
+
+  @override
+  String get provider_retry => 'Qayta urinish';
+
+  @override
+  String get provider_no_services => 'Xizmatlar yo‘q.';
+
+  @override
+  String get provider_no_reviews => 'Hozircha sharhlar yo‘q.';
+
+  @override
+  String get provider_book => 'Band qilish';
+
+  @override
+  String get provider_free => 'BEKORGA';
+
+  @override
+  String get provider_favourite => 'Sevimlilarga';
+
+  @override
+  String get provider_favourited => 'Sevimlida';
 }

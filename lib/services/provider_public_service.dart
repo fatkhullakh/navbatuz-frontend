@@ -31,25 +31,35 @@ class LocationSummary {
 }
 
 class BusinessHourItem {
-  final String day; // e.g. MONDAY
-  final String start; // "HH:mm:ss"
-  final String end; // "HH:mm:ss"
-  BusinessHourItem({required this.day, required this.start, required this.end});
+  final String day; // e.g. "MONDAY"
+  final String? start; // "HH:mm:ss" OR null
+  final String? end; // "HH:mm:ss" OR null
+  BusinessHourItem({required this.day, this.start, this.end});
+
   factory BusinessHourItem.fromJson(Map<String, dynamic> j) => BusinessHourItem(
         day: (j['day'] ?? '').toString(),
-        start: (j['startTime'] ?? '').toString(),
-        end: (j['endTime'] ?? '').toString(),
+        start: (j['startTime'] as String?)?.toString(),
+        end: (j['endTime'] as String?)?.toString(),
       );
 }
 
 class WorkerLite {
   final String id;
-  final String name; // fallback-friendly
+  final String name; // name + surname nicely combined
+
   WorkerLite({required this.id, required this.name});
-  factory WorkerLite.fromJson(Map<String, dynamic> j) => WorkerLite(
-        id: (j['id'] ?? '').toString(),
-        name: (j['name'] ?? j['fullName'] ?? 'Worker').toString(),
-      );
+
+  factory WorkerLite.fromJson(Map<String, dynamic> j) {
+    final n = (j['name'] ?? '').toString().trim();
+    final s = (j['surname'] ?? '').toString().trim();
+    final combined = [n, s].where((e) => e.isNotEmpty).join(' ');
+    return WorkerLite(
+      id: (j['id'] ?? '').toString(),
+      name: combined.isNotEmpty
+          ? combined
+          : (j['fullName'] ?? 'Worker').toString(),
+    );
+  }
 }
 
 class ProviderResponse {
@@ -134,7 +144,6 @@ class ProviderPublicService {
   Future<ProviderResponse> getById(String id) async {
     final r = await _dio.get('/providers/public/$id');
     return ProviderResponse.fromJson(r.data as Map<String, dynamic>);
-    // contains avgRating + category + LocationSummary? (may be null)
   }
 
   Future<ProvidersDetails> getDetails(String id) async {
@@ -142,7 +151,6 @@ class ProviderPublicService {
     return ProvidersDetails.fromJson(r.data as Map<String, dynamic>);
   }
 
-  // Favourites
   Future<List<String>> getFavouriteIds() async {
     final r = await _dio.get('/customers/favourites');
     return (r.data as List).map((e) => e.toString()).toList();

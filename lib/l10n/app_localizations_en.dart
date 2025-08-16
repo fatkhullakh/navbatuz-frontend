@@ -118,4 +118,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_generic => 'Something went wrong.';
+
+  @override
+  String get provider_tab_services => 'Services';
+
+  @override
+  String get provider_tab_reviews => 'Reviews';
+
+  @override
+  String get provider_tab_details => 'Details';
+
+  @override
+  String get provider_about => 'About';
+
+  @override
+  String get provider_category => 'Category';
+
+  @override
+  String get provider_address => 'Address';
+
+  @override
+  String get provider_contacts => 'Contacts';
+
+  @override
+  String get provider_email_label => 'Email';
+
+  @override
+  String get provider_phone_label => 'Phone';
+
+  @override
+  String get provider_team => 'Workers';
+
+  @override
+  String get provider_hours => 'Working hours';
+
+  @override
+  String get provider_closed => 'Closed';
+
+  @override
+  String get provider_retry => 'Retry';
+
+  @override
+  String get provider_no_services => 'No services.';
+
+  @override
+  String get provider_no_reviews => 'No reviews yet.';
+
+  @override
+  String get provider_book => 'Book';
+
+  @override
+  String get provider_free => 'FREE';
+
+  @override
+  String get provider_favourite => 'Favourite';
+
+  @override
+  String get provider_favourited => 'Favourited';
 }

@@ -318,6 +318,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong.'**
   String get error_generic;
+
+  /// No description provided for @provider_tab_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get provider_tab_services;
+
+  /// No description provided for @provider_tab_reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get provider_tab_reviews;
+
+  /// No description provided for @provider_tab_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get provider_tab_details;
+
+  /// No description provided for @provider_about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get provider_about;
+
+  /// No description provided for @provider_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get provider_category;
+
+  /// No description provided for @provider_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get provider_address;
+
+  /// No description provided for @provider_contacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts'**
+  String get provider_contacts;
+
+  /// No description provided for @provider_email_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get provider_email_label;
+
+  /// No description provided for @provider_phone_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get provider_phone_label;
+
+  /// No description provided for @provider_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Workers'**
+  String get provider_team;
+
+  /// No description provided for @provider_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get provider_hours;
+
+  /// No description provided for @provider_closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get provider_closed;
+
+  /// No description provided for @provider_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get provider_retry;
+
+  /// No description provided for @provider_no_services.
+  ///
+  /// In en, this message translates to:
+  /// **'No services.'**
+  String get provider_no_services;
+
+  /// No description provided for @provider_no_reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet.'**
+  String get provider_no_reviews;
+
+  /// No description provided for @provider_book.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get provider_book;
+
+  /// No description provided for @provider_free.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE'**
+  String get provider_free;
+
+  /// No description provided for @provider_favourite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite'**
+  String get provider_favourite;
+
+  /// No description provided for @provider_favourited.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourited'**
+  String get provider_favourited;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

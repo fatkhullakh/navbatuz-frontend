@@ -41,5 +41,26 @@
   "action_save": "Save",
   "action_retry": "Retry",
   "action_reload": "Reload",
-  "error_generic": "Something went wrong."
+  "error_generic": "Something went wrong.",
+  "provider_tab_services": "Services",
+  "provider_tab_reviews": "Reviews",
+  "provider_tab_details": "Details",
+
+  "provider_about": "About",
+  "provider_category": "Category",
+  "provider_address": "Address",
+  "provider_contacts": "Contacts",
+  "provider_email_label": "Email",
+  "provider_phone_label": "Phone",
+  "provider_team": "Workers",
+  "provider_hours": "Working hours",
+  "provider_closed": "Closed",
+
+  "provider_retry": "Retry",
+  "provider_no_services": "No services.",
+  "provider_no_reviews": "No reviews yet.",
+  "provider_book": "Book",
+  "provider_free": "FREE",
+  "provider_favourite": "Favourite",
+  "provider_favourited": "Favourited"
 }
