@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../../services/home_service.dart';
-import '../../models/appointment.dart';
-import '../../models/provider.dart' as models;
-import '../search/search_screen.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/home_service.dart' as hs;
 
 class CustomerHomeScreen extends StatefulWidget {
   final VoidCallback onOpenSearch;
@@ -20,8 +17,8 @@ class CustomerHomeScreen extends StatefulWidget {
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
-  final _svc = HomeService();
-  late Future<HomeData> _future;
+  final _svc = hs.HomeService();
+  late Future<hs.HomeData> _future;
 
   @override
   void initState() {
@@ -30,20 +27,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Future<void> _refresh() async {
-    final f = _svc.loadAll(); // async work outside setState
-    setState(() {
-      _future = f; // setState returns void
-    });
-    await f;
+    setState(() => _future = _svc.loadAll());
+    await _future;
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F9),
       body: RefreshIndicator(
         onRefresh: _refresh,
-        child: FutureBuilder<HomeData>(
+        child: FutureBuilder<hs.HomeData>(
           future: _future,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
@@ -53,10 +49,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               return ListView(
                 children: [
                   const SizedBox(height: 120),
-                  _ErrorBox(
-                    text: 'Failed to load home. Pull to refresh.',
-                    onRetry: _refresh,
-                  ),
+                  _ErrorBox(text: t.error_home_failed, onRetry: _refresh),
                 ],
               );
             }
@@ -64,64 +57,81 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: _SearchBar(onTap: widget.onOpenSearch),
+                  child: _SearchBar(
+                      onTap: widget.onOpenSearch, hint: t.home_search_hint),
                 ),
                 SliverToBoxAdapter(
                   child: _Section(
-                    title: 'Categories',
+                    title: t.categories,
                     child: _CategoryChips(
                       categories: data.categories,
-                      onTap: (c) {
-                        // TODO: wire filtered search by category
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const SearchScreen()),
-                        );
-                      },
+                      onTap: (c) => Navigator.of(context).pushNamed(
+                        '/providers',
+                        arguments: {'categoryId': c.id},
+                      ),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: _Section(
-                    title: 'Upcoming appointment',
-                    child: data.upcomingAppointment != null
-                        ? _UpcomingCard(
-                            item: data.upcomingAppointment!,
+                    title: t.upcoming_appointment,
+                    child: () {
+                      final a = data.upcomingAppointment;
+                      if (a == null) {
+                        return _NoUpcoming(
                             onTap: widget.onOpenAppointments,
-                          )
-                        : _NoUpcoming(onTap: widget.onOpenAppointments),
+                            label: t.btn_go_appointments);
+                      }
+                      DateTime? start;
+                      final dd =
+                          (a.date?.toLowerCase() == 'null') ? null : a.date;
+                      final tt = (a.startTime?.toLowerCase() == 'null')
+                          ? null
+                          : a.startTime;
+                      if (dd != null && tt != null) {
+                        start = DateTime.tryParse('${dd}T$tt');
+                      }
+                      return _UpcomingCard(
+                        start: start,
+                        serviceName: a.serviceName,
+                        providerName: a.providerName,
+                        onTap: widget.onOpenAppointments, // switch tab
+                      );
+                    }(),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: _Section(
-                    title: 'Favorites',
+                    title: t.favorites,
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () {
-                              // TODO: wire to favorites list
-                            },
-                            child: const Text('See all'),
+                            onPressed: () => Navigator.of(context).pushNamed(
+                              '/providers',
+                              arguments: {'filter': 'favorites'},
+                            ),
+                            child: Text(t.see_all),
                           )
                         : null,
                     child: data.favoriteShops.isNotEmpty
                         ? _ProviderRow(shops: data.favoriteShops)
-                        : const _MutedNote('No favorites yet.'),
+                        : _MutedNote(t.no_favorites),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: _Section(
-                    title: 'Recommended',
+                    title: t.recommended,
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () {
-                              // TODO: wire to recommended list
-                            },
-                            child: const Text('See all'),
+                            onPressed: () => Navigator.of(context).pushNamed(
+                              '/providers',
+                              arguments: {'filter': 'recommended'},
+                            ),
+                            child: Text(t.see_all),
                           )
                         : null,
                     child: data.recommendedShops.isNotEmpty
                         ? _ProviderRow(shops: data.recommendedShops)
-                        : const _MutedNote('No recommendations right now.'),
+                        : _MutedNote(t.no_recommended),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -136,7 +146,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
-  const _SearchBar({required this.onTap});
+  final String hint;
+  const _SearchBar({required this.onTap, required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -144,28 +155,32 @@ class _SearchBar extends StatelessWidget {
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: const [
-                Icon(Icons.search_rounded),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Search services or businesses',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black54),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Ink(
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.search_rounded),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      hint,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.black54),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -211,13 +226,14 @@ class _Section extends StatelessWidget {
 }
 
 class _CategoryChips extends StatelessWidget {
-  final List<CategoryItem> categories;
-  final void Function(CategoryItem) onTap;
+  final List<hs.CategoryItem> categories;
+  final void Function(hs.CategoryItem) onTap;
   const _CategoryChips({required this.categories, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    if (categories.isEmpty) return const _MutedNote('No categories.');
+    final t = AppLocalizations.of(context)!;
+    if (categories.isEmpty) return _MutedNote(t.no_categories);
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -236,10 +252,8 @@ class _CategoryChips extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: const Color(0xFF77ADE2)),
               ),
-              child: Text(
-                c.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
+              child: Text(c.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
           );
         },
@@ -250,31 +264,49 @@ class _CategoryChips extends StatelessWidget {
 
 class _NoUpcoming extends StatelessWidget {
   final VoidCallback onTap;
-  const _NoUpcoming({required this.onTap});
+  final String label;
+  const _NoUpcoming({required this.onTap, required this.label});
   @override
   Widget build(BuildContext context) => OutlinedButton.icon(
         onPressed: onTap,
         icon: const Icon(Icons.event_note_rounded),
-        label: const Text('Go to my appointments →'),
+        label: Text(label),
       );
 }
 
 class _UpcomingCard extends StatelessWidget {
-  final AppointmentItem item;
+  final DateTime? start;
+  final String? serviceName;
+  final String? providerName;
   final VoidCallback onTap;
-  const _UpcomingCard({required this.item, required this.onTap});
+
+  const _UpcomingCard({
+    super.key,
+    required this.start,
+    required this.serviceName,
+    required this.providerName,
+    required this.onTap,
+  });
+
   @override
   Widget build(BuildContext context) {
-    final time = DateFormat('EEE, d MMM • HH:mm').format(item.start);
+    final timeText =
+        start != null ? DateFormat('EEE, d MMM • HH:mm').format(start!) : null;
+    final subtitleParts = <String>[];
+    if ((providerName ?? '').isNotEmpty) subtitleParts.add(providerName!);
+    if (timeText != null) subtitleParts.add(timeText);
+    final subtitle = subtitleParts.join(' • ');
+
     return Card(
       elevation: 0,
       child: ListTile(
-        onTap: onTap,
+        onTap: onTap, // switches to Appointments tab
         leading: const Icon(Icons.event_available),
-        title: Text(item.serviceName ?? 'Service',
+        title: Text((serviceName ?? 'Service'),
             maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text('${item.providerName ?? 'Provider'} • $time',
-            maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: subtitle.isNotEmpty
+            ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
+            : null,
         trailing: const Icon(Icons.chevron_right),
       ),
     );
@@ -282,20 +314,19 @@ class _UpcomingCard extends StatelessWidget {
 }
 
 class _ProviderRow extends StatelessWidget {
-  final List<models.ProviderItem> shops;
+  final List<hs.ProviderItem> shops;
   const _ProviderRow({required this.shops});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180,
+      height: 170,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: shops.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
           final s = shops[i];
-          final address = s.location.compact; // may be empty
           return SizedBox(
             width: 240,
             child: Card(
@@ -320,26 +351,20 @@ class _ProviderRow extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(s.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 15)),
-                      if (address.isNotEmpty)
-                        Text(
-                          address,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.black54),
-                        ),
+                      Text(
+                        s.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
                       Row(
                         children: [
                           const Icon(Icons.star_rate_rounded, size: 16),
                           const SizedBox(width: 2),
-                          Text(
-                            s.rating.toStringAsFixed(1),
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
+                          Text(s.rating.toStringAsFixed(1),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
@@ -351,6 +376,15 @@ class _ProviderRow extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (s.location != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          s.location!.compact,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -368,9 +402,8 @@ class _MutedNote extends StatelessWidget {
   const _MutedNote(this.text);
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Text(text, style: const TextStyle(color: Colors.black54)),
-      );
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(text, style: const TextStyle(color: Colors.black54)));
 }
 
 class _ErrorBox extends StatelessWidget {
@@ -384,7 +417,8 @@ class _ErrorBox extends StatelessWidget {
             Text(text),
             const SizedBox(height: 8),
             OutlinedButton(
-                onPressed: () => onRetry(), child: const Text('Retry')),
+                onPressed: () => onRetry(),
+                child: Text(AppLocalizations.of(context)!.action_reload)),
           ],
         ),
       );
@@ -398,10 +432,9 @@ class _Skeleton extends StatelessWidget {
           height: h,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F2F5),
-            borderRadius: BorderRadius.circular(12),
-          ),
+              color: const Color(0xFFF0F2F5),
+              borderRadius: BorderRadius.circular(12)),
         );
-    return ListView(children: [box(48), box(56), box(96), box(180), box(180)]);
+    return ListView(children: [box(48), box(56), box(96), box(170), box(170)]);
   }
 }

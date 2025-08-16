@@ -1,15 +1,75 @@
-import 'dart:convert';
+// lib/services/home_service.dart
 import 'package:dio/dio.dart';
-import '../core/dio_client.dart';
-import '../models/appointment.dart';
-import '../models/provider.dart' as models;
+import 'api_service.dart';
+
+class CategoryItem {
+  final String id; // e.g. "CLINIC"
+  final String name; // display name
+  CategoryItem({required this.id, required this.name});
+  factory CategoryItem.fromJson(Map<String, dynamic> j) => CategoryItem(
+      id: (j['id'] ?? '').toString(), name: (j['name'] ?? '').toString());
+}
+
+class ProviderLocation {
+  final String? addressLine1;
+  final String? city;
+  final String? countryIso2;
+  ProviderLocation({this.addressLine1, this.city, this.countryIso2});
+
+  factory ProviderLocation.fromJson(Map<String, dynamic> j) => ProviderLocation(
+        addressLine1: j['addressLine1'] as String?,
+        city: j['city'] as String?,
+        countryIso2: j['countryIso2'] as String?,
+      );
+
+  String get compact {
+    final parts = <String>[];
+    if ((addressLine1 ?? '').trim().isNotEmpty) parts.add(addressLine1!.trim());
+    if ((city ?? '').trim().isNotEmpty) parts.add(city!.trim());
+    if ((countryIso2 ?? '').trim().isNotEmpty) parts.add(countryIso2!.trim());
+    return parts.join(', ');
+  }
+}
+
+class ProviderItem {
+  final String id;
+  final String name;
+  final String description;
+  final double rating;
+  final String category;
+  final ProviderLocation? location;
+  ProviderItem({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.rating,
+    required this.category,
+    required this.location,
+  });
+}
+
+class HomeAppointment {
+  final String id;
+  final String serviceName;
+  final String providerName;
+  final DateTime start;
+  HomeAppointment({
+    required this.id,
+    required this.serviceName,
+    required this.providerName,
+    required this.start,
+  });
+
+  get date => null;
+
+  get startTime => null;
+}
 
 class HomeData {
   final List<CategoryItem> categories;
-  final AppointmentItem? upcomingAppointment;
-  final List<models.ProviderItem> favoriteShops;
-  final List<models.ProviderItem> recommendedShops;
-
+  final HomeAppointment? upcomingAppointment;
+  final List<ProviderItem> favoriteShops;
+  final List<ProviderItem> recommendedShops;
   HomeData({
     required this.categories,
     required this.upcomingAppointment,
@@ -18,36 +78,94 @@ class HomeData {
   });
 }
 
-class CategoryItem {
-  final String id;
-  final String name;
-  CategoryItem({required this.id, required this.name});
-  factory CategoryItem.fromJson(Map<String, dynamic> j) => CategoryItem(
-      id: (j['id'] ?? '').toString(),
-      name: (j['name'] ?? 'Unknown').toString());
-}
-
 class HomeService {
-  final Dio _dio = DioClient.build();
+  final Dio _dio = ApiService.client;
+  static const _prefix = ''; // see note in ProfileService
 
   Future<HomeData> loadAll() async {
-    // Make each call safe so one failure doesn't nuke the whole screen
-    final catsF = _loadCategories().catchError((_) => <CategoryItem>[]);
-    final upF = _loadUpcomingFromList().catchError((_) => null);
-    final favIdsF = _loadFavouriteIds().catchError((_) => <String>[]);
-    final providersF =
-        _loadProvidersPage().catchError((_) => <models.ProviderItem>[]);
+    final results = await Future.wait([
+      _dio.get('$_prefix/providers'), // categories
+      _dio.get('$_prefix/appointments/me', queryParameters: {'onlyNext': true}),
+      _dio.get('$_prefix/customers/favourites'),
+      _dio.get('$_prefix/providers/public/all',
+          queryParameters: {'page': 0, 'size': 50, 'sortBy': 'name'}),
+    ]);
 
-    final results = await Future.wait([catsF, upF, favIdsF, providersF]);
+    // Categories
+    final catsRaw = results[0].data;
+    final categories = (catsRaw is List)
+        ? catsRaw
+            .map((e) =>
+                CategoryItem.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList()
+        : <CategoryItem>[];
 
-    final categories = results[0] as List<CategoryItem>;
-    final upcoming = results[1] as AppointmentItem?;
-    final favIds = (results[2] as List).map((e) => e.toString()).toSet();
-    final providers = results[3] as List<models.ProviderItem>;
+    // Upcoming (pick the earliest future BOOKED/CONFIRMED)
+    final apptsRaw = results[1].data;
+    HomeAppointment? upcoming;
+    final now = DateTime.now();
+    if (apptsRaw is List) {
+      for (final it in apptsRaw) {
+        final m = Map<String, dynamic>.from(it as Map);
+        final date = (m['date'] ?? '').toString(); // yyyy-MM-dd
+        final startTime = (m['startTime'] ?? '').toString(); // HH:mm:ss
+        DateTime? start;
+        try {
+          start = DateTime.parse('${date}T$startTime');
+        } catch (_) {}
+        if (start == null) continue;
+
+        final status = (m['status'] ?? '').toString().toUpperCase();
+        if ((status == 'BOOKED' || status == 'CONFIRMED') &&
+            start.isAfter(now)) {
+          final cand = HomeAppointment(
+            id: (m['id'] ?? '').toString(),
+            serviceName: (m['serviceName'] ?? '').toString(),
+            providerName: (m['providerName'] ?? '').toString(),
+            start: start,
+          );
+          if (upcoming == null || cand.start.isBefore(upcoming!.start)) {
+            upcoming = cand;
+          }
+        }
+      }
+    }
+
+    // Favourites: list of provider IDs
+    final favIds = <String>{};
+    final favRaw = results[2].data;
+    if (favRaw is List) {
+      for (final e in favRaw) {
+        favIds.add(e.toString());
+      }
+    }
+
+    // Providers (page content)
+    final provRaw = results[3].data;
+    final content = (provRaw is Map && provRaw['content'] is List)
+        ? (provRaw['content'] as List)
+        : const <dynamic>[];
+
+    final providers = content.map((e) {
+      final m = Map<String, dynamic>.from(e as Map);
+      ProviderLocation? loc;
+      final locRaw = m['location'];
+      if (locRaw is Map) {
+        loc = ProviderLocation.fromJson(Map<String, dynamic>.from(locRaw));
+      }
+      return ProviderItem(
+        id: (m['id'] ?? '').toString(),
+        name: (m['name'] ?? '').toString(),
+        description: (m['description'] ?? '').toString(),
+        rating:
+            (m['avgRating'] is num) ? (m['avgRating'] as num).toDouble() : 0.0,
+        category: (m['category'] ?? '').toString(),
+        location: loc,
+      );
+    }).toList();
 
     final favorites = providers.where((p) => favIds.contains(p.id)).toList();
-    final recommended =
-        providers.where((p) => !favIds.contains(p.id)).take(10).toList();
+    final recommended = providers; // naive
 
     return HomeData(
       categories: categories,
@@ -55,69 +173,5 @@ class HomeService {
       favoriteShops: favorites,
       recommendedShops: recommended,
     );
-  }
-
-  // ---------- helpers ----------
-
-  // BACKEND: ProviderController @GetMapping("/api/providers")
-  // returns [{id,name}] list from enum values
-  Future<List<CategoryItem>> _loadCategories() async {
-    final r = await _dio.get('/providers'); // << moved from /categories
-    final data = r.data;
-    if (data is List) {
-      return data
-          .cast<Map<String, dynamic>>()
-          .map(CategoryItem.fromJson)
-          .toList();
-    }
-    return const <CategoryItem>[];
-  }
-
-  Future<AppointmentItem?> _loadUpcomingFromList() async {
-    final r =
-        await _dio.get('/appointments/me', queryParameters: {'onlyNext': true});
-    final data = r.data;
-    final list = <AppointmentItem>[];
-
-    if (data is List) {
-      for (final it in data) {
-        if (it is Map)
-          list.add(AppointmentItem.fromJson(it.cast<String, dynamic>()));
-      }
-    } else if (data is Map) {
-      list.add(AppointmentItem.fromJson(data.cast<String, dynamic>()));
-    }
-
-    final now = DateTime.now();
-    list.removeWhere((a) {
-      final s = a.status.toUpperCase();
-      return !(s == 'BOOKED' || s == 'CONFIRMED') || !a.start.isAfter(now);
-    });
-    list.sort((a, b) => a.start.compareTo(b.start));
-    return list.isNotEmpty ? list.first : null;
-  }
-
-  Future<List<String>> _loadFavouriteIds() async {
-    final r = await _dio.get('/customers/favourites');
-    final data = r.data;
-    if (data is List) return data.map((e) => e.toString()).toList();
-    return const <String>[];
-  }
-
-  Future<List<models.ProviderItem>> _loadProvidersPage() async {
-    // Paged response: { content: [ {id, name, ..., location: {...}|null } ], ... }
-    final r = await _dio.get(
-      '/providers/public/all',
-      queryParameters: {'page': 0, 'size': 50, 'sortBy': 'name'},
-      options: Options(
-          responseType: ResponseType.plain), // defensive against text/plain
-    );
-    dynamic body = r.data;
-    if (body is String) body = jsonDecode(body);
-    if (body is Map && body['content'] is List) {
-      final list = (body['content'] as List).cast<Map<String, dynamic>>();
-      return list.map(models.ProviderItem.fromJson).toList();
-    }
-    return const <models.ProviderItem>[];
   }
 }

@@ -1,0 +1,45 @@
+{
+  "@@locale": "ru",
+
+  "navHome": "Главная",
+  "navAppointments": "Записи",
+  "navSearch": "Поиск",
+  "navAccount": "Аккаунт",
+
+  "home_search_hint": "Поиск услуг или бизнесов",
+  "categories": "Категории",
+  "no_categories": "Нет категорий.",
+  "upcoming_appointment": "Ближайшая запись",
+  "no_upcoming": "Нет ближайших записей.",
+  "favorites": "Избранное",
+  "no_favorites": "Пока нет избранных.",
+  "recommended": "Рекомендовано",
+  "no_recommended": "Пока нет рекомендаций.",
+  "see_all": "Смотреть все",
+  "error_home_failed": "Не удалось загрузить главную. Потяните для обновления.",
+  "btn_go_appointments": "Перейти к моим записям →",
+
+  "account_title": "Аккаунт",
+  "account_personal": "Личные данные",
+  "account_personal_sub": "Имя, Фамилия, Email, Телефон, ДР, Пол",
+  "account_settings": "Настройки",
+  "account_settings_sub": "Язык, Страна",
+  "account_change_password": "Смена пароля",
+  "account_change_password_sub": "Обновите пароль",
+  "account_support": "Поддержка",
+  "account_support_sub": "FAQ, Контакты, Сообщить о проблеме",
+  "account_other": "Другое",
+  "account_other_sub": "О нас, Условия, Конфиденциальность",
+  "logout": "Выйти",
+
+  "settingsTitle": "Настройки",
+  "settingsLanguage": "Язык",
+  "settingsChangePassword": "Сменить пароль",
+
+  "settings_country": "Страна",
+  "settings_country_hint": "Код страны ISO-2",
+  "action_save": "Сохранить",
+  "action_retry": "Повторить",
+  "action_reload": "Обновить",
+  "error_generic": "Что-то пошло не так."
+}

@@ -1,0 +1,45 @@
+{
+  "@@locale": "en",
+
+  "navHome": "Home",
+  "navAppointments": "Appointments",
+  "navSearch": "Search",
+  "navAccount": "Account",
+
+  "home_search_hint": "Search services or businesses",
+  "categories": "Categories",
+  "no_categories": "No categories.",
+  "upcoming_appointment": "Upcoming appointment",
+  "no_upcoming": "No upcoming appointments.",
+  "favorites": "Favorites",
+  "no_favorites": "No favorites yet.",
+  "recommended": "Recommended",
+  "no_recommended": "No recommendations right now.",
+  "see_all": "See all",
+  "error_home_failed": "Failed to load home. Pull to refresh.",
+  "btn_go_appointments": "Go to my appointments →",
+
+  "account_title": "Account",
+  "account_personal": "Personal Info",
+  "account_personal_sub": "Name, Surname, Email, Phone, Birthday, Gender",
+  "account_settings": "Account Settings",
+  "account_settings_sub": "Language, Country",
+  "account_change_password": "Change Password",
+  "account_change_password_sub": "Update your password",
+  "account_support": "Support",
+  "account_support_sub": "FAQ, Contact Us, Report a problem",
+  "account_other": "Other",
+  "account_other_sub": "About, Terms, Privacy",
+  "logout": "Log out",
+
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsChangePassword": "Change password",
+
+  "settings_country": "Country",
+  "settings_country_hint": "Country ISO-2",
+  "action_save": "Save",
+  "action_retry": "Retry",
+  "action_reload": "Reload",
+  "error_generic": "Something went wrong."
+}

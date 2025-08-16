@@ -8,6 +8,7 @@ import 'screens/test/test_customer_home.dart';
 import 'navigation/nav_root.dart';
 import 'screens/appointments/appointments_screen.dart';
 import 'screens/auth/forgot_password_request_screen.dart';
+import 'screens/shop/shop_details_screen.dart';
 
 // import 'screens/register_screen.dart';
 
@@ -29,11 +30,16 @@ class NavbatUzApp extends StatelessWidget {
         '/customers': (context) => const NavRoot(),
         '/providers': (context) => const ProviderDashboard(),
         '/register': (context) => const RegisterScreen(),
-        '/change-password': (context) => ChangePasswordScreen(),
+        //'/change-password': (context) => ChangePasswordScreen(),
         '/test-customer-home': (context) => FoodAppHomeScreen1(),
         '/customer-appointments': (_) => const AppointmentsScreen(),
         '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
         // '/forgot-password/verify' is pushed via MaterialPageRoute with email arg
+        '/shop': (context) {
+          final id = ModalRoute.of(context)!.settings.arguments as String;
+          return ShopDetailsScreen(providerId: id);
+        },
+        // '/service': (context) => ServiceDetailsScreen(...), // when ready
       },
     );
   }

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/profile_service.dart';
 import 'personal_info_screen.dart';
 import 'account_settings_screen.dart';
 import 'change_password_screen.dart';
 import 'support_screen.dart';
 import 'other_screen.dart';
-
-// TODO: user can change email and phone number in seperate section cause we need to send SMS to verify
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -35,19 +34,12 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       final me = await _svc.getMe(force: force);
       if (!mounted) return;
-      setState(() {
-        _me = me;
-      });
+      setState(() => _me = me);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      if (mounted)
-        setState(() {
-          _loading = false;
-        });
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -70,12 +62,10 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _openChangePassword() async {
-    if (_me == null) return;
     final changed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => ChangePasswordScreen(userId: _me!.id)),
+      MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
     );
-    // no user fields change here, but keep behavior consistent
     if (changed == true) await _load(force: true);
   }
 
@@ -88,6 +78,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     final body = () {
       if (_loading && _me == null && _error == null) {
         return ListView(
@@ -103,80 +95,78 @@ class _AccountScreenState extends State<AccountScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 120),
-            Center(child: Text('Failed to load: $_error')),
+            Center(child: Text(t.error_generic)),
             const SizedBox(height: 12),
             Center(
               child: OutlinedButton(
                 onPressed: () => _load(force: true),
-                child: const Text('Retry'),
+                child: Text(t.action_retry),
               ),
             ),
           ],
         );
       }
       final me = _me!;
+      final fullName =
+          [me.name, me.surname].where((s) => (s ?? '').isNotEmpty).join(' ');
+      final avatar = (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         children: [
-          // Header with user's info (kept)
           Card(
             elevation: 0,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
               leading: CircleAvatar(
-                child: Text(
-                  (me.fullName.isNotEmpty ? me.fullName[0] : '?').toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
+                child: Text(avatar,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
               ),
-              title: Text(me.fullName,
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              title:
+                  Text(fullName, maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(me.phoneNumber),
-                  if (me.email.isNotEmpty) Text(me.email),
+                  if ((me.phoneNumber ?? '').isNotEmpty) Text(me.phoneNumber!),
+                  if ((me.email ?? '').isNotEmpty) Text(me.email!),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // Sections only (tap to navigate)
           _SectionTile(
-            title: 'Personal Info',
-            subtitle: 'Name, Surname, Email, Phone, Birthday, Gender',
+            title: t.account_personal,
+            subtitle: t.account_personal_sub,
             onTap: _openPersonal,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Account Settings',
-            subtitle: 'Language, Country',
+            title: t.account_settings,
+            subtitle: t.account_settings_sub,
             onTap: _openSettings,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Change Password',
-            subtitle: 'Update your password',
+            title: t.account_change_password,
+            subtitle: t.account_change_password_sub,
             onTap: _openChangePassword,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Support',
-            subtitle: 'FAQ, Contact Us, Report a problem',
+            title: t.account_support,
+            subtitle: t.account_support_sub,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const SupportScreen())),
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Other',
-            subtitle: 'About, Terms, Privacy',
+            title: t.account_other,
+            subtitle: t.account_other_sub,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const OtherScreen())),
           ),
-
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -189,7 +179,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: _logout,
-              child: const Text('Log out'),
+              child: Text(t.logout),
             ),
           ),
         ],
@@ -197,7 +187,7 @@ class _AccountScreenState extends State<AccountScreen> {
     }();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: AppBar(title: Text(t.account_title)),
       body: RefreshIndicator(onRefresh: () => _load(force: true), child: body),
     );
   }

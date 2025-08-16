@@ -1,39 +1,71 @@
-// lib/models/appointment.dart
+import 'package:intl/intl.dart';
+
 class AppointmentItem {
   final String id;
-  final DateTime start; // combined date + startTime
-  final DateTime end; // combined date + endTime
-  final String status; // e.g., COMPLETED/BOOKED/CANCELED
+  final DateTime start;
+  final DateTime end;
+  final String status;
+  final String? providerName;
+  final String? serviceName;
+  final String? workerName;
 
-  final String? workerName; // new
-  final String? providerName; // new
-  final String? serviceName; // new
+  // Optional location snippet (if provided by details endpoint)
+  final String? addressLine1;
+  final String? city;
+  final String? countryIso2;
+  final double? price;
 
   AppointmentItem({
     required this.id,
     required this.start,
     required this.end,
     required this.status,
-    this.workerName,
     this.providerName,
     this.serviceName,
+    this.workerName,
+    this.addressLine1,
+    this.city,
+    this.countryIso2,
+    this.price,
   });
 
-  factory AppointmentItem.fromJson(Map<String, dynamic> j) {
-    final date = j['date'] as String; // "2025-07-29"
-    final startTime = j['startTime'] as String; // "12:00[:00]"
-    final endTime = j['endTime'] as String;
+  static DateTime _combine(String d, String t) {
+    // d = yyyy-MM-dd, t = HH:mm:ss
+    final dt = DateFormat("yyyy-MM-dd HH:mm:ss").parse('$d $t', true).toLocal();
+    return dt;
+  }
 
-    String norm(String t) => t.split(':').length == 2 ? '$t:00' : t;
+  factory AppointmentItem.fromJson(Map<String, dynamic> j) {
+    final hasStart =
+        j.containsKey('start') && j.containsKey('end'); // server variant A
+    final hasDateTime =
+        j.containsKey('date') && j.containsKey('startTime'); // variant B
+
+    DateTime start, end;
+    if (hasStart) {
+      start = DateTime.parse(j['start'].toString()).toLocal();
+      end = DateTime.parse(j['end'].toString()).toLocal();
+    } else if (hasDateTime) {
+      start = _combine(j['date'].toString(), j['startTime'].toString());
+      end = _combine(j['date'].toString(), j['endTime'].toString());
+    } else {
+      // Fallback to now if bad payload
+      start = DateTime.now();
+      end = start.add(const Duration(minutes: 25));
+    }
 
     return AppointmentItem(
-      id: j['id'] as String,
-      start: DateTime.parse('${date}T${norm(startTime)}'),
-      end: DateTime.parse('${date}T${norm(endTime)}'),
-      status: (j['status'] ?? 'BOOKED') as String,
-      workerName: j['workerName'] as String?,
-      providerName: j['providerName'] as String?,
-      serviceName: j['serviceName'] as String?,
+      id: j['id'].toString(),
+      start: start,
+      end: end,
+      status: (j['status'] ?? '').toString(),
+      providerName: j['providerName']?.toString(),
+      serviceName: j['serviceName']?.toString(),
+      workerName: j['workerName']?.toString(),
+      addressLine1: j['addressLine1']?.toString(),
+      city: j['city']?.toString(),
+      countryIso2: j['countryIso2']?.toString(),
+      price: (j['price'] is num) ? (j['price'] as num).toDouble() : null,
     );
   }
 }
