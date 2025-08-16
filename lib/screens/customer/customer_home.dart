@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/home_service.dart' as hs;
+import '../providers/provider_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   final VoidCallback onOpenSearch;
@@ -335,8 +336,14 @@ class _ProviderRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12)),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: () =>
-                    Navigator.of(context).pushNamed('/shop', arguments: s.id),
+                onTap: () {
+                  // use root navigator so it sees global routes
+                  Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(
+                      builder: (_) => ProviderScreen(providerId: s.id),
+                    ),
+                  );
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
