@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/appointment_service.dart';
 import '../../models/appointment.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId;
@@ -25,18 +26,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Future<void> _cancel(AppointmentItem a) async {
+    final t = AppLocalizations.of(context)!;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel appointment?'),
-        content: const Text('This action cannot be undone.'),
+        title: Text(t.appointment_cancel_confirm_title),
+        content: Text(t.appointment_cancel_confirm_body),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('No')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.common_no),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Yes, cancel')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.appointment_cancel_confirm_yes),
+          ),
         ],
       ),
     );
@@ -46,18 +51,28 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     try {
       await _svc.cancel(a.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Appointment canceled')));
-      Navigator.pop(context, true); // notify parent to refresh
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.appointment_cancel_success)),
+      );
+      Navigator.pop(context, true);
+    } on LateCancellationException catch (e) {
+      if (!mounted) return;
+      final msg = (e.minutes != null)
+          ? t.appointment_cancel_too_late_with_window(e.minutes!)
+          : t.appointment_cancel_too_late;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } on DioException catch (e) {
       if (!mounted) return;
       final code = e.response?.statusCode;
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cancel failed: ${code ?? ''}')));
+      final msg = (code == 401)
+          ? t.error_session_expired
+          : t.appointment_cancel_failed_generic(code?.toString() ?? '');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Cancel failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.appointment_cancel_failed_unknown)),
+      );
     } finally {
       if (mounted) setState(() => _busyCancel = false);
     }
@@ -65,10 +80,16 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final df = DateFormat('EEE, d MMM yyyy');
     final tf = DateFormat('HH:mm');
+    final priceFmt = NumberFormat.currency(
+      locale: Localizations.localeOf(context).toLanguageTag(),
+      symbol: '',
+      decimalDigits: 0,
+    );
     return Scaffold(
-      appBar: AppBar(title: const Text('Appointment Details')),
+      appBar: AppBar(title: Text(t.appointment_details_title)),
       body: FutureBuilder<AppointmentItem>(
         future: _future,
         builder: (context, snap) {
@@ -91,6 +112,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   leading: const Icon(Icons.medical_services_outlined),
                   title: Text(a.serviceName ?? 'Service'),
                   subtitle: Text(a.providerName ?? 'Provider'),
+                  trailing: (a.price != null)
+                      ? Text(
+                          priceFmt.format(a.price),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 12),

@@ -325,4 +325,68 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get continueLabel => 'Продолжить';
+
+  @override
+  String get appointment_details_title => 'Детали записи';
+
+  @override
+  String get appointments_upcoming_title => 'Предстоящие записи';
+
+  @override
+  String get appointments_finished_title => 'Завершённые записи';
+
+  @override
+  String get appointments_empty => 'У вас пока нет записей.';
+
+  @override
+  String get appointment_cancel_button => 'Отменить запись';
+
+  @override
+  String get appointment_cancel_confirm_title => 'Отменить запись?';
+
+  @override
+  String get appointment_cancel_confirm_body => 'Это действие нельзя отменить.';
+
+  @override
+  String get appointment_cancel_confirm_yes => 'Да, отменить';
+
+  @override
+  String get appointment_cancel_success => 'Запись отменена';
+
+  @override
+  String get appointment_cancel_too_late => 'Слишком поздно для отмены.';
+
+  @override
+  String appointment_cancel_too_late_with_window(Object minutes) {
+    return 'Слишком поздно для отмены (осталось $minutes мин).';
+  }
+
+  @override
+  String appointment_cancel_failed_generic(Object code) {
+    return 'Не удалось отменить: $code';
+  }
+
+  @override
+  String get appointment_cancel_failed_unknown => 'Ошибка при отмене. Попробуйте ещё раз.';
+
+  @override
+  String get error_session_expired => 'Сессия истекла. Пожалуйста, войдите снова.';
+
+  @override
+  String get appointment_staff_label => 'Сотрудник';
+
+  @override
+  String get common_no => 'Нет';
+
+  @override
+  String get common_back => 'Назад';
+
+  @override
+  String get common_cancelling => 'Отмена…';
+
+  @override
+  String get common_service => 'Услуга';
+
+  @override
+  String get common_provider => 'Провайдер';
 }

@@ -117,5 +117,26 @@
   "subtotal": "Subtotal",
   "bookingSuccessTitle": "Appointment booked!",
   "bookingSuccessDesc": "You’re all set. See you soon.",
-  "continueLabel": "Continue"
+  "continueLabel": "Continue",
+
+    "appointment_details_title": "Appointment Details",
+    "appointments_upcoming_title": "Upcoming Appointments",
+    "appointments_finished_title": "Finished Appointments",
+    "appointments_empty": "You don't have any appointments yet.",
+    "appointment_cancel_button": "Cancel appointment",
+    "appointment_cancel_confirm_title": "Cancel appointment?",
+    "appointment_cancel_confirm_body": "This action cannot be undone.",
+    "appointment_cancel_confirm_yes": "Yes, cancel",
+    "appointment_cancel_success": "Appointment canceled",
+    "appointment_cancel_too_late": "Too late to cancel.",
+    "appointment_cancel_too_late_with_window": "Too late to cancel (within {minutes} min window).",
+    "appointment_cancel_failed_generic": "Cancel failed: {code}",
+    "appointment_cancel_failed_unknown": "Cancel failed. Please try again.",
+    "error_session_expired": "Session expired. Please login again.",
+    "appointment_staff_label": "Staff",
+    "common_no": "No",
+    "common_back": "Back",
+    "common_cancelling": "Cancelling…",
+    "common_service": "Service",
+    "common_provider": "Provider"
 }

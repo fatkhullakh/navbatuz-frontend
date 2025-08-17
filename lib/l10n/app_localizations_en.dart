@@ -325,4 +325,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueLabel => 'Continue';
+
+  @override
+  String get appointment_details_title => 'Appointment Details';
+
+  @override
+  String get appointments_upcoming_title => 'Upcoming Appointments';
+
+  @override
+  String get appointments_finished_title => 'Finished Appointments';
+
+  @override
+  String get appointments_empty => 'You don\'t have any appointments yet.';
+
+  @override
+  String get appointment_cancel_button => 'Cancel appointment';
+
+  @override
+  String get appointment_cancel_confirm_title => 'Cancel appointment?';
+
+  @override
+  String get appointment_cancel_confirm_body => 'This action cannot be undone.';
+
+  @override
+  String get appointment_cancel_confirm_yes => 'Yes, cancel';
+
+  @override
+  String get appointment_cancel_success => 'Appointment canceled';
+
+  @override
+  String get appointment_cancel_too_late => 'Too late to cancel.';
+
+  @override
+  String appointment_cancel_too_late_with_window(Object minutes) {
+    return 'Too late to cancel (within $minutes min window).';
+  }
+
+  @override
+  String appointment_cancel_failed_generic(Object code) {
+    return 'Cancel failed: $code';
+  }
+
+  @override
+  String get appointment_cancel_failed_unknown => 'Cancel failed. Please try again.';
+
+  @override
+  String get error_session_expired => 'Session expired. Please login again.';
+
+  @override
+  String get appointment_staff_label => 'Staff';
+
+  @override
+  String get common_no => 'No';
+
+  @override
+  String get common_back => 'Back';
+
+  @override
+  String get common_cancelling => 'Cancelling…';
+
+  @override
+  String get common_service => 'Service';
+
+  @override
+  String get common_provider => 'Provider';
 }

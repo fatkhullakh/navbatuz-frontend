@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
 import 'appointment_details_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   final VoidCallback? onChanged;
@@ -73,18 +74,20 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   Future<void> _cancel(String id) async {
+    final t = AppLocalizations.of(context)!;
+
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel appointment?'),
-        content: const Text('This action cannot be undone.'),
+        title: Text(t.appointment_cancel_confirm_title),
+        content: Text(t.appointment_cancel_confirm_body),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('No')),
+              child: Text(t.common_no)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Yes, cancel')),
+              child: Text(t.appointment_cancel_confirm_yes)),
         ],
       ),
     );
@@ -94,26 +97,31 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       await _svc.cancel(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Appointment canceled')));
+          .showSnackBar(SnackBar(content: Text(t.appointment_cancel_success)));
       await _load();
       widget.onChanged?.call();
+    } on LateCancellationException catch (e) {
+      if (!mounted) return;
+      final msg = (e.minutes != null)
+          ? t.appointment_cancel_too_late_with_window(e.minutes!)
+          : t.appointment_cancel_too_late;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } on DioException catch (e) {
       if (!mounted) return;
       if (e.response?.statusCode == 401) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Session expired. Please login again.')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.error_session_expired)));
         Navigator.of(context, rootNavigator: true)
             .pushNamedAndRemoveUntil('/login', (_) => false);
         return;
       }
+      final code = e.response?.statusCode?.toString() ?? '';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Cancel failed: ${e.response?.statusCode ?? ''}')),
-      );
-    } catch (e) {
+          SnackBar(content: Text(t.appointment_cancel_failed_generic(code))));
+    } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Cancel failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.appointment_cancel_failed_unknown)));
     }
   }
 
