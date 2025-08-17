@@ -1,12 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../models/appointment_detail.dart';
 import '../../services/appointment_service.dart';
-import '../../models/appointment.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
-  final String appointmentId;
-  const AppointmentDetailsScreen({super.key, required this.appointmentId});
+  final String id;
+  const AppointmentDetailsScreen({super.key, required this.id});
 
   @override
   State<AppointmentDetailsScreen> createState() =>
@@ -15,17 +14,34 @@ class AppointmentDetailsScreen extends StatefulWidget {
 
 class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   final _svc = AppointmentService();
-  late Future<AppointmentItem> _future;
-  bool _busyCancel = false;
+  late Future<AppointmentDetail> _future;
+
+  final _headerFmt = DateFormat('HH:mm - EEE, MMM d');
+  final _timeFmt = DateFormat('HH:mm');
 
   @override
   void initState() {
     super.initState();
-    _future = _svc.getById(widget.appointmentId);
+    _future = _svc.getDetails(widget.id);
   }
 
-  Future<void> _cancel(AppointmentItem a) async {
-    final confirmed = await showDialog<bool>(
+  Color _statusColor(String s) {
+    switch (s.toUpperCase()) {
+      case 'COMPLETED':
+      case 'FINISHED':
+        return Colors.green.shade700;
+      case 'CANCELED':
+      case 'CANCELLED':
+        return Colors.red.shade700;
+      case 'CONFIRMED':
+      case 'BOOKED':
+      default:
+        return const Color(0xFF6C5CE7);
+    }
+  }
+
+  Future<void> _cancel(AppointmentDetail d) async {
+    final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Cancel appointment?'),
@@ -40,113 +56,203 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         ],
       ),
     );
-    if (confirmed != true) return;
-
-    setState(() => _busyCancel = true);
+    if (ok != true) return;
     try {
-      await _svc.cancel(a.id);
+      await AppointmentService().cancel(d.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Appointment canceled')));
-      Navigator.pop(context, true); // notify parent to refresh
-    } on DioException catch (e) {
-      if (!mounted) return;
-      final code = e.response?.statusCode;
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cancel failed: ${code ?? ''}')));
+      Navigator.pop(context, true); // return to list; let it refresh
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Cancel failed: $e')));
-    } finally {
-      if (mounted) setState(() => _busyCancel = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final df = DateFormat('EEE, d MMM yyyy');
-    final tf = DateFormat('HH:mm');
-    return Scaffold(
-      appBar: AppBar(title: const Text('Appointment Details')),
-      body: FutureBuilder<AppointmentItem>(
-        future: _future,
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snap.hasError || !snap.hasData) {
-            return Center(child: Text('Failed to load: ${snap.error}'));
-          }
-          final a = snap.data!;
-          final status = a.status.toUpperCase();
-          final canCancel = status == 'BOOKED' || status == 'CONFIRMED';
+    return FutureBuilder<AppointmentDetail>(
+      future: _future,
+      builder: (context, snap) {
+        if (!snap.hasData) {
+          return Scaffold(
+            appBar: AppBar(),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        final d = snap.data!;
+        final canCancel = (d.status.toUpperCase() == 'BOOKED' ||
+                d.status.toUpperCase() == 'CONFIRMED') &&
+            d.start.isAfter(DateTime.now());
 
-          return ListView(
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_headerFmt.format(d.start)),
+            leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context)),
+          ),
+          body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Card(
-                elevation: 0,
-                child: ListTile(
-                  leading: const Icon(Icons.medical_services_outlined),
-                  title: Text(a.serviceName ?? 'Service'),
-                  subtitle: Text(a.providerName ?? 'Provider'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Card(
-                elevation: 0,
-                child: ListTile(
-                  leading: const Icon(Icons.event),
-                  title: Text(df.format(a.start)),
-                  subtitle: Text('${tf.format(a.start)} – ${tf.format(a.end)}'),
-                  trailing: Chip(label: Text(status)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if ((a.addressLine1 ?? a.city ?? a.countryIso2) != null)
-                Card(
-                  elevation: 0,
-                  child: ListTile(
-                    leading: const Icon(Icons.place_outlined),
-                    title: Text([
-                      if ((a.addressLine1 ?? '').isNotEmpty) a.addressLine1,
-                      if ((a.city ?? '').isNotEmpty) a.city,
-                      if ((a.countryIso2 ?? '').isNotEmpty) a.countryIso2
-                    ].whereType<String>().join(', ')),
+              Center(
+                child: Text(
+                  d.status.toUpperCase(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: _statusColor(d.status),
                   ),
                 ),
+              ),
               const SizedBox(height: 12),
-              if (a.workerName != null)
-                Card(
-                  elevation: 0,
-                  child: ListTile(
-                    leading: const Icon(Icons.person_outline),
-                    title: Text(a.workerName!),
-                    subtitle: const Text('Staff'),
+
+              // Provider card
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: const CircleAvatar(),
+                  title: Text(d.providerName ?? 'Provider',
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(d.providerAddress ?? '—',
+                      maxLines: 2, overflow: TextOverflow.ellipsis),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.place_outlined),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('TODO: open map')),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Service block
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text(d.serviceName ?? 'Service',
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle: Text(
+                        d.workerName != null ? 'with ${d.workerName}' : '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Text(
+                        d.price != null ? _sum(d.price!) : '',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Time'),
+                          Text(
+                              '${_timeFmt.format(d.start)} - ${_timeFmt.format(d.end)}'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Price summary
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Column(
+                    children: [
+                      _row('Subtotal', _sum(d.subtotal)),
+                      const SizedBox(height: 8),
+                      _row('Discount',
+                          d.discount != null ? '- ${_sum(d.discount!)}' : '-'),
+                      const Divider(height: 20),
+                      _row('Total', _sum(d.total), bold: true),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Contact
+              if ((d.providerPhone ?? '').isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(d.providerPhone!),
+                      TextButton(
+                        onPressed: () =>
+                            ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('TODO: dial phone')),
+                        ),
+                        child: const Text('Call'),
+                      ),
+                    ],
                   ),
                 ),
               const SizedBox(height: 24),
-              if (canCancel)
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red.shade600,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _busyCancel ? null : () => _cancel(a),
-                  icon: const Icon(Icons.cancel_outlined),
-                  label:
-                      Text(_busyCancel ? 'Cancelling…' : 'Cancel appointment'),
-                )
-              else
-                OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Back'),
-                ),
             ],
-          );
-        },
-      ),
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonal(
+                onPressed: canCancel
+                    ? () => _cancel(d)
+                    : () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('TODO: book again')),
+                        );
+                      },
+                child: Text(canCancel ? 'Cancel' : 'Book again'),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+
+  String _sum(int v) {
+    // simple thousands formatter for UZS; replace with intl NumberFormat if you prefer
+    final s = v.toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      final idx = s.length - i;
+      buf.write(s[i]);
+      if (idx > 1 && idx % 3 == 1) buf.write(',');
+    }
+    return '$s'.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',') +
+        ' sum';
+  }
+
+  Widget _row(String l, String r, {bool bold = false}) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(l,
+              style: TextStyle(
+                  fontWeight: bold ? FontWeight.w700 : FontWeight.w400)),
+          Text(r,
+              style: TextStyle(
+                  fontWeight: bold ? FontWeight.w700 : FontWeight.w400)),
+        ],
+      );
 }

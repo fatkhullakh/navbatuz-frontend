@@ -1,57 +1,77 @@
 import 'package:dio/dio.dart';
-import '../services/api_service.dart';
+import '../core/dio_client.dart';
 import '../models/appointment.dart';
+import '../models/appointment_detail.dart';
 
 class AppointmentService {
-  final _dio = ApiService.client;
+  final Dio _dio = DioClient.build();
 
+  // Uses /api/appointments/me (recommended)
   Future<List<AppointmentItem>> listMine() async {
-    final r = await _dio.get('/appointments/me');
-    final list = (r.data as List).cast<Map<String, dynamic>>();
-    return list.map(AppointmentItem.fromJson).toList();
+    final res = await _dio.get('/appointments/me');
+    final list = (res.data as List).cast<Map<String, dynamic>>();
+    return list.map((e) => AppointmentItem.fromJson(e)).toList();
   }
 
-  Future<AppointmentItem> getById(String id) async {
-    final r = await _dio.get('/appointments/$id');
-    return AppointmentItem.fromJson(r.data as Map<String, dynamic>);
+  // If you still need by ID:
+  Future<List<AppointmentItem>> listForCustomer(String customerId) async {
+    final res = await _dio.get('/appointments/customer/$customerId');
+    final list = (res.data as List).cast<Map<String, dynamic>>();
+    return list.map((e) => AppointmentItem.fromJson(e)).toList();
   }
 
   Future<void> cancel(String id) async {
-    Response r;
-    try {
-      // Most common
-      r = await _dio.put('/appointments/$id/cancel');
-    } on DioException catch (e) {
-      // Fallback variants your backend might use
-      if (e.response?.statusCode == 404 || e.response?.statusCode == 405) {
-        r = await _dio.put('/appointments/$id/cancel');
-      } else {
-        rethrow;
-      }
-    }
-    final ok = {200, 202, 204}.contains(r.statusCode);
-    if (!ok) {
+    final res = await _dio.put('/appointments/$id/cancel');
+    if (res.statusCode != 200 && res.statusCode != 204) {
       throw DioException(
-        requestOptions: r.requestOptions,
-        response: r,
-        error: 'Unexpected status ${r.statusCode}',
+        requestOptions: res.requestOptions,
+        response: res,
+        error: 'Cancel failed (${res.statusCode})',
         type: DioExceptionType.badResponse,
       );
     }
   }
 
-  // Future<void> cancel(String id) async {
-  //   // 🔴 adjust if your backend is different:
-  //   // e.g. PUT /api/appointments/{id}/cancel  or  POST /api/appointments/{id}/cancel
-  //   final r = await _dio.put('/appointments/$id/cancel');
-  //   // tolerate 200/202/204
-  //   if (r.statusCode != 200 && r.statusCode != 202 && r.statusCode != 204) {
-  //     throw DioException(
-  //       requestOptions: r.requestOptions,
-  //       response: r,
-  //       error: 'Unexpected status ${r.statusCode}',
-  //       type: DioExceptionType.badResponse,
-  //     );
-  //   }
-  // }
+  /// Fetch the next upcoming appointment.
+  /// Tries `/appointments/me?onlyNext=true`; if not available, derives from `listMine()`.
+  Future<AppointmentItem?> nextUpcoming() async {
+    try {
+      final res = await _dio
+          .get('/appointments/me', queryParameters: {'onlyNext': true});
+      final d = res.data;
+      if (d == null || d == '') return null;
+      if (d is Map) return AppointmentItem.fromJson(d.cast<String, dynamic>());
+      if (d is List && d.isNotEmpty) {
+        // If backend returns a list, take earliest future BOOKED/CONFIRMED
+        final all = d
+            .cast<Map<String, dynamic>>()
+            .map(AppointmentItem.fromJson)
+            .toList();
+        final now = DateTime.now();
+        final future = all.where((a) {
+          final s = a.status.toUpperCase();
+          return (s == 'BOOKED' || s == 'CONFIRMED') && a.start.isAfter(now);
+        }).toList()
+          ..sort((a, b) => a.start.compareTo(b.start));
+        return future.isNotEmpty ? future.first : null;
+      }
+    } catch (_) {
+      // fall back to derive from listMine
+    }
+    // Fallback
+    final all = await listMine();
+    final now = DateTime.now();
+    final future = all.where((a) {
+      final s = a.status.toUpperCase();
+      return (s == 'BOOKED' || s == 'CONFIRMED') && a.start.isAfter(now);
+    }).toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    return future.isNotEmpty ? future.first : null;
+  }
+
+  Future<AppointmentDetail> getDetails(String id) async {
+    final r = await _dio.get('/appointments/$id');
+    final map = (r.data as Map).cast<String, dynamic>();
+    return AppointmentDetail.fromJson(map);
+  }
 }

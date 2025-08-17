@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/provider_public_service.dart';
 import '../../services/service_catalog_service.dart';
+import '../../screens/booking/service_booking_screen.dart';
 
 class ProviderScreen extends StatefulWidget {
   final String providerId;
@@ -104,7 +105,20 @@ class _ProviderScreenState extends State<ProviderScreen>
         body: TabBarView(
           controller: _tabs,
           children: [
-            _ServicesTab(future: _futureServices),
+            _ServicesTab(
+              future: _futureServices,
+              onBook: (s) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ServiceBookingScreen(
+                      providerId: providerId, // the current provider id
+                      serviceId: service.id, // the tapped service id
+                    ),
+                  ),
+                );
+              },
+            ),
             const _ReviewsTab(),
             _DetailsTab(details: _details),
           ],
@@ -215,7 +229,8 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
 
 class _ServicesTab extends StatelessWidget {
   final Future<List<ServiceSummary>> future;
-  const _ServicesTab({required this.future});
+  final void Function(ServiceSummary) onBook;
+  const _ServicesTab({required this.future, required this.onBook});
 
   @override
   Widget build(BuildContext context) {
@@ -279,9 +294,7 @@ class _ServicesTab extends StatelessWidget {
                       width: 88,
                       height: 28,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: go to choose time
-                        },
+                        onPressed: () => onBook(s),
                         child: Text(t.provider_book,
                             style: const TextStyle(fontSize: 12)),
                       ),

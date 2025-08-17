@@ -45,21 +45,15 @@ class BusinessHourItem {
 
 class WorkerLite {
   final String id;
-  final String name; // name + surname nicely combined
+  final String name;
+  final String? surname;
+  WorkerLite({required this.id, required this.name, this.surname});
 
-  WorkerLite({required this.id, required this.name});
-
-  factory WorkerLite.fromJson(Map<String, dynamic> j) {
-    final n = (j['name'] ?? '').toString().trim();
-    final s = (j['surname'] ?? '').toString().trim();
-    final combined = [n, s].where((e) => e.isNotEmpty).join(' ');
-    return WorkerLite(
-      id: (j['id'] ?? '').toString(),
-      name: combined.isNotEmpty
-          ? combined
-          : (j['fullName'] ?? 'Worker').toString(),
-    );
-  }
+  factory WorkerLite.fromJson(Map<String, dynamic> j) => WorkerLite(
+        id: (j['id'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        surname: j['surname']?.toString(),
+      );
 }
 
 class ProviderResponse {
@@ -92,49 +86,25 @@ class ProviderResponse {
       );
 }
 
-class ProvidersDetails {
+class ProvidersDetailsLite {
   final String id;
   final String name;
-  final String? description;
-  final String category;
   final List<WorkerLite> workers;
-  final String email;
-  final String phone;
-  final double avgRating;
-  final List<BusinessHourItem> businessHours;
-  final LocationSummary? location;
 
-  ProvidersDetails({
+  ProvidersDetailsLite({
     required this.id,
     required this.name,
-    this.description,
-    required this.category,
     required this.workers,
-    required this.email,
-    required this.phone,
-    required this.avgRating,
-    required this.businessHours,
-    this.location,
   });
 
-  factory ProvidersDetails.fromJson(Map<String, dynamic> j) => ProvidersDetails(
+  factory ProvidersDetailsLite.fromJson(Map<String, dynamic> j) =>
+      ProvidersDetailsLite(
         id: (j['id'] ?? '').toString(),
         name: (j['name'] ?? '').toString(),
-        description: j['description']?.toString(),
-        category: (j['category'] ?? '').toString(),
         workers: ((j['workers'] as List?) ?? const [])
-            .map((e) => WorkerLite.fromJson(e as Map<String, dynamic>))
+            .whereType<Map<String, dynamic>>()
+            .map(WorkerLite.fromJson)
             .toList(),
-        email: (j['email'] ?? '').toString(),
-        phone: (j['phone'] ?? '').toString(),
-        avgRating:
-            (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : 0,
-        businessHours: ((j['businessHours'] as List?) ?? const [])
-            .map((e) => BusinessHourItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        location: (j['location'] != null)
-            ? LocationSummary.fromJson(j['location'])
-            : null,
       );
 }
 
@@ -146,9 +116,9 @@ class ProviderPublicService {
     return ProviderResponse.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<ProvidersDetails> getDetails(String id) async {
-    final r = await _dio.get('/providers/public/$id/details');
-    return ProvidersDetails.fromJson(r.data as Map<String, dynamic>);
+  Future<ProvidersDetailsLite> getDetails(String providerId) async {
+    final r = await _dio.get('/providers/public/$providerId/details');
+    return ProvidersDetailsLite.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<String>> getFavouriteIds() async {

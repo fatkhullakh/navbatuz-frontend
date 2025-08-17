@@ -175,4 +175,154 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get provider_favourited => 'Sevimlida';
+
+  @override
+  String get booking_title => 'Navbatga yozilish';
+
+  @override
+  String get booking_anyone => 'Istalgan';
+
+  @override
+  String get booking_slots_retry => 'Qayta urinish';
+
+  @override
+  String get booking_no_slots => 'Bu kunda bo‘sh vaqt yo‘q.';
+
+  @override
+  String get booking_book => 'Band qilish';
+
+  @override
+  String get booking_worker => 'Xodim';
+
+  @override
+  String get booking_service => 'Xizmat';
+
+  @override
+  String get booking_time => 'Vaqt';
+
+  @override
+  String get providerTabServices => 'XIZMATLAR';
+
+  @override
+  String get providerTabReviews => 'SHARHLAR';
+
+  @override
+  String get providerTabDetails => 'MAʼLUMOT';
+
+  @override
+  String get providerAbout => 'Haqida';
+
+  @override
+  String get providerCategory => 'Kategoriya';
+
+  @override
+  String get providerAddress => 'Manzil';
+
+  @override
+  String get providerContact => 'Aloqa';
+
+  @override
+  String get providerWorkingHours => 'Ish vaqti';
+
+  @override
+  String get providerWorkers => 'Hodimlar';
+
+  @override
+  String get providerNoWorkers => 'Hodimlar ko‘rsatilmagan.';
+
+  @override
+  String get providerNoServices => 'Xizmatlar yo‘q.';
+
+  @override
+  String get providerFavourite => 'Sevimlilarga';
+
+  @override
+  String get providerFavourited => 'Sevimlilarda';
+
+  @override
+  String get noReviewsYet => 'Hozircha sharhlar yo‘q.';
+
+  @override
+  String get free => 'BEKOR';
+
+  @override
+  String get actionBook => 'Band qilish';
+
+  @override
+  String get actionRetry => 'Qayta urinib ko‘ring';
+
+  @override
+  String get errorGeneric => 'Yuklab bo‘lmadi';
+
+  @override
+  String get closed => 'Yopiq';
+
+  @override
+  String get dayMonday => 'Dushanba';
+
+  @override
+  String get dayTuesday => 'Seshanba';
+
+  @override
+  String get dayWednesday => 'Chorshanba';
+
+  @override
+  String get dayThursday => 'Payshanba';
+
+  @override
+  String get dayFriday => 'Juma';
+
+  @override
+  String get daySaturday => 'Shanba';
+
+  @override
+  String get daySunday => 'Yakshanba';
+
+  @override
+  String get bookingTitle => 'Uchrashuvni band qilish';
+
+  @override
+  String get bookingPickWorker => 'Xodimni tanlang';
+
+  @override
+  String get bookingPickTime => 'Vaqtni tanlang';
+
+  @override
+  String get bookingNoSlotsDay => 'Bu kunda bo\'sh vaqt yo\'q.';
+
+  @override
+  String get anyone => 'Istalgan';
+
+  @override
+  String get pickDate => 'Sana tanlash';
+
+  @override
+  String get withWorker => 'bilan';
+
+  @override
+  String get timeRange => 'Vaqt';
+
+  @override
+  String get reviewTitle => 'Ko‘rib chiqing va tasdiqlang';
+
+  @override
+  String get howPay => 'Qanday to‘laysiz?';
+
+  @override
+  String get payCash => 'Naqd';
+
+  @override
+  String get confirmAndBook => 'Tasdiqlash va band qilish';
+
+  @override
+  String get subtotal => 'Jami';
+
+  @override
+  String get bookingSuccessTitle => 'Uchrashuv band qilindi!';
+
+  @override
+  String get bookingSuccessDesc => 'Hammasi tayyor. Ko‘rishguncha!';
+
+  @override
+  String get continueLabel => 'Davom etish';
 }

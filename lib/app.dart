@@ -33,6 +33,7 @@ class NavbatUzApp extends StatelessWidget {
         //'/change-password': (context) => ChangePasswordScreen(),
         '/test-customer-home': (context) => FoodAppHomeScreen1(),
         '/customer-appointments': (_) => const AppointmentsScreen(),
+        //'/booking/success': (_) => const BookingSuccessScreen(appointmentId: ''),
         '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
         // '/forgot-password/verify' is pushed via MaterialPageRoute with email arg
         '/provider': (context) {

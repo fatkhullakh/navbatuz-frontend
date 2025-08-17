@@ -26,7 +26,6 @@ class _NavRootState extends State<NavRoot> {
   };
 
   int _appointmentsKeySeed = 0;
-  int _homeKeySeed = 0; // <-- NEW
 
   Future<bool> _onWillPop() async {
     final nav = _navKeys[_current]!.currentState!;
@@ -47,11 +46,6 @@ class _NavRootState extends State<NavRoot> {
       _current = t;
       if (t == TabItem.appointments) _appointmentsKeySeed++;
     });
-  }
-
-  // When appointments change (e.g., cancel), bump home key to remount & reload
-  void _onAppointmentsChanged() {
-    setState(() => _homeKeySeed++);
   }
 
   @override
@@ -87,12 +81,11 @@ class _NavRootState extends State<NavRoot> {
         body: IndexedStack(
           index: _current.index,
           children: [
-            // HOME (remount on _homeKeySeed change)
+            // Home
             Navigator(
               key: _navKeys[TabItem.home],
               onGenerateRoute: (settings) => MaterialPageRoute(
                 builder: (_) => CustomerHomeScreen(
-                  key: ValueKey(_homeKeySeed), // <-- NEW
                   onOpenSearch: () => _goTab(TabItem.search),
                   onOpenAppointments: () => _goTab(TabItem.appointments),
                 ),
@@ -100,26 +93,24 @@ class _NavRootState extends State<NavRoot> {
               ),
             ),
 
-            // APPOINTMENTS (remount on _appointmentsKeySeed change)
+            // Appointments (key bumps → initState -> reload)
             Navigator(
               key: _navKeys[TabItem.appointments],
               onGenerateRoute: (settings) => MaterialPageRoute(
-                builder: (_) => AppointmentsScreen(
-                  key: ValueKey(_appointmentsKeySeed),
-                  onChanged: _onAppointmentsChanged, // <-- NEW
-                ),
+                builder: (_) =>
+                    AppointmentsScreen(key: ValueKey(_appointmentsKeySeed)),
                 settings: settings,
               ),
             ),
 
-            // SEARCH
+            // Search
             Navigator(
               key: _navKeys[TabItem.search],
               onGenerateRoute: (settings) => MaterialPageRoute(
                   builder: (_) => const SearchScreen(), settings: settings),
             ),
 
-            // ACCOUNT
+            // Account
             Navigator(
               key: _navKeys[TabItem.account],
               onGenerateRoute: (settings) => MaterialPageRoute(
