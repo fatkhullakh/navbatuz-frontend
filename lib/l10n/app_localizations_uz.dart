@@ -325,4 +325,68 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get continueLabel => 'Davom etish';
+
+  @override
+  String get appointment_details_title => 'Uchrashuv tafsilotlari';
+
+  @override
+  String get appointments_upcoming_title => 'Kelgusi uchrashuvlar';
+
+  @override
+  String get appointments_finished_title => 'Tugallangan uchrashuvlar';
+
+  @override
+  String get appointments_empty => 'Sizda hali uchrashuvlar yo\'q.';
+
+  @override
+  String get appointment_cancel_button => 'Uchrashuvni bekor qilish';
+
+  @override
+  String get appointment_cancel_confirm_title => 'Uchrashuv bekor qilinsinmi?';
+
+  @override
+  String get appointment_cancel_confirm_body => 'Bu amalni qaytarib bo‘lmaydi.';
+
+  @override
+  String get appointment_cancel_confirm_yes => 'Ha, bekor qil';
+
+  @override
+  String get appointment_cancel_success => 'Uchrashuv bekor qilindi';
+
+  @override
+  String get appointment_cancel_too_late => 'Bekor qilish uchun kech.';
+
+  @override
+  String appointment_cancel_too_late_with_window(Object minutes) {
+    return 'Bekor qilish uchun kech (qolgan vaqt $minutes daqiqa).';
+  }
+
+  @override
+  String appointment_cancel_failed_generic(Object code) {
+    return 'Bekor qilish muvaffaqiyatsiz: $code';
+  }
+
+  @override
+  String get appointment_cancel_failed_unknown => 'Bekor qilish amalga oshmadi. Qaytadan urinib ko‘ring.';
+
+  @override
+  String get error_session_expired => 'Sessiya tugadi. Qayta tizimga kiring.';
+
+  @override
+  String get appointment_staff_label => 'Xodim';
+
+  @override
+  String get common_no => 'Yo‘q';
+
+  @override
+  String get common_back => 'Orqaga';
+
+  @override
+  String get common_cancelling => 'Bekor qilinmoqda…';
+
+  @override
+  String get common_service => 'Xizmat';
+
+  @override
+  String get common_provider => 'Provayder';
 }

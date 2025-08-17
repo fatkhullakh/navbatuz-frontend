@@ -9,6 +9,11 @@ class CustomerMissingException implements Exception {}
 
 class NotAuthorizedException implements Exception {}
 
+class LateCancellationException implements Exception {
+  final int? minutes; // window in minutes if we can parse it
+  LateCancellationException([this.minutes]);
+}
+
 class AppointmentService {
   final _dio = ApiService.client;
 
@@ -24,26 +29,27 @@ class AppointmentService {
   }
 
   Future<void> cancel(String id) async {
-    Response r;
     try {
-      // Most common
-      r = await _dio.put('/appointments/$id/cancel');
-    } on DioException catch (e) {
-      // Fallback variants your backend might use
-      if (e.response?.statusCode == 404 || e.response?.statusCode == 405) {
-        r = await _dio.put('/appointments/$id/cancel');
-      } else {
-        rethrow;
+      final r = await _dio.put('/appointments/$id/cancel');
+      final ok = {200, 202, 204}.contains(r.statusCode);
+      if (!ok) {
+        throw DioException(
+          requestOptions: r.requestOptions,
+          response: r,
+          error: 'Unexpected status ${r.statusCode}',
+          type: DioExceptionType.badResponse,
+        );
       }
-    }
-    final ok = {200, 202, 204}.contains(r.statusCode);
-    if (!ok) {
-      throw DioException(
-        requestOptions: r.requestOptions,
-        response: r,
-        error: 'Unexpected status ${r.statusCode}',
-        type: DioExceptionType.badResponse,
-      );
+    } on DioException catch (e) {
+      // If backend blocks last-minute cancel it returns 403 with a message like:
+      // "Too late to cancel (120 min window)"
+      if (e.response?.statusCode == 403) {
+        final text = (e.response?.data ?? '').toString();
+        final match = RegExp(r'(\d+)\s*min').firstMatch(text);
+        final minutes = match != null ? int.tryParse(match.group(1)!) : null;
+        throw LateCancellationException(minutes);
+      }
+      rethrow;
     }
   }
 

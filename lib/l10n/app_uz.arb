@@ -118,5 +118,26 @@
   "subtotal": "Jami",
   "bookingSuccessTitle": "Uchrashuv band qilindi!",
   "bookingSuccessDesc": "Hammasi tayyor. Ko‘rishguncha!",
-  "continueLabel": "Davom etish"
+  "continueLabel": "Davom etish",
+
+  "appointment_details_title": "Uchrashuv tafsilotlari",
+  "appointments_upcoming_title": "Kelgusi uchrashuvlar",
+  "appointments_finished_title": "Tugallangan uchrashuvlar",
+  "appointments_empty": "Sizda hali uchrashuvlar yo'q.",
+  "appointment_cancel_button": "Uchrashuvni bekor qilish",
+  "appointment_cancel_confirm_title": "Uchrashuv bekor qilinsinmi?",
+  "appointment_cancel_confirm_body": "Bu amalni qaytarib bo‘lmaydi.",
+  "appointment_cancel_confirm_yes": "Ha, bekor qil",
+  "appointment_cancel_success": "Uchrashuv bekor qilindi",
+  "appointment_cancel_too_late": "Bekor qilish uchun kech.",
+  "appointment_cancel_too_late_with_window": "Bekor qilish uchun kech (qolgan vaqt {minutes} daqiqa).",
+  "appointment_cancel_failed_generic": "Bekor qilish muvaffaqiyatsiz: {code}",
+  "appointment_cancel_failed_unknown": "Bekor qilish amalga oshmadi. Qaytadan urinib ko‘ring.",
+  "error_session_expired": "Sessiya tugadi. Qayta tizimga kiring.",
+  "appointment_staff_label": "Xodim",
+  "common_no": "Yo‘q",
+  "common_back": "Orqaga",
+  "common_cancelling": "Bekor qilinmoqda…",
+  "common_service": "Xizmat",
+  "common_provider": "Provayder"
 }

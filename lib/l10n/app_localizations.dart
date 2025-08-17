@@ -732,6 +732,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get continueLabel;
+
+  /// No description provided for @appointment_details_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Details'**
+  String get appointment_details_title;
+
+  /// No description provided for @appointments_upcoming_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Appointments'**
+  String get appointments_upcoming_title;
+
+  /// No description provided for @appointments_finished_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished Appointments'**
+  String get appointments_finished_title;
+
+  /// No description provided for @appointments_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any appointments yet.'**
+  String get appointments_empty;
+
+  /// No description provided for @appointment_cancel_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel appointment'**
+  String get appointment_cancel_button;
+
+  /// No description provided for @appointment_cancel_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel appointment?'**
+  String get appointment_cancel_confirm_title;
+
+  /// No description provided for @appointment_cancel_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get appointment_cancel_confirm_body;
+
+  /// No description provided for @appointment_cancel_confirm_yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get appointment_cancel_confirm_yes;
+
+  /// No description provided for @appointment_cancel_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment canceled'**
+  String get appointment_cancel_success;
+
+  /// No description provided for @appointment_cancel_too_late.
+  ///
+  /// In en, this message translates to:
+  /// **'Too late to cancel.'**
+  String get appointment_cancel_too_late;
+
+  /// No description provided for @appointment_cancel_too_late_with_window.
+  ///
+  /// In en, this message translates to:
+  /// **'Too late to cancel (within {minutes} min window).'**
+  String appointment_cancel_too_late_with_window(Object minutes);
+
+  /// No description provided for @appointment_cancel_failed_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed: {code}'**
+  String appointment_cancel_failed_generic(Object code);
+
+  /// No description provided for @appointment_cancel_failed_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed. Please try again.'**
+  String get appointment_cancel_failed_unknown;
+
+  /// No description provided for @error_session_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please login again.'**
+  String get error_session_expired;
+
+  /// No description provided for @appointment_staff_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get appointment_staff_label;
+
+  /// No description provided for @common_no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get common_no;
+
+  /// No description provided for @common_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get common_back;
+
+  /// No description provided for @common_cancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling…'**
+  String get common_cancelling;
+
+  /// No description provided for @common_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get common_service;
+
+  /// No description provided for @common_provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get common_provider;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

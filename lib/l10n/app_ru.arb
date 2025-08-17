@@ -118,5 +118,26 @@
   "subtotal": "Итого",
   "bookingSuccessTitle": "Запись подтверждена!",
   "bookingSuccessDesc": "Все готово. До встречи!",
-  "continueLabel": "Продолжить"
+  "continueLabel": "Продолжить",
+
+  "appointment_details_title": "Детали записи",
+  "appointments_upcoming_title": "Предстоящие записи",
+  "appointments_finished_title": "Завершённые записи",
+  "appointments_empty": "У вас пока нет записей.",
+  "appointment_cancel_button": "Отменить запись",
+  "appointment_cancel_confirm_title": "Отменить запись?",
+  "appointment_cancel_confirm_body": "Это действие нельзя отменить.",
+  "appointment_cancel_confirm_yes": "Да, отменить",
+  "appointment_cancel_success": "Запись отменена",
+  "appointment_cancel_too_late": "Слишком поздно для отмены.",
+  "appointment_cancel_too_late_with_window": "Слишком поздно для отмены (осталось {minutes} мин).",
+  "appointment_cancel_failed_generic": "Не удалось отменить: {code}",
+  "appointment_cancel_failed_unknown": "Ошибка при отмене. Попробуйте ещё раз.",
+  "error_session_expired": "Сессия истекла. Пожалуйста, войдите снова.",
+  "appointment_staff_label": "Сотрудник",
+  "common_no": "Нет",
+  "common_back": "Назад",
+  "common_cancelling": "Отмена…",
+  "common_service": "Услуга",
+  "common_provider": "Провайдер"
 }
