@@ -67,6 +67,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   Widget build(BuildContext context) {
     final df = DateFormat('EEE, d MMM yyyy');
     final tf = DateFormat('HH:mm');
+    final priceFmt = NumberFormat.currency(
+      locale: Localizations.localeOf(context).toLanguageTag(),
+      symbol: '',
+      decimalDigits: 0,
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('Appointment Details')),
       body: FutureBuilder<AppointmentItem>(
@@ -91,6 +96,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   leading: const Icon(Icons.medical_services_outlined),
                   title: Text(a.serviceName ?? 'Service'),
                   subtitle: Text(a.providerName ?? 'Provider'),
+                  trailing: (a.price != null)
+                      ? Text(
+                          priceFmt.format(a.price),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 12),
