@@ -1,6 +1,13 @@
 import 'package:dio/dio.dart';
 import '../services/api_service.dart';
 import '../models/appointment.dart';
+import 'package:intl/intl.dart';
+
+class SlotUnavailableException implements Exception {}
+
+class CustomerMissingException implements Exception {}
+
+class NotAuthorizedException implements Exception {}
 
 class AppointmentService {
   final _dio = ApiService.client;
@@ -37,6 +44,36 @@ class AppointmentService {
         error: 'Unexpected status ${r.statusCode}',
         type: DioExceptionType.badResponse,
       );
+    }
+  }
+
+  Future<AppointmentItem> create({
+    required String serviceId,
+    required String workerId,
+    required DateTime date,
+    required String startTimeHHmmss,
+    String? customerId,
+  }) async {
+    final df = DateFormat('yyyy-MM-dd');
+    final body = {
+      'serviceId': serviceId,
+      'workerId': workerId,
+      'date': df.format(date),
+      'startTime': startTimeHHmmss,
+      if (customerId != null) 'customerId': customerId,
+    };
+
+    try {
+      final r = await _dio.post('/appointments', data: body);
+      return AppointmentItem.fromJson(r.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final msg = (e.response?.data ?? '').toString().toLowerCase();
+
+      if (code == 409) throw SlotUnavailableException(); // slot taken
+      if (code == 403) throw NotAuthorizedException(); // not allowed
+      if (msg.contains('customer not found')) throw CustomerMissingException();
+      throw e;
     }
   }
 

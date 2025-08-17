@@ -175,4 +175,154 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get provider_favourited => 'Favourited';
+
+  @override
+  String get booking_title => 'Book an Appointment';
+
+  @override
+  String get booking_anyone => 'Anyone';
+
+  @override
+  String get booking_slots_retry => 'Retry';
+
+  @override
+  String get booking_no_slots => 'No free slots for this day.';
+
+  @override
+  String get booking_book => 'Book';
+
+  @override
+  String get booking_worker => 'Worker';
+
+  @override
+  String get booking_service => 'Service';
+
+  @override
+  String get booking_time => 'Time';
+
+  @override
+  String get providerTabServices => 'SERVICES';
+
+  @override
+  String get providerTabReviews => 'REVIEWS';
+
+  @override
+  String get providerTabDetails => 'DETAILS';
+
+  @override
+  String get providerAbout => 'About';
+
+  @override
+  String get providerCategory => 'Category';
+
+  @override
+  String get providerAddress => 'Address';
+
+  @override
+  String get providerContact => 'Contact';
+
+  @override
+  String get providerWorkingHours => 'Working hours';
+
+  @override
+  String get providerWorkers => 'Staff';
+
+  @override
+  String get providerNoWorkers => 'No staff listed.';
+
+  @override
+  String get providerNoServices => 'No services.';
+
+  @override
+  String get providerFavourite => 'Favourite';
+
+  @override
+  String get providerFavourited => 'Favourited';
+
+  @override
+  String get noReviewsYet => 'No reviews yet.';
+
+  @override
+  String get free => 'FREE';
+
+  @override
+  String get actionBook => 'Book';
+
+  @override
+  String get actionRetry => 'Retry';
+
+  @override
+  String get errorGeneric => 'Failed to load';
+
+  @override
+  String get closed => 'Closed';
+
+  @override
+  String get dayMonday => 'Monday';
+
+  @override
+  String get dayTuesday => 'Tuesday';
+
+  @override
+  String get dayWednesday => 'Wednesday';
+
+  @override
+  String get dayThursday => 'Thursday';
+
+  @override
+  String get dayFriday => 'Friday';
+
+  @override
+  String get daySaturday => 'Saturday';
+
+  @override
+  String get daySunday => 'Sunday';
+
+  @override
+  String get bookingTitle => 'Book an Appointment';
+
+  @override
+  String get bookingPickWorker => 'Choose a staff';
+
+  @override
+  String get bookingPickTime => 'Choose a time';
+
+  @override
+  String get bookingNoSlotsDay => 'No availability for this day.';
+
+  @override
+  String get anyone => 'Anyone';
+
+  @override
+  String get pickDate => 'Pick date';
+
+  @override
+  String get withWorker => 'with';
+
+  @override
+  String get timeRange => 'Time';
+
+  @override
+  String get reviewTitle => 'Review and confirm';
+
+  @override
+  String get howPay => 'How would you like to pay?';
+
+  @override
+  String get payCash => 'Cash';
+
+  @override
+  String get confirmAndBook => 'Confirm & Book';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get bookingSuccessTitle => 'Appointment booked!';
+
+  @override
+  String get bookingSuccessDesc => 'You’re all set. See you soon.';
+
+  @override
+  String get continueLabel => 'Continue';
 }

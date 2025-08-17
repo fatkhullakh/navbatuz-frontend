@@ -175,4 +175,154 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get provider_favourited => 'В избранном';
+
+  @override
+  String get booking_title => 'Запись на прием';
+
+  @override
+  String get booking_anyone => 'Любой';
+
+  @override
+  String get booking_slots_retry => 'Повторить';
+
+  @override
+  String get booking_no_slots => 'Нет свободных слотов на этот день.';
+
+  @override
+  String get booking_book => 'Записаться';
+
+  @override
+  String get booking_worker => 'Сотрудник';
+
+  @override
+  String get booking_service => 'Услуга';
+
+  @override
+  String get booking_time => 'Время';
+
+  @override
+  String get providerTabServices => 'УСЛУГИ';
+
+  @override
+  String get providerTabReviews => 'ОТЗЫВЫ';
+
+  @override
+  String get providerTabDetails => 'ДЕТАЛИ';
+
+  @override
+  String get providerAbout => 'О нас';
+
+  @override
+  String get providerCategory => 'Категория';
+
+  @override
+  String get providerAddress => 'Адрес';
+
+  @override
+  String get providerContact => 'Контакты';
+
+  @override
+  String get providerWorkingHours => 'Часы работы';
+
+  @override
+  String get providerWorkers => 'Персонал';
+
+  @override
+  String get providerNoWorkers => 'Персонал не указан.';
+
+  @override
+  String get providerNoServices => 'Нет услуг.';
+
+  @override
+  String get providerFavourite => 'В избранное';
+
+  @override
+  String get providerFavourited => 'В избранном';
+
+  @override
+  String get noReviewsYet => 'Пока нет отзывов.';
+
+  @override
+  String get free => 'БЕСПЛАТНО';
+
+  @override
+  String get actionBook => 'Записаться';
+
+  @override
+  String get actionRetry => 'Повторить';
+
+  @override
+  String get errorGeneric => 'Не удалось загрузить';
+
+  @override
+  String get closed => 'Выходной';
+
+  @override
+  String get dayMonday => 'Понедельник';
+
+  @override
+  String get dayTuesday => 'Вторник';
+
+  @override
+  String get dayWednesday => 'Среда';
+
+  @override
+  String get dayThursday => 'Четверг';
+
+  @override
+  String get dayFriday => 'Пятница';
+
+  @override
+  String get daySaturday => 'Суббота';
+
+  @override
+  String get daySunday => 'Воскресенье';
+
+  @override
+  String get bookingTitle => 'Запись на прием';
+
+  @override
+  String get bookingPickWorker => 'Выберите сотрудника';
+
+  @override
+  String get bookingPickTime => 'Выберите время';
+
+  @override
+  String get bookingNoSlotsDay => 'Нет доступного времени в этот день.';
+
+  @override
+  String get anyone => 'Любой';
+
+  @override
+  String get pickDate => 'Выбрать дату';
+
+  @override
+  String get withWorker => 'c';
+
+  @override
+  String get timeRange => 'Время';
+
+  @override
+  String get reviewTitle => 'Проверка и подтверждение';
+
+  @override
+  String get howPay => 'Как оплатить?';
+
+  @override
+  String get payCash => 'Наличными';
+
+  @override
+  String get confirmAndBook => 'Подтвердить и записаться';
+
+  @override
+  String get subtotal => 'Итого';
+
+  @override
+  String get bookingSuccessTitle => 'Запись подтверждена!';
+
+  @override
+  String get bookingSuccessDesc => 'Все готово. До встречи!';
+
+  @override
+  String get continueLabel => 'Продолжить';
 }

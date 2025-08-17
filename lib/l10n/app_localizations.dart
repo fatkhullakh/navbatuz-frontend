@@ -432,6 +432,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favourited'**
   String get provider_favourited;
+
+  /// No description provided for @booking_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Book an Appointment'**
+  String get booking_title;
+
+  /// No description provided for @booking_anyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone'**
+  String get booking_anyone;
+
+  /// No description provided for @booking_slots_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get booking_slots_retry;
+
+  /// No description provided for @booking_no_slots.
+  ///
+  /// In en, this message translates to:
+  /// **'No free slots for this day.'**
+  String get booking_no_slots;
+
+  /// No description provided for @booking_book.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get booking_book;
+
+  /// No description provided for @booking_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get booking_worker;
+
+  /// No description provided for @booking_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get booking_service;
+
+  /// No description provided for @booking_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get booking_time;
+
+  /// No description provided for @providerTabServices.
+  ///
+  /// In en, this message translates to:
+  /// **'SERVICES'**
+  String get providerTabServices;
+
+  /// No description provided for @providerTabReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'REVIEWS'**
+  String get providerTabReviews;
+
+  /// No description provided for @providerTabDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'DETAILS'**
+  String get providerTabDetails;
+
+  /// No description provided for @providerAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get providerAbout;
+
+  /// No description provided for @providerCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get providerCategory;
+
+  /// No description provided for @providerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get providerAddress;
+
+  /// No description provided for @providerContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get providerContact;
+
+  /// No description provided for @providerWorkingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get providerWorkingHours;
+
+  /// No description provided for @providerWorkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get providerWorkers;
+
+  /// No description provided for @providerNoWorkers.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff listed.'**
+  String get providerNoWorkers;
+
+  /// No description provided for @providerNoServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No services.'**
+  String get providerNoServices;
+
+  /// No description provided for @providerFavourite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite'**
+  String get providerFavourite;
+
+  /// No description provided for @providerFavourited.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourited'**
+  String get providerFavourited;
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet.'**
+  String get noReviewsYet;
+
+  /// No description provided for @free.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE'**
+  String get free;
+
+  /// No description provided for @actionBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get actionBook;
+
+  /// No description provided for @actionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get actionRetry;
+
+  /// No description provided for @errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load'**
+  String get errorGeneric;
+
+  /// No description provided for @closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closed;
+
+  /// No description provided for @dayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get dayMonday;
+
+  /// No description provided for @dayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get dayTuesday;
+
+  /// No description provided for @dayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get dayWednesday;
+
+  /// No description provided for @dayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get dayThursday;
+
+  /// No description provided for @dayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get dayFriday;
+
+  /// No description provided for @daySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get daySaturday;
+
+  /// No description provided for @daySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get daySunday;
+
+  /// No description provided for @bookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book an Appointment'**
+  String get bookingTitle;
+
+  /// No description provided for @bookingPickWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a staff'**
+  String get bookingPickWorker;
+
+  /// No description provided for @bookingPickTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time'**
+  String get bookingPickTime;
+
+  /// No description provided for @bookingNoSlotsDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No availability for this day.'**
+  String get bookingNoSlotsDay;
+
+  /// No description provided for @anyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone'**
+  String get anyone;
+
+  /// No description provided for @pickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick date'**
+  String get pickDate;
+
+  /// No description provided for @withWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'with'**
+  String get withWorker;
+
+  /// No description provided for @timeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timeRange;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and confirm'**
+  String get reviewTitle;
+
+  /// No description provided for @howPay.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to pay?'**
+  String get howPay;
+
+  /// No description provided for @payCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get payCash;
+
+  /// No description provided for @confirmAndBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Book'**
+  String get confirmAndBook;
+
+  /// No description provided for @subtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotal;
+
+  /// No description provided for @bookingSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment booked!'**
+  String get bookingSuccessTitle;
+
+  /// No description provided for @bookingSuccessDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re all set. See you soon.'**
+  String get bookingSuccessDesc;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
