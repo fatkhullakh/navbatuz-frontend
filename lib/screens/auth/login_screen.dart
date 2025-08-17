@@ -2,65 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:jwt_decode/jwt_decode.dart';
-
 import '../../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool isLoading = false;
+  bool _loading = false;
   final storage = const FlutterSecureStorage();
 
-  Future<void> handleLogin() async {
+  Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => isLoading = true);
+    setState(() => _loading = true);
     try {
-      final response = await ApiService.login(
-        emailController.text.trim(),
-        passwordController.text,
-      );
-
-      // Expect backend to return only { token: "..." }
+      final response =
+          await ApiService.login(_email.text.trim(), _password.text);
       final token = response.data?['token'];
       if (token == null || token is! String || token.isEmpty) {
         throw Exception('Malformed login response: ${response.data}');
       }
-
-      // Decode role from JWT claims
       final Map<String, dynamic> claims = Jwt.parseJwt(token);
-      // Try common claim names; default to CUSTOMER
       final rawRole = (claims['role'] ??
               claims['roles'] ??
               claims['authorities'] ??
               'CUSTOMER')
           .toString()
           .toUpperCase();
-
-      // Persist
       await storage.write(key: 'jwt_token', value: token);
       await storage.write(key: 'user_role', value: rawRole);
 
-      // Route by role
+      if (!mounted) return;
       if (rawRole.contains('CUSTOMER')) {
-        if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/customers');
       } else if (rawRole.contains('OWNER') || rawRole.contains('PROVIDER')) {
-        if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/providers');
       } else if (rawRole.contains('WORKER')) {
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(context, '/workers');
+        Navigator.pushReplacementNamed(context, '/customers'); // adjust later
       } else {
-        if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/customers');
       }
     } on DioException catch (dioErr) {
@@ -68,20 +52,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final code = dioErr.response?.statusCode;
       final body = dioErr.response?.data;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $code ${body ?? ''}')),
-      );
+          SnackBar(content: Text('Login failed: $code ${body ?? ''}')));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Login failed: $e')));
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted) setState(() => _loading = false);
     }
-
-    // Debug prints (optional)
-    // print("Attempting login...");
-    // print("Email: ${emailController.text.trim()}");
   }
 
   @override
@@ -94,48 +72,38 @@ class _LoginScreenState extends State<LoginScreen> {
             key: _formKey,
             child: Column(
               children: [
-                const Text(
-                  "NavbatUz Login",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 160, 107, 87),
-                  ),
-                ),
+                const Text("NavbatUz Login",
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 40),
                 TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? "Enter email" : null,
-                ),
+                    controller: _email,
+                    decoration: const InputDecoration(labelText: "Email"),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? "Enter email" : null),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: "Password"),
-                  obscureText: true,
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? "Enter password" : null,
-                ),
+                    controller: _password,
+                    decoration: const InputDecoration(labelText: "Password"),
+                    obscureText: true,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? "Enter password" : null),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: isLoading ? null : handleLogin,
-                  child: isLoading
+                  onPressed: _loading ? null : _handleLogin,
+                  child: _loading
                       ? const CircularProgressIndicator()
                       : const Text("Login"),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
+                  onPressed: () => Navigator.pushNamed(context, '/register'),
                   child: const Text("Don't have an account? Register"),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/forgot-password');
-                  },
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/forgot-password'),
                   child: const Text("Forgot password?"),
                 ),
               ],

@@ -1,23 +1,24 @@
+// lib/screens/account/change_password_screen.dart
 import 'package:flutter/material.dart';
 import '../../services/profile_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  final String userId; // UUID
-  const ChangePasswordScreen({super.key, required this.userId});
+  final String? userId; // optional; not needed for /users/change-password
+  const ChangePasswordScreen({super.key, this.userId});
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _form = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+  final _svc = ProfileService();
+
   final _current = TextEditingController();
   final _new = TextEditingController();
   final _confirm = TextEditingController();
-  final _svc = ProfileService();
 
   bool _saving = false;
-  bool _showCurrent = false, _showNew = false, _showConfirm = false;
 
   @override
   void dispose() {
@@ -27,95 +28,78 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    if (!_form.currentState!.validate()) return;
-    if (_new.text != _confirm.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('New passwords do not match')),
-      );
-      return;
-    }
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => _saving = true);
     try {
       await _svc.changePassword(
-        id: widget.userId,
         currentPassword: _current.text,
         newPassword: _new.text,
       );
+
       if (!mounted) return;
-      Navigator.pop(context, true); // indicate success
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password changed')),
+      );
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed: $e')),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
+  String? _req(String? v) => (v == null || v.isEmpty) ? 'Required' : null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Change Password')),
+      appBar: AppBar(title: const Text('Change password')),
       body: Form(
-        key: _form,
+        key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             TextFormField(
               controller: _current,
-              decoration: InputDecoration(
-                labelText: 'Current password',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                      _showCurrent ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _showCurrent = !_showCurrent),
-                ),
-              ),
-              obscureText: !_showCurrent,
-              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+              decoration: const InputDecoration(labelText: 'Current password'),
+              obscureText: true,
+              validator: _req,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _new,
-              decoration: InputDecoration(
-                labelText: 'New password',
-                suffixIcon: IconButton(
-                  icon:
-                      Icon(_showNew ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _showNew = !_showNew),
-                ),
-              ),
-              obscureText: !_showNew,
-              validator: (v) =>
-                  (v == null || v.length < 6) ? 'Min 6 characters' : null,
+              decoration: const InputDecoration(labelText: 'New password'),
+              obscureText: true,
+              validator: (v) {
+                if (_req(v) != null) return 'Required';
+                if (v!.length < 6) return 'Min 6 characters';
+                return null;
+              },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _confirm,
-              decoration: InputDecoration(
-                labelText: 'Confirm new password',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                      _showConfirm ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _showConfirm = !_showConfirm),
-                ),
-              ),
-              obscureText: !_showConfirm,
-              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+              decoration:
+                  const InputDecoration(labelText: 'Confirm new password'),
+              obscureText: true,
+              validator: (v) {
+                if (_req(v) != null) return 'Required';
+                if (v != _new.text) return 'Passwords do not match';
+                return null;
+              },
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Save'),
-              ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _saving ? null : _submit,
+              child: _saving
+                  ? const SizedBox(
+                      width: 18, height: 18, child: CircularProgressIndicator())
+                  : const Text('Save'),
             ),
           ],
         ),
