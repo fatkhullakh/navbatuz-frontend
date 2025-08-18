@@ -5,7 +5,6 @@ import '../../l10n/app_localizations.dart';
 import '../../services/provider_public_service.dart';
 import '../../services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
-// ⬇️ adjust the import path if needed
 import '../../widgets/favorite_toggle_button.dart';
 
 class ProviderScreen extends StatefulWidget {
@@ -25,7 +24,6 @@ class _ProviderScreenState extends State<ProviderScreen>
   ProvidersDetails? _details;
   String? _error;
 
-  // only used to seed the FavoriteToggleButton quickly; the button manages itself
   bool? _initialFav;
 
   late Future<List<ServiceSummary>> _futureServices;
@@ -42,7 +40,7 @@ class _ProviderScreenState extends State<ProviderScreen>
     setState(() => _error = null);
     try {
       final d = await _providers.getDetails(widget.providerId);
-      final favIds = await _providers.getFavouriteIds(); // List<String>
+      final favIds = await _providers.getFavouriteIds();
       setState(() {
         _details = d;
         _initialFav = favIds.contains(d.id);
@@ -61,9 +59,7 @@ class _ProviderScreenState extends State<ProviderScreen>
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-
-    final hasLogo =
-        _details?.logoUrl != null && _details!.logoUrl!.trim().isNotEmpty;
+    final logo = _details?.logoUrl;
 
     return Scaffold(
       body: NestedScrollView(
@@ -71,16 +67,26 @@ class _ProviderScreenState extends State<ProviderScreen>
           SliverAppBar(
             pinned: true,
             expandedHeight: 200,
-            flexibleSpace: FlexibleSpaceBar(
-              background: hasLogo
-                  ? Image.network(
-                      _details!.logoUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const ColoredBox(color: Color(0xFFF2F4F7)),
-                    )
-                  : const ColoredBox(color: Color(0xFFF2F4F7)),
-            ),
+            flexibleSpace: (logo != null && logo.isNotEmpty)
+                ? FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          logo,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const ColoredBox(
+                            color: Color(0xFFF2F4F7),
+                          ),
+                        ),
+                        // Optional subtle overlay for contrast
+                        Container(color: Colors.black.withOpacity(0.12)),
+                      ],
+                    ),
+                  )
+                : const FlexibleSpaceBar(
+                    background: ColoredBox(color: Color(0xFFF2F4F7)),
+                  ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(104),
               child: _buildHeader(t),
@@ -180,18 +186,15 @@ class _ProviderScreenState extends State<ProviderScreen>
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(width: 6),
-
-              // ✅ Favorite button
               FavoriteToggleButton(
                 providerId: d.id,
                 initialIsFavorite: _initialFav,
                 onChanged: () {
-                  // If you need to react to changes, do it here.
+                  // If you need to react to fav change, do it here.
                 },
               ),
-
               IconButton(
-                onPressed: () {}, // TODO: share deep link
+                onPressed: () {},
                 icon: const Icon(Icons.share_outlined),
                 tooltip: t.provider_tab_details,
               ),
