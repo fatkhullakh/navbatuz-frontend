@@ -10,7 +10,7 @@ import '../../services/customer_service.dart';
 import '../../services/appointment_service.dart';
 
 class ReviewConfirmScreen extends StatefulWidget {
-  final ServiceDetail service;
+  final ServiceDetails service;
   final ProvidersDetails provider;
   final WorkerLite worker;
   final DateTime date; // selected day
@@ -41,7 +41,7 @@ class _ReviewConfirmScreenState extends State<ReviewConfirmScreen> {
         int.parse(parts[0]), int.parse(parts[1]));
   }
 
-  DateTime get _end => _start.add(widget.service.duration);
+  DateTime get _end => _start.add(widget.service.duration ?? Duration.zero);
 
   String _fmtDT(DateTime dt) =>
       '${DateFormat.yMMMMd(Localizations.localeOf(context).toLanguageTag()).format(dt)} | '

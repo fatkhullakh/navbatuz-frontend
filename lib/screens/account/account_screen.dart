@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../../services/profile_service.dart';
+import '../../services/uploads_service.dart';
+import '../../services/api_service.dart';
 import 'personal_info_screen.dart';
 import 'account_settings_screen.dart';
 import 'change_password_screen.dart';
@@ -15,6 +19,8 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final _svc = ProfileService();
+  final _uploads = UploadsService();
+  final _picker = ImagePicker();
 
   Me? _me;
   bool _loading = false;
@@ -76,6 +82,109 @@ class _AccountScreenState extends State<AccountScreen> {
         .pushNamedAndRemoveUntil('/login', (_) => false);
   }
 
+  // ---- Avatar actions ----
+
+  void _onAvatarPressed(Me me, AppLocalizations t) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: Text(t.action_change_photo),
+              onTap: () async {
+                Navigator.pop(context);
+                await _changeAvatar(me);
+              },
+            ),
+            if ((me.avatarUrl ?? '').isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.remove_circle_outline),
+                title: Text(t.action_remove_photo),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _removeAvatar(me);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.visibility_outlined),
+              title: Text(t.action_view_photo),
+              onTap: () {
+                Navigator.pop(context);
+                _viewAvatar(me);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _changeAvatar(Me me) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 90,
+        maxWidth: 1600,
+      );
+      if (picked == null) return;
+
+      final url = await _uploads.uploadUserAvatar(
+        userId: me.id,
+        filePath: picked.path,
+      );
+      await _svc.setAvatarUrl(me.id, url);
+      if (!mounted) return;
+      await _load(force: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avatar updated')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update avatar: $e')),
+      );
+    }
+  }
+
+  Future<void> _removeAvatar(Me me) async {
+    try {
+      await _svc.removeAvatar(me.id);
+      if (!mounted) return;
+      await _load(force: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avatar removed')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to remove avatar: $e')),
+      );
+    }
+  }
+
+  void _viewAvatar(Me me) {
+    final url = ApiService.normalizeMediaUrl(me.avatarUrl);
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: url == null
+              ? const Center(child: Icon(Icons.account_circle, size: 120))
+              : InteractiveViewer(
+                  minScale: 0.8,
+                  maxScale: 5,
+                  child: Image.network(url, fit: BoxFit.cover),
+                ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -109,7 +218,9 @@ class _AccountScreenState extends State<AccountScreen> {
       final me = _me!;
       final fullName =
           [me.name, me.surname].where((s) => (s ?? '').isNotEmpty).join(' ');
-      final avatar = (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+      final avatarLetter =
+          (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+      final avatarUrl = ApiService.normalizeMediaUrl(me.avatarUrl);
 
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -120,9 +231,17 @@ class _AccountScreenState extends State<AccountScreen> {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
-              leading: CircleAvatar(
-                child: Text(avatar,
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
+              leading: GestureDetector(
+                onTap: () => _onAvatarPressed(me, t),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundImage:
+                      (avatarUrl != null) ? NetworkImage(avatarUrl) : null,
+                  child: (avatarUrl == null)
+                      ? Text(avatarLetter,
+                          style: const TextStyle(fontWeight: FontWeight.w700))
+                      : null,
+                ),
               ),
               title:
                   Text(fullName, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -132,6 +251,11 @@ class _AccountScreenState extends State<AccountScreen> {
                   if ((me.phoneNumber ?? '').isNotEmpty) Text(me.phoneNumber!),
                   if ((me.email ?? '').isNotEmpty) Text(me.email!),
                 ],
+              ),
+              trailing: IconButton(
+                onPressed: () => _onAvatarPressed(me, t),
+                icon: const Icon(Icons.edit),
+                tooltip: t.action_change_photo,
               ),
             ),
           ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/search/service_search_screen.dart';
+import 'package:frontend/screens/search/universal_search_screen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 import '../l10n/app_localizations.dart';

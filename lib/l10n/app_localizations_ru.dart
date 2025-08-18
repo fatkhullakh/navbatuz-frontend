@@ -39,9 +39,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favorites => 'Избранное';
 
   @override
-  String get no_favorites => 'You have no favorite shops yet.';
-
-  @override
   String get recommended => 'Рекомендовано';
 
   @override
@@ -115,9 +112,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get action_reload => 'Обновить';
-
-  @override
-  String get error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get provider_tab_services => 'Услуги';
@@ -415,11 +409,50 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favorites_toggle_failed => 'Не удалось обновить избранное. Попробуйте еще раз.';
 
   @override
-  String get providers => 'Providers';
+  String get providers => 'Поставщики услуг';
 
   @override
-  String get no_results => 'No results';
+  String get no_results => 'Нет результатов';
 
   @override
-  String get remove_from_favorites => 'Remove from favorites';
+  String get no_favorites => 'У вас пока нет избранных магазинов.';
+
+  @override
+  String get remove_from_favorites => 'Убрать из избранного';
+
+  @override
+  String get error_generic => 'Что-то пошло не так. Повторите попытку.';
+
+  @override
+  String get provider_change_logo => 'Изменить логотип';
+
+  @override
+  String get action_pick_from_gallery => 'Выбрать из галереи';
+
+  @override
+  String get action_take_photo => 'Сделать фото';
+
+  @override
+  String get provider_logo_updated => 'Логотип обновлён';
+
+  @override
+  String get error_upload_failed => 'Загрузка не удалась';
+
+  @override
+  String get action_change_photo => 'Изменить фото';
+
+  @override
+  String get action_remove_photo => 'Удалить фото';
+
+  @override
+  String get action_view_photo => 'Просмотреть фото';
+
+  @override
+  String get search => 'Поиск';
+
+  @override
+  String get services => 'Услуги';
+
+  @override
+  String get all => 'Все';
 }

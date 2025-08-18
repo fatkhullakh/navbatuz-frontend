@@ -12,7 +12,6 @@
   "upcoming_appointment": "Ближайшая запись",
   "no_upcoming": "Нет ближайших записей.",
   "favorites": "Избранное",
-  "no_favorites": "Пока нет избранных.",
   "recommended": "Рекомендовано",
   "no_recommended": "Пока нет рекомендаций.",
   "see_all": "Смотреть все",
@@ -41,7 +40,6 @@
   "action_save": "Сохранить",
   "action_retry": "Повторить",
   "action_reload": "Обновить",
-  "error_generic": "Что-то пошло не так.",
   
   "provider_tab_services": "Услуги",
   "provider_tab_reviews": "Отзывы",
@@ -150,14 +148,22 @@
   "favorites_removed_snack": "Удалено из избранного",
   "favorites_toggle_failed": "Не удалось обновить избранное. Попробуйте еще раз.",
 
+  "providers": "Поставщики услуг",
+  "no_results": "Нет результатов",
+  "no_favorites": "У вас пока нет избранных магазинов.",
+  "remove_from_favorites": "Убрать из избранного",
+  "error_generic": "Что-то пошло не так. Повторите попытку.",
 
-  
-  "providers": "Providers",
-  "no_results": "No results",
-  "no_favorites": "You have no favorite shops yet.",
-  "providers": "Providers",
-  "no_results": "No results",
-  "no_favorites": "You have no favorite shops yet.",
-  "remove_from_favorites": "Remove from favorites",
-  "error_generic": "Something went wrong. Please try again."
+  "provider_change_logo": "Изменить логотип",
+  "action_pick_from_gallery": "Выбрать из галереи",
+  "action_take_photo": "Сделать фото",
+  "provider_logo_updated": "Логотип обновлён",
+  "error_upload_failed": "Загрузка не удалась",
+
+  "action_change_photo": "Изменить фото",
+  "action_remove_photo": "Удалить фото",
+  "action_view_photo": "Просмотреть фото",
+  "search": "Поиск",
+  "services": "Услуги",
+  "all": "Все"
 }

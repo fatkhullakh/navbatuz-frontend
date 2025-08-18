@@ -157,12 +157,6 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get favorites;
 
-  /// No description provided for @no_favorites.
-  ///
-  /// In en, this message translates to:
-  /// **'You have no favorite shops yet.'**
-  String get no_favorites;
-
   /// No description provided for @recommended.
   ///
   /// In en, this message translates to:
@@ -312,12 +306,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reload'**
   String get action_reload;
-
-  /// No description provided for @error_generic.
-  ///
-  /// In en, this message translates to:
-  /// **'Something went wrong. Please try again.'**
-  String get error_generic;
 
   /// No description provided for @provider_tab_services.
   ///
@@ -913,11 +901,89 @@ abstract class AppLocalizations {
   /// **'No results'**
   String get no_results;
 
+  /// No description provided for @no_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no favorite shops yet.'**
+  String get no_favorites;
+
   /// No description provided for @remove_from_favorites.
   ///
   /// In en, this message translates to:
   /// **'Remove from favorites'**
   String get remove_from_favorites;
+
+  /// No description provided for @error_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get error_generic;
+
+  /// No description provided for @provider_change_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change logo'**
+  String get provider_change_logo;
+
+  /// No description provided for @action_pick_from_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from gallery'**
+  String get action_pick_from_gallery;
+
+  /// No description provided for @action_take_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get action_take_photo;
+
+  /// No description provided for @provider_logo_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo updated'**
+  String get provider_logo_updated;
+
+  /// No description provided for @error_upload_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed'**
+  String get error_upload_failed;
+
+  /// No description provided for @action_change_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get action_change_photo;
+
+  /// No description provided for @action_remove_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get action_remove_photo;
+
+  /// No description provided for @action_view_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'View photo'**
+  String get action_view_photo;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @services.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get services;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

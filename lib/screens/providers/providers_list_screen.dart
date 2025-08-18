@@ -37,7 +37,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
       if (widget.filter == 'favorites') {
         final r = await _dio.get('/customers/favourites');
 
-        // Case A: backend returns full ProviderResponse objects
         if (r.data is List &&
             (r.data as List).isNotEmpty &&
             (r.data as List).first is Map) {
@@ -47,7 +46,7 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                   _ProviderSummary.fromJson(Map<String, dynamic>.from(m)))
               .toList();
         } else {
-          // Case B: backend returns list of IDs → fetch details per ID
+          // IDs fallback (rare now)
           final ids = (r.data as List).map((e) => e.toString()).toList();
           final futures = ids.map((id) async {
             final d = await _dio.get('/providers/public/$id/details');
@@ -59,7 +58,7 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
 
         _items.sort((a, b) => a.name.compareTo(b.name));
       } else {
-        // 'all' = use public/all page (your endpoint)
+        // 'all'
         final r = await _dio.get(
           '/providers/public/all',
           queryParameters: {'page': 0, 'size': 100, 'sortBy': 'name'},
@@ -115,60 +114,96 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         ],
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                         itemCount: _items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (_, i) {
                           final p = _items[i];
+                          final subtitleBits = <String>[];
+                          if ((p.category ?? '').isNotEmpty) {
+                            subtitleBits.add(p.category!);
+                          }
+                          if (p.rating != null) {
+                            subtitleBits.add(p.rating!.toStringAsFixed(1));
+                          }
+                          if ((p.locationCompact ?? '').isNotEmpty) {
+                            subtitleBits.add(p.locationCompact!);
+                          }
 
-                          // Top line: category • rating
-                          final bits = <String>[];
-                          if ((p.category ?? '').isNotEmpty)
-                            bits.add(p.category!);
-                          if (p.rating != null)
-                            bits.add(p.rating!.toStringAsFixed(1));
-                          final top = bits.join(' • ');
-
-                          return Card(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              onTap: () {
-                                // Open provider details screen
-                                Navigator.of(context, rootNavigator: true).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        ProviderScreen(providerId: p.id),
-                                  ),
-                                );
-                              },
-                              title: Text(
-                                p.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700),
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.of(context, rootNavigator: true).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ProviderScreen(providerId: p.id),
+                                ),
+                              );
+                            },
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: const Color(0xFFE6E8EB)),
                               ),
-                              subtitle: Column(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (top.isNotEmpty)
-                                    Text(top,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis),
-                                  if ((p.locationCompact ?? '').isNotEmpty)
-                                    Text(
-                                      p.locationCompact!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          color: Colors.black54),
+                                  AspectRatio(
+                                    aspectRatio: 16 / 9,
+                                    child: (p.logoUrl == null)
+                                        ? Container(
+                                            color: const Color(0xFFF2F4F7),
+                                            child: const Center(
+                                              child: Icon(
+                                                  Icons.storefront_rounded,
+                                                  size: 40),
+                                            ),
+                                          )
+                                        : Image.network(
+                                            p.logoUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) =>
+                                                Container(
+                                              color: const Color(0xFFF2F4F7),
+                                              child: const Center(
+                                                child: Icon(
+                                                  Icons.broken_image_outlined,
+                                                  size: 40,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        12, 10, 12, 12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          p.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          subtitleBits.join(' • '),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
+                                      ],
                                     ),
+                                  ),
                                 ],
                               ),
-                              trailing: const Icon(Icons.chevron_right),
                             ),
                           );
                         },
@@ -182,9 +217,10 @@ class _ProviderSummary {
   final String id;
   final String name;
   final String? description;
-  final double? rating; // from avgRating
-  final String? category; // “CLINIC”, etc.
+  final double? rating; // avgRating
+  final String? category;
   final String? locationCompact;
+  final String? logoUrl;
 
   _ProviderSummary({
     required this.id,
@@ -193,6 +229,7 @@ class _ProviderSummary {
     this.rating,
     this.category,
     this.locationCompact,
+    this.logoUrl,
   });
 
   factory _ProviderSummary.fromJson(Map<String, dynamic> j) {
@@ -219,6 +256,7 @@ class _ProviderSummary {
           (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : null,
       category: j['category']?.toString(),
       locationCompact: compactLocation(),
+      logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
     );
   }
 }

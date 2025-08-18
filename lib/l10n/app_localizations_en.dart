@@ -39,9 +39,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favorites => 'Favorites';
 
   @override
-  String get no_favorites => 'You have no favorite shops yet.';
-
-  @override
   String get recommended => 'Recommended';
 
   @override
@@ -115,9 +112,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get action_reload => 'Reload';
-
-  @override
-  String get error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get provider_tab_services => 'Services';
@@ -421,5 +415,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_results => 'No results';
 
   @override
+  String get no_favorites => 'You have no favorite shops yet.';
+
+  @override
   String get remove_from_favorites => 'Remove from favorites';
+
+  @override
+  String get error_generic => 'Something went wrong. Please try again.';
+
+  @override
+  String get provider_change_logo => 'Change logo';
+
+  @override
+  String get action_pick_from_gallery => 'Pick from gallery';
+
+  @override
+  String get action_take_photo => 'Take a photo';
+
+  @override
+  String get provider_logo_updated => 'Logo updated';
+
+  @override
+  String get error_upload_failed => 'Upload failed';
+
+  @override
+  String get action_change_photo => 'Change photo';
+
+  @override
+  String get action_remove_photo => 'Remove photo';
+
+  @override
+  String get action_view_photo => 'View photo';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get services => 'Services';
+
+  @override
+  String get all => 'All';
 }
