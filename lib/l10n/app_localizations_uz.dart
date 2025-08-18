@@ -39,9 +39,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get favorites => 'Sevimlilar';
 
   @override
-  String get no_favorites => 'Sevimli do‘konlaringiz hali yo‘q.';
-
-  @override
   String get recommended => 'Tavsiya etilgan';
 
   @override
@@ -115,9 +112,6 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get action_reload => 'Yangilash';
-
-  @override
-  String get error_generic => 'Nimadir xato ketdi. Iltimos, yana bir bor urinib ko‘ring.';
 
   @override
   String get provider_tab_services => 'Xizmatlar';
@@ -421,7 +415,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get no_results => 'Natijalar topilmadi';
 
   @override
+  String get no_favorites => 'Sevimli do‘konlaringiz hali yo‘q.';
+
+  @override
   String get remove_from_favorites => 'Sevimlilardan olib tashlash';
+
+  @override
+  String get error_generic => 'Nimadir xato ketdi. Iltimos, yana bir bor urinib ko‘ring.';
 
   @override
   String get provider_change_logo => 'Logotipni o‘zgartirish';
@@ -446,4 +446,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get action_view_photo => 'Rasmni ko\'rish';
+
+  @override
+  String get search => 'Qidiruv';
+
+  @override
+  String get services => 'Xizmatlar';
+
+  @override
+  String get all => 'Barchasi';
 }
