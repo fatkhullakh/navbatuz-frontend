@@ -6,6 +6,7 @@ import '../../services/provider_public_service.dart';
 import '../../services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
+import '../../screens/services/service_details_screen.dart';
 
 class ProviderScreen extends StatefulWidget {
   final String providerId;
@@ -66,7 +67,7 @@ class _ProviderScreenState extends State<ProviderScreen>
         headerSliverBuilder: (_, __) => [
           SliverAppBar(
             pinned: true,
-            expandedHeight: 200,
+            expandedHeight: 300,
             flexibleSpace: (logo != null && logo.isNotEmpty)
                 ? FlexibleSpaceBar(
                     background: Stack(
@@ -290,6 +291,21 @@ class _ServicesTab extends StatelessWidget {
             return Card(
               elevation: 0,
               child: ListTile(
+                onTap: () {
+                  // Open details screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ServiceDetailsScreen(
+                        serviceId: s.id,
+                        providerId: (context.findAncestorStateOfType<
+                                _ProviderScreenState>()!)
+                            .widget
+                            .providerId, // pass through providerId
+                      ),
+                    ),
+                  );
+                },
                 title:
                     Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: parts.isNotEmpty ? Text(parts.join(' • ')) : null,

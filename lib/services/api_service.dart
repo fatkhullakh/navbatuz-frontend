@@ -87,6 +87,8 @@ class ApiService {
     return '$origin/$url';
   }
 
+  static String fixPublicUrl(String url) => normalizeMediaUrl(url) ?? url;
+
   // --- Auth endpoints ---
   static Future<Response> login(String email, String password) =>
       _dio.post('/auth/login', data: {'email': email, 'password': password});
