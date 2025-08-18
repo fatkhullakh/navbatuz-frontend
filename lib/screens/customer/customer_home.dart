@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/home_service.dart' as hs;
 import '../providers/provider_screen.dart';
+import '../providers/providers_list_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   final VoidCallback onOpenSearch;
@@ -106,10 +107,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.favorites,
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () => Navigator.of(context).pushNamed(
-                              '/providers',
-                              arguments: {'filter': 'favorites'},
-                            ),
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ProvidersListScreen(
+                                      filter: 'favorites'),
+                                ),
+                              );
+                            },
                             child: Text(t.see_all),
                           )
                         : null,
@@ -123,10 +128,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.recommended,
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
-                            onPressed: () => Navigator.of(context).pushNamed(
-                              '/providers',
-                              arguments: {'filter': 'recommended'},
-                            ),
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const ProvidersListScreen(filter: 'all'),
+                                ),
+                              );
+                            },
                             child: Text(t.see_all),
                           )
                         : null,

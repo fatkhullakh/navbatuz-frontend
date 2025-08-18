@@ -139,5 +139,25 @@
   "common_back": "Orqaga",
   "common_cancelling": "Bekor qilinmoqda…",
   "common_service": "Xizmat",
-  "common_provider": "Provayder"
+  "common_provider": "Provayder",
+
+  "providers_title": "Xizmat ko‘rsatuvchilar",
+  "favorites_title": "Sevimli do‘konlar",
+  "favorites_empty": "Siz hali sevimlilarga hech narsa qo‘shmagansiz.",
+  "providers_empty": "Xizmat ko‘rsatuvchilar topilmadi.",
+  "error_favorites_failed": "Sevimlilarni yuklashda xatolik.",
+  "favorites_added_snack": "Sevimlilarga qo‘shildi",
+  "favorites_removed_snack": "Sevimlilardan olib tashlandi",
+  "favorites_toggle_failed": "Sevimlilarni yangilab bo‘lmadi. Iltimos, qayta urinib ko‘ring.",
+
+
+  
+  "providers": "Providers",
+  "no_results": "No results",
+  "no_favorites": "You have no favorite shops yet.",
+  "providers": "Providers",
+  "no_results": "No results",
+  "no_favorites": "You have no favorite shops yet.",
+  "remove_from_favorites": "Remove from favorites",
+  "error_generic": "Something went wrong. Please try again."
 }

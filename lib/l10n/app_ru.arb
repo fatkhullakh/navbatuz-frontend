@@ -139,5 +139,25 @@
   "common_back": "Назад",
   "common_cancelling": "Отмена…",
   "common_service": "Услуга",
-  "common_provider": "Провайдер"
+  "common_provider": "Провайдер",
+
+  "providers_title": "Поставщики",
+  "favorites_title": "Избранные магазины",
+  "favorites_empty": "Вы еще не добавили избранные.",
+  "providers_empty": "Нет поставщиков для отображения.",
+  "error_favorites_failed": "Не удалось загрузить избранное.",
+  "favorites_added_snack": "Добавлено в избранное",
+  "favorites_removed_snack": "Удалено из избранного",
+  "favorites_toggle_failed": "Не удалось обновить избранное. Попробуйте еще раз.",
+
+
+  
+  "providers": "Providers",
+  "no_results": "No results",
+  "no_favorites": "You have no favorite shops yet.",
+  "providers": "Providers",
+  "no_results": "No results",
+  "no_favorites": "You have no favorite shops yet.",
+  "remove_from_favorites": "Remove from favorites",
+  "error_generic": "Something went wrong. Please try again."
 }

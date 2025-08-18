@@ -39,7 +39,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favorites => 'Избранное';
 
   @override
-  String get no_favorites => 'Пока нет избранных.';
+  String get no_favorites => 'You have no favorite shops yet.';
 
   @override
   String get recommended => 'Рекомендовано';
@@ -117,7 +117,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get action_reload => 'Обновить';
 
   @override
-  String get error_generic => 'Что-то пошло не так.';
+  String get error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get provider_tab_services => 'Услуги';
@@ -389,4 +389,37 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get common_provider => 'Провайдер';
+
+  @override
+  String get providers_title => 'Поставщики';
+
+  @override
+  String get favorites_title => 'Избранные магазины';
+
+  @override
+  String get favorites_empty => 'Вы еще не добавили избранные.';
+
+  @override
+  String get providers_empty => 'Нет поставщиков для отображения.';
+
+  @override
+  String get error_favorites_failed => 'Не удалось загрузить избранное.';
+
+  @override
+  String get favorites_added_snack => 'Добавлено в избранное';
+
+  @override
+  String get favorites_removed_snack => 'Удалено из избранного';
+
+  @override
+  String get favorites_toggle_failed => 'Не удалось обновить избранное. Попробуйте еще раз.';
+
+  @override
+  String get providers => 'Providers';
+
+  @override
+  String get no_results => 'No results';
+
+  @override
+  String get remove_from_favorites => 'Remove from favorites';
 }
