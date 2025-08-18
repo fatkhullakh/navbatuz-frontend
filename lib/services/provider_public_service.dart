@@ -101,6 +101,7 @@ class ProvidersDetails {
   final List<WorkerLite> workers;
   final String email;
   final String phone;
+  final String? logoUrl;
   final double avgRating;
   final List<BusinessHourItem> businessHours;
   final LocationSummary? location;
@@ -113,6 +114,7 @@ class ProvidersDetails {
     required this.workers,
     required this.email,
     required this.phone,
+    required this.logoUrl,
     required this.avgRating,
     required this.businessHours,
     this.location,
@@ -128,6 +130,7 @@ class ProvidersDetails {
             .toList(),
         email: (j['email'] ?? '').toString(),
         phone: (j['phone'] ?? '').toString(),
+        logoUrl: j['logoUrl']?.toString(),
         avgRating:
             (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : 0,
         businessHours: ((j['businessHours'] as List?) ?? const [])
@@ -141,6 +144,10 @@ class ProvidersDetails {
 
 class ProviderPublicService {
   final _dio = ApiService.client;
+
+  Future<void> setLogo(String providerId, String url) async {
+    await _dio.put('/providers/$providerId/logo', data: {'url': url});
+  }
 
   Future<ProviderResponse> getById(String id) async {
     final r = await _dio.get('/providers/public/$id');

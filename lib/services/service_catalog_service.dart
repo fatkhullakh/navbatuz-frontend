@@ -85,4 +85,8 @@ class ServiceCatalogService {
     final r = await _dio.get('/services/public/$serviceId');
     return ServiceDetail.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<void> setImage(String serviceId, String url) async {
+    await _dio.put('/services/$serviceId/image', data: {'url': url});
+  }
 }

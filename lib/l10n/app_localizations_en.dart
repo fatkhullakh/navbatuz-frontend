@@ -422,4 +422,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remove_from_favorites => 'Remove from favorites';
+
+  @override
+  String get provider_change_logo => 'Change logo';
+
+  @override
+  String get action_pick_from_gallery => 'Pick from gallery';
+
+  @override
+  String get action_take_photo => 'Take a photo';
+
+  @override
+  String get provider_logo_updated => 'Logo updated';
+
+  @override
+  String get error_upload_failed => 'Upload failed';
 }

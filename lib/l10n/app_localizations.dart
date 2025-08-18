@@ -918,6 +918,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from favorites'**
   String get remove_from_favorites;
+
+  /// No description provided for @provider_change_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change logo'**
+  String get provider_change_logo;
+
+  /// No description provided for @action_pick_from_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from gallery'**
+  String get action_pick_from_gallery;
+
+  /// No description provided for @action_take_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get action_take_photo;
+
+  /// No description provided for @provider_logo_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo updated'**
+  String get provider_logo_updated;
+
+  /// No description provided for @error_upload_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed'**
+  String get error_upload_failed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
