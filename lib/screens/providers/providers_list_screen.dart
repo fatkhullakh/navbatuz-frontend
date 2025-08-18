@@ -3,10 +3,11 @@ import 'package:dio/dio.dart';
 import '../../services/api_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/provider_screen.dart';
+import '../../services/provider_public_service.dart'; // for details to get logoUrl
 
 class ProvidersListScreen extends StatefulWidget {
   /// 'favorites' => list user’s favorite providers
-  /// 'all'       => list all providers (placeholder for recommendations)
+  /// null/'all'  => list all providers (MVP for recommendations)
   final String? filter;
   final String? categoryId; // (future)
   const ProvidersListScreen({super.key, this.filter, this.categoryId});
@@ -17,14 +18,32 @@ class ProvidersListScreen extends StatefulWidget {
 
 class _ProvidersListScreenState extends State<ProvidersListScreen> {
   final _dio = ApiService.client;
+  final _pub = ProviderPublicService(); // to hydrate logos when absent
   bool _loading = false;
   String? _error;
   List<_ProviderSummary> _items = [];
+
+  // id -> logoUrl
+  final Map<String, String?> _logoById = {};
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  Future<void> _hydrateLogos() async {
+    // fetch details only for items with unknown logo
+    for (final p in _items) {
+      if (_logoById.containsKey(p.id)) continue;
+      try {
+        final d = await _pub.getDetails(p.id);
+        if (!mounted) return;
+        setState(() => _logoById[p.id] = d.logoUrl);
+      } catch (_) {
+        // ignore per-item failures
+      }
+    }
   }
 
   Future<void> _load() async {
@@ -74,6 +93,15 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
             .toList();
       }
 
+      // Pre-seed logos when list payload already has it; otherwise lazy load.
+      for (final p in _items) {
+        if (p.logoUrl != null && !_logoById.containsKey(p.id)) {
+          _logoById[p.id] = p.logoUrl;
+        }
+      }
+      // lazy hydrate
+      _hydrateLogos();
+
       setState(() {});
     } on DioException catch (e) {
       setState(() => _error = 'Failed: ${e.response?.statusCode ?? ''}');
@@ -121,13 +149,15 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         itemBuilder: (_, i) {
                           final p = _items[i];
 
-                          // Top line: category • rating
+                          // Category • Rating
                           final bits = <String>[];
                           if ((p.category ?? '').isNotEmpty)
                             bits.add(p.category!);
                           if (p.rating != null)
                             bits.add(p.rating!.toStringAsFixed(1));
                           final top = bits.join(' • ');
+
+                          final logoUrl = _logoById[p.id] ?? p.logoUrl;
 
                           return Card(
                             elevation: 0,
@@ -136,7 +166,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                             ),
                             child: ListTile(
                               onTap: () {
-                                // Open provider details screen
                                 Navigator.of(context, rootNavigator: true).push(
                                   MaterialPageRoute(
                                     builder: (_) =>
@@ -144,6 +173,16 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                                   ),
                                 );
                               },
+                              leading: CircleAvatar(
+                                radius: 22,
+                                backgroundImage:
+                                    (logoUrl != null && logoUrl.isNotEmpty)
+                                        ? NetworkImage(logoUrl)
+                                        : null,
+                                child: (logoUrl == null || logoUrl.isEmpty)
+                                    ? const Icon(Icons.storefront_outlined)
+                                    : null,
+                              ),
                               title: Text(
                                 p.name,
                                 maxLines: 1,
@@ -185,6 +224,7 @@ class _ProviderSummary {
   final double? rating; // from avgRating
   final String? category; // “CLINIC”, etc.
   final String? locationCompact;
+  final String? logoUrl; // may come from details or list payload
 
   _ProviderSummary({
     required this.id,
@@ -193,6 +233,7 @@ class _ProviderSummary {
     this.rating,
     this.category,
     this.locationCompact,
+    this.logoUrl,
   });
 
   factory _ProviderSummary.fromJson(Map<String, dynamic> j) {
@@ -219,6 +260,7 @@ class _ProviderSummary {
           (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : null,
       category: j['category']?.toString(),
       locationCompact: compactLocation(),
+      logoUrl: j['logoUrl']?.toString(), // present if backend includes it
     );
   }
 }

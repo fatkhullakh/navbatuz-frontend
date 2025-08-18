@@ -159,11 +159,6 @@ class ProviderPublicService {
     return ProvidersDetails.fromJson(r.data as Map<String, dynamic>);
   }
 
-  // Future<List<String>> getFavouriteIds() async {
-  //   final r = await _dio.get('/customers/favourites');
-  //   return (r.data as List).map((e) => e.toString()).toList();
-  // }
-
   Future<List<String>> getFavouriteIds() {
     return FavoriteService().listFavoriteIds();
   }

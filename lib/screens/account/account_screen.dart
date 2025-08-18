@@ -7,6 +7,9 @@ import 'change_password_screen.dart';
 import 'support_screen.dart';
 import 'other_screen.dart';
 
+// add this import to read API base url for normalizing image URLs
+import '../../services/api_service.dart';
+
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
   @override
@@ -25,6 +28,36 @@ class _AccountScreenState extends State<AccountScreen> {
     super.initState();
     _load(force: true);
   }
+
+  // ---- helpers to normalize image URLs ----
+  String _apiOrigin() {
+    // e.g. http://10.0.2.2:8080/api  ->  http://10.0.2.2:8080
+    var b = ApiService.client.options.baseUrl;
+    if (b.endsWith('/')) b = b.substring(0, b.length - 1);
+    if (b.endsWith('/api')) b = b.substring(0, b.length - 4);
+    return b;
+  }
+
+  String? _normalizedImg(String? url) {
+    if (url == null || url.isEmpty) return null;
+    final origin = _apiOrigin();
+
+    // fix localhost → emulator host
+    if (url.startsWith('http://localhost:8080')) {
+      return url.replaceFirst('http://localhost:8080', origin);
+    }
+    if (url.startsWith('http://127.0.0.1:8080')) {
+      return url.replaceFirst('http://127.0.0.1:8080', origin);
+    }
+
+    // handle relative paths like /uploads/...
+    if (url.startsWith('/')) {
+      return '$origin$url';
+    }
+
+    return url; // already absolute & fine
+  }
+  // -----------------------------------------
 
   Future<void> _load({bool force = false}) async {
     setState(() {
@@ -109,7 +142,8 @@ class _AccountScreenState extends State<AccountScreen> {
       final me = _me!;
       final fullName =
           [me.name, me.surname].where((s) => (s ?? '').isNotEmpty).join(' ');
-      final avatar = (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+      final initial = (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+      final avatarUrl = _normalizedImg(me.avatarUrl);
 
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -121,8 +155,14 @@ class _AccountScreenState extends State<AccountScreen> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
               leading: CircleAvatar(
-                child: Text(avatar,
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                radius: 24,
+                backgroundColor: const Color(0xFFE9EEF5),
+                backgroundImage:
+                    (avatarUrl != null) ? NetworkImage(avatarUrl) : null,
+                child: (avatarUrl == null)
+                    ? Text(initial,
+                        style: const TextStyle(fontWeight: FontWeight.w700))
+                    : null,
               ),
               title:
                   Text(fullName, maxLines: 1, overflow: TextOverflow.ellipsis),

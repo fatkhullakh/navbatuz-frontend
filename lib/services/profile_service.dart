@@ -13,6 +13,7 @@ class Me {
   final String? email;
   final String? language; // 'EN' | 'RU' | 'UZ'
   final String? country;
+  final String? avatarUrl;
 
   Me({
     required this.id,
@@ -24,6 +25,7 @@ class Me {
     this.email,
     this.language,
     this.country,
+    this.avatarUrl,
   });
 
   /// Convenient display name used by Account UI
@@ -57,6 +59,7 @@ class Me {
       email: j['email'] as String?,
       language: j['language']?.toString(),
       country: j['country']?.toString(),
+      avatarUrl: j['avatarUrl']?.toString(),
     );
   }
 }

@@ -62,14 +62,24 @@ class _ProviderScreenState extends State<ProviderScreen>
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
+    final hasLogo =
+        _details?.logoUrl != null && _details!.logoUrl!.trim().isNotEmpty;
+
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
           SliverAppBar(
             pinned: true,
             expandedHeight: 200,
-            flexibleSpace: const FlexibleSpaceBar(
-              background: ColoredBox(color: Color(0xFFF2F4F7)),
+            flexibleSpace: FlexibleSpaceBar(
+              background: hasLogo
+                  ? Image.network(
+                      _details!.logoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const ColoredBox(color: Color(0xFFF2F4F7)),
+                    )
+                  : const ColoredBox(color: Color(0xFFF2F4F7)),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(104),
@@ -171,13 +181,12 @@ class _ProviderScreenState extends State<ProviderScreen>
               ),
               const SizedBox(width: 6),
 
-              // ✅ Correct usage of FavoriteToggleButton
+              // ✅ Favorite button
               FavoriteToggleButton(
-                providerId: d.id, // <-- required
-                initialIsFavorite: _initialFav, // <-- optional, seeds state
+                providerId: d.id,
+                initialIsFavorite: _initialFav,
                 onChanged: () {
-                  // If you need to refresh other UI based on fav state, do it here.
-                  // setState(() {}); // not strictly needed now
+                  // If you need to react to changes, do it here.
                 },
               ),
 
