@@ -1,14 +1,14 @@
-// lib/screens/appointments/appointments_screen.dart
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:dio/dio.dart';
-
 import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
 import 'appointment_details_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppointmentsScreen extends StatefulWidget {
-  const AppointmentsScreen({super.key});
+  final VoidCallback? onChanged;
+  const AppointmentsScreen({super.key, this.onChanged});
 
   @override
   State<AppointmentsScreen> createState() => _AppointmentsScreenState();
@@ -16,11 +16,9 @@ class AppointmentsScreen extends StatefulWidget {
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final _svc = AppointmentService();
-
   bool _loading = false;
   List<AppointmentItem> _upcoming = [];
   List<AppointmentItem> _past = [];
-
   final _dateFmt = DateFormat('EEE, d MMM');
   final _timeFmt = DateFormat('HH:mm');
 
@@ -30,17 +28,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     _load();
   }
 
-  void refresh() => _load();
-
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
       final all = await _svc.listMine();
-
       final now = DateTime.now();
       final upcoming = <AppointmentItem>[];
       final past = <AppointmentItem>[];
-
       for (final a in all) {
         final s = a.status.toUpperCase();
         final isUpcomingStatus = s == 'BOOKED' || s == 'CONFIRMED';
@@ -50,11 +44,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           past.add(a);
         }
       }
+      upcoming.sort((a, b) => a.start.compareTo(b.start));
+      past.sort((a, b) => b.start.compareTo(a.start));
 
-      upcoming.sort((a, b) => a.start.compareTo(b.start)); // ASC
-      past.sort((a, b) => b.start.compareTo(a.start)); // DESC
-
-      if (!mounted) return;
       setState(() {
         _upcoming = upcoming;
         _past = past;
@@ -65,24 +57,37 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         SnackBar(content: Text('Failed to load appointments: $e')),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _openDetails(String id) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+          builder: (_) => AppointmentDetailsScreen(appointmentId: id)),
+    );
+    if (changed == true) {
+      await _load();
+      widget.onChanged?.call(); // <-- tell root so Home remounts
     }
   }
 
   Future<void> _cancel(String id) async {
+    final t = AppLocalizations.of(context)!;
+
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel appointment?'),
-        content: const Text('This action cannot be undone.'),
+        title: Text(t.appointment_cancel_confirm_title),
+        content: Text(t.appointment_cancel_confirm_body),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('No')),
+              child: Text(t.common_no)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Yes, cancel')),
+              child: Text(t.appointment_cancel_confirm_yes)),
         ],
       ),
     );
@@ -91,36 +96,33 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     try {
       await _svc.cancel(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Appointment canceled')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.appointment_cancel_success)));
       await _load();
+      widget.onChanged?.call();
+    } on LateCancellationException catch (e) {
+      if (!mounted) return;
+      final msg = (e.minutes != null)
+          ? t.appointment_cancel_too_late_with_window(e.minutes!)
+          : t.appointment_cancel_too_late;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } on DioException catch (e) {
       if (!mounted) return;
       if (e.response?.statusCode == 401) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Session expired. Please login again.')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.error_session_expired)));
         Navigator.of(context, rootNavigator: true)
             .pushNamedAndRemoveUntil('/login', (_) => false);
         return;
       }
+      final code = e.response?.statusCode?.toString() ?? '';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Cancel failed: ${e.response?.statusCode ?? ''}')),
-      );
-    } catch (e) {
+          SnackBar(content: Text(t.appointment_cancel_failed_generic(code))));
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cancel failed: $e')),
-      );
+          SnackBar(content: Text(t.appointment_cancel_failed_unknown)));
     }
-  }
-
-  void _bookAgain(AppointmentItem a) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('TODO: open provider to book again')),
-    );
   }
 
   Color _statusColor(String status) {
@@ -144,83 +146,53 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       appBar: AppBar(title: const Text('Appointments')),
       body: RefreshIndicator(
         onRefresh: _load,
-        child: _buildBody(),
+        child: _loading && _upcoming.isEmpty && _past.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                children: [
+                  if (_upcoming.isNotEmpty)
+                    _Section(
+                      title: 'Upcoming Appointments',
+                      children: _upcoming
+                          .map((a) => _AppointmentCard(
+                                item: a,
+                                dateFmt: _dateFmt,
+                                timeFmt: _timeFmt,
+                                statusColor: _statusColor(a.status),
+                                primaryActionText: 'Cancel',
+                                onPrimaryAction: () => _cancel(a.id),
+                                onOpen: () =>
+                                    _openDetails(a.id), // <-- open details
+                              ))
+                          .toList(),
+                    ),
+                  if (_past.isNotEmpty) const SizedBox(height: 12),
+                  if (_past.isNotEmpty)
+                    _Section(
+                      title: 'Finished Appointments',
+                      children: _past
+                          .map((a) => _AppointmentCard(
+                                item: a,
+                                dateFmt: _dateFmt,
+                                timeFmt: _timeFmt,
+                                statusColor: _statusColor(a.status),
+                                primaryActionText: 'Book again',
+                                onPrimaryAction: () {/* TODO */},
+                                onOpen: () => _openDetails(a.id),
+                              ))
+                          .toList(),
+                    ),
+                  if (_upcoming.isEmpty && _past.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 48.0),
+                        child: Text("You don't have any appointments yet."),
+                      ),
+                    ),
+                ],
+              ),
       ),
-    );
-  }
-
-  Widget _buildBody() {
-    // Make loading & error states scrollable for pull-to-refresh
-    if (_loading && _upcoming.isEmpty && _past.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 120),
-          Center(child: CircularProgressIndicator()),
-        ],
-      );
-    }
-
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      children: [
-        if (_upcoming.isNotEmpty)
-          _Section(
-            title: 'Upcoming Appointments',
-            children: _upcoming
-                .map(
-                  (a) => _AppointmentCard(
-                    item: a,
-                    dateFmt: _dateFmt,
-                    timeFmt: _timeFmt,
-                    statusColor: _statusColor(a.status),
-                    primaryActionText: 'Cancel',
-                    onPrimaryAction: () => _cancel(a.id),
-                    onTap: () async {
-                      final changed = await Navigator.push<bool>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AppointmentDetailsScreen(id: a.id),
-                        ),
-                      );
-                      if (changed == true && mounted) refresh();
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        if (_past.isNotEmpty) const SizedBox(height: 12),
-        if (_past.isNotEmpty)
-          _Section(
-            title: 'Finished Appointments',
-            children: _past
-                .map(
-                  (a) => _AppointmentCard(
-                    item: a,
-                    dateFmt: _dateFmt,
-                    timeFmt: _timeFmt,
-                    statusColor: _statusColor(a.status),
-                    primaryActionText: 'Book again',
-                    onPrimaryAction: () => _bookAgain(a),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AppointmentDetailsScreen(id: a.id),
-                        ),
-                      );
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        if (_upcoming.isEmpty && _past.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 48.0),
-            child: Center(child: Text("You don't have any appointments yet.")),
-          ),
-      ],
     );
   }
 }
@@ -236,18 +208,16 @@ class _Section extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
         ...children.expand((w) sync* {
           yield w;
           yield const SizedBox(height: 12);
-        }),
+        })
       ],
     );
   }
@@ -260,7 +230,7 @@ class _AppointmentCard extends StatelessWidget {
   final Color statusColor;
   final String primaryActionText;
   final VoidCallback onPrimaryAction;
-  final VoidCallback? onTap; // NEW
+  final VoidCallback onOpen;
 
   const _AppointmentCard({
     required this.item,
@@ -269,7 +239,7 @@ class _AppointmentCard extends StatelessWidget {
     required this.statusColor,
     required this.primaryActionText,
     required this.onPrimaryAction,
-    this.onTap,
+    required this.onOpen,
   });
 
   @override
@@ -277,18 +247,17 @@ class _AppointmentCard extends StatelessWidget {
     final dateText = dateFmt.format(item.start);
     final timeText =
         "${timeFmt.format(item.start)} – ${timeFmt.format(item.end)}";
-
     final title = item.serviceName ?? 'Service';
     final provider = item.providerName ?? 'Provider';
     final worker = item.workerName != null ? "with ${item.workerName}" : null;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Theme.of(context).colorScheme.surface,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onOpen, // <-- open details
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        color: Theme.of(context).colorScheme.surface,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(

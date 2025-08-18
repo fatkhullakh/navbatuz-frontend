@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../l10n/app_localizations.dart';
 import '../../services/profile_service.dart';
+import '../../services/uploads_service.dart';
+import '../../services/api_service.dart';
 import 'personal_info_screen.dart';
 import 'account_settings_screen.dart';
 import 'change_password_screen.dart';
 import 'support_screen.dart';
 import 'other_screen.dart';
-
-// TODO: user can change email and phone number in seperate section cause we need to send SMS to verify
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -16,6 +19,8 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final _svc = ProfileService();
+  final _uploads = UploadsService();
+  final _picker = ImagePicker();
 
   Me? _me;
   bool _loading = false;
@@ -35,19 +40,12 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       final me = await _svc.getMe(force: force);
       if (!mounted) return;
-      setState(() {
-        _me = me;
-      });
+      setState(() => _me = me);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      if (mounted)
-        setState(() {
-          _loading = false;
-        });
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -70,12 +68,10 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _openChangePassword() async {
-    if (_me == null) return;
     final changed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => ChangePasswordScreen(userId: _me!.id)),
+      MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
     );
-    // no user fields change here, but keep behavior consistent
     if (changed == true) await _load(force: true);
   }
 
@@ -86,8 +82,113 @@ class _AccountScreenState extends State<AccountScreen> {
         .pushNamedAndRemoveUntil('/login', (_) => false);
   }
 
+  // ---- Avatar actions ----
+
+  void _onAvatarPressed(Me me, AppLocalizations t) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: Text(t.action_change_photo),
+              onTap: () async {
+                Navigator.pop(context);
+                await _changeAvatar(me);
+              },
+            ),
+            if ((me.avatarUrl ?? '').isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.remove_circle_outline),
+                title: Text(t.action_remove_photo),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _removeAvatar(me);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.visibility_outlined),
+              title: Text(t.action_view_photo),
+              onTap: () {
+                Navigator.pop(context);
+                _viewAvatar(me);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _changeAvatar(Me me) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 90,
+        maxWidth: 1600,
+      );
+      if (picked == null) return;
+
+      final url = await _uploads.uploadUserAvatar(
+        userId: me.id,
+        filePath: picked.path,
+      );
+      await _svc.setAvatarUrl(me.id, url);
+      if (!mounted) return;
+      await _load(force: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avatar updated')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update avatar: $e')),
+      );
+    }
+  }
+
+  Future<void> _removeAvatar(Me me) async {
+    try {
+      await _svc.removeAvatar(me.id);
+      if (!mounted) return;
+      await _load(force: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avatar removed')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to remove avatar: $e')),
+      );
+    }
+  }
+
+  void _viewAvatar(Me me) {
+    final url = ApiService.normalizeMediaUrl(me.avatarUrl);
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: url == null
+              ? const Center(child: Icon(Icons.account_circle, size: 120))
+              : InteractiveViewer(
+                  minScale: 0.8,
+                  maxScale: 5,
+                  child: Image.network(url, fit: BoxFit.cover),
+                ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     final body = () {
       if (_loading && _me == null && _error == null) {
         return ListView(
@@ -103,80 +204,93 @@ class _AccountScreenState extends State<AccountScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 120),
-            Center(child: Text('Failed to load: $_error')),
+            Center(child: Text(t.error_generic)),
             const SizedBox(height: 12),
             Center(
               child: OutlinedButton(
                 onPressed: () => _load(force: true),
-                child: const Text('Retry'),
+                child: Text(t.action_retry),
               ),
             ),
           ],
         );
       }
       final me = _me!;
+      final fullName =
+          [me.name, me.surname].where((s) => (s ?? '').isNotEmpty).join(' ');
+      final avatarLetter =
+          (fullName.isNotEmpty ? fullName[0] : '?').toUpperCase();
+      final avatarUrl = ApiService.normalizeMediaUrl(me.avatarUrl);
+
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         children: [
-          // Header with user's info (kept)
           Card(
             elevation: 0,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
-              leading: CircleAvatar(
-                child: Text(
-                  (me.fullName.isNotEmpty ? me.fullName[0] : '?').toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+              leading: GestureDetector(
+                onTap: () => _onAvatarPressed(me, t),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundImage:
+                      (avatarUrl != null) ? NetworkImage(avatarUrl) : null,
+                  child: (avatarUrl == null)
+                      ? Text(avatarLetter,
+                          style: const TextStyle(fontWeight: FontWeight.w700))
+                      : null,
                 ),
               ),
-              title: Text(me.fullName,
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              title:
+                  Text(fullName, maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(me.phoneNumber),
-                  if (me.email.isNotEmpty) Text(me.email),
+                  if ((me.phoneNumber ?? '').isNotEmpty) Text(me.phoneNumber!),
+                  if ((me.email ?? '').isNotEmpty) Text(me.email!),
                 ],
+              ),
+              trailing: IconButton(
+                onPressed: () => _onAvatarPressed(me, t),
+                icon: const Icon(Icons.edit),
+                tooltip: t.action_change_photo,
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // Sections only (tap to navigate)
           _SectionTile(
-            title: 'Personal Info',
-            subtitle: 'Name, Surname, Email, Phone, Birthday, Gender',
+            title: t.account_personal,
+            subtitle: t.account_personal_sub,
             onTap: _openPersonal,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Account Settings',
-            subtitle: 'Language, Country',
+            title: t.account_settings,
+            subtitle: t.account_settings_sub,
             onTap: _openSettings,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Change Password',
-            subtitle: 'Update your password',
+            title: t.account_change_password,
+            subtitle: t.account_change_password_sub,
             onTap: _openChangePassword,
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Support',
-            subtitle: 'FAQ, Contact Us, Report a problem',
+            title: t.account_support,
+            subtitle: t.account_support_sub,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const SupportScreen())),
           ),
           const SizedBox(height: 12),
           _SectionTile(
-            title: 'Other',
-            subtitle: 'About, Terms, Privacy',
+            title: t.account_other,
+            subtitle: t.account_other_sub,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const OtherScreen())),
           ),
-
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -189,7 +303,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: _logout,
-              child: const Text('Log out'),
+              child: Text(t.logout),
             ),
           ),
         ],
@@ -197,7 +311,7 @@ class _AccountScreenState extends State<AccountScreen> {
     }();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: AppBar(title: Text(t.account_title)),
       body: RefreshIndicator(onRefresh: () => _load(force: true), child: body),
     );
   }

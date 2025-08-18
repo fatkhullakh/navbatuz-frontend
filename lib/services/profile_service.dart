@@ -1,118 +1,114 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../core/dio_client.dart';
+import 'api_service.dart';
 
 class Me {
   final String id;
-  final String name;
-  final String surname;
-  final String phoneNumber;
-  final String email;
+  final String? name;
+  final String? surname;
   final DateTime? dateOfBirth;
-  final String? gender; // MALE/FEMALE/OTHER
-  final String? language; // EN/UZ/RU/...
+  final String? gender;
+  final String? phoneNumber;
+  final String? email;
+  final String? language; // 'EN' | 'RU' | 'UZ'
   final String? country;
+  final String? avatarUrl;
 
-  const Me({
+  Me({
     required this.id,
-    required this.name,
-    required this.surname,
-    required this.phoneNumber,
-    required this.email,
+    this.name,
+    this.surname,
     this.dateOfBirth,
     this.gender,
+    this.phoneNumber,
+    this.email,
     this.language,
     this.country,
+    this.avatarUrl,
   });
 
   String get fullName {
-    final n = name.trim(), s = surname.trim();
-    if (n.isEmpty) return s;
-    if (s.isEmpty) return n;
-    return '$n $s';
+    final parts = <String>[];
+    final n = (name ?? '').trim();
+    final s = (surname ?? '').trim();
+    if (n.isNotEmpty) parts.add(n);
+    if (s.isNotEmpty) parts.add(s);
+    final joined = parts.join(' ').trim();
+    if (joined.isNotEmpty) return joined;
+    if ((email ?? '').trim().isNotEmpty) return email!.trim();
+    if ((phoneNumber ?? '').trim().isNotEmpty) return phoneNumber!.trim();
+    return 'User';
   }
 
-  factory Me.fromJson(Map<String, dynamic> j) => Me(
-        id: (j['id'] ?? '').toString(),
-        name: (j['name'] ?? '').toString(),
-        surname: (j['surname'] ?? '').toString(),
-        phoneNumber: (j['phoneNumber'] ?? '').toString(),
-        email: (j['email'] ?? '').toString(),
-        dateOfBirth:
-            (j['dateOfBirth'] == null || j['dateOfBirth'].toString().isEmpty)
-                ? null
-                : DateTime.tryParse(j['dateOfBirth'].toString()),
-        gender: (j['gender'] as String?)?.toString(),
-        language: (j['language'] as String?)?.toString(),
-        country: (j['country'] as String?)?.toString(),
-      );
+  factory Me.fromJson(Map<String, dynamic> j) {
+    DateTime? dob;
+    final rawDob = j['dateOfBirth'];
+    if (rawDob is String && rawDob.isNotEmpty) {
+      dob = DateTime.tryParse(rawDob);
+    }
+    return Me(
+      id: (j['id'] ?? '').toString(),
+      name: j['name'] as String?,
+      surname: j['surname'] as String?,
+      dateOfBirth: dob,
+      gender: j['gender'] as String?,
+      phoneNumber: j['phoneNumber'] as String?,
+      email: j['email'] as String?,
+      language: j['language']?.toString(),
+      country: j['country']?.toString(),
+      avatarUrl: j['avatarUrl']?.toString(),
+    );
+  }
 }
 
 class ProfileService {
-  final Dio _dio = DioClient.build();
-  static final _storage = FlutterSecureStorage();
+  final Dio _dio = ApiService.client;
+  final _storage = const FlutterSecureStorage();
+
+  static const _prefix = '';
 
   Future<Me> getMe({bool force = false}) async {
-    final r = await _dio.get(
-      '/users/me',
+    final resp = await _dio.get(
+      '$_prefix/users/me',
+      options: Options(headers: {'Cache-Control': 'no-cache'}),
       queryParameters:
           force ? {'_': DateTime.now().millisecondsSinceEpoch} : null,
-      options: Options(headers: const {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      }),
     );
-    return Me.fromJson((r.data as Map).cast<String, dynamic>());
+    return Me.fromJson(resp.data as Map<String, dynamic>);
   }
 
-  Future<Me> updatePersonal({
+  Future<void> updatePersonal({
     required String id,
-    required String name,
-    required String surname,
-    required String phoneNumber,
-    required String email,
-    DateTime? dateOfBirth,
-    String? gender,
+    required Map<String, dynamic> body,
   }) async {
-    final r = await _dio.put('/users/$id', data: {
-      'name': name,
-      'surname': surname,
-      'dateOfBirth': dateOfBirth != null
-          ? dateOfBirth.toIso8601String().split('T').first
-          : null,
-      'gender': gender,
-      'phoneNumber': phoneNumber,
-      'email': email,
-    });
-    return Me.fromJson((r.data as Map).cast<String, dynamic>());
+    await _dio.put('$_prefix/users/$id', data: body);
   }
 
-  Future<Me> updateSettings({
+  Future<void> updateSettingsById({
     required String id,
-    String? language,
-    String? country,
+    required Map<String, dynamic> body,
   }) async {
-    final r = await _dio.put('/users/$id/settings', data: {
-      if (language != null) 'language': language,
-      if (country != null) 'country': country,
-    });
-    return Me.fromJson((r.data as Map).cast<String, dynamic>());
+    await _dio.put('$_prefix/users/$id/settings', data: body);
   }
 
   Future<void> changePassword({
-    required String id,
     required String currentPassword,
     required String newPassword,
   }) async {
-    await _dio.put('/users/$id/change-password', data: {
+    await _dio.put('$_prefix/users/change-password', data: {
       'currentPassword': currentPassword,
       'newPassword': newPassword,
     });
   }
 
-  Future<void> deactivate({required String id}) async {
-    await _dio.delete('/users/$id');
+  /// Set/replace avatar URL
+  Future<void> setAvatarUrl(String userId, String url) async {
+    await _dio.put('$_prefix/users/$userId/avatar', data: {'url': url});
+  }
+
+  /// Remove avatar (if your backend supports DELETE)
+  Future<void> removeAvatar(String userId) async {
+    await _dio.delete('$_prefix/users/$userId/avatar');
   }
 
   Future<void> logout() async {

@@ -1,39 +1,78 @@
-// lib/models/appointment.dart
+import 'package:intl/intl.dart';
+
 class AppointmentItem {
   final String id;
-  final DateTime start; // combined date + startTime
-  final DateTime end; // combined date + endTime
-  final String status; // e.g., COMPLETED/BOOKED/CANCELED
-
-  final String? workerName; // new
-  final String? providerName; // new
-  final String? serviceName; // new
+  final DateTime start;
+  final DateTime end;
+  final String status;
+  final String? providerName;
+  final String? serviceName;
+  final String? workerName;
+  final String? addressLine1;
+  final String? city;
+  final String? countryIso2;
+  final double? price;
 
   AppointmentItem({
     required this.id,
     required this.start,
     required this.end,
     required this.status,
-    this.workerName,
     this.providerName,
     this.serviceName,
+    this.workerName,
+    this.addressLine1,
+    this.city,
+    this.countryIso2,
+    this.price,
   });
 
-  factory AppointmentItem.fromJson(Map<String, dynamic> j) {
-    final date = j['date'] as String; // "2025-07-29"
-    final startTime = j['startTime'] as String; // "12:00[:00]"
-    final endTime = j['endTime'] as String;
+  // Server sends date + time with no TZ → treat as LOCAL, do NOT toLocal()
+  static DateTime _combineLocal(String d, String t) {
+    // If time is "HH:mm", make it "HH:mm:ss"
+    final parts = t.split(':');
+    final hhmmss = parts.length == 2 ? '$t:00' : t;
+    // "yyyy-MM-ddTHH:mm:ss" with no zone = local time in Dart
+    return DateTime.parse('${d}T$hhmmss');
+  }
 
-    String norm(String t) => t.split(':').length == 2 ? '$t:00' : t;
+  // For ISO strings: only convert to local if the value is actually UTC (ends with Z)
+  static DateTime _parseIsoSmart(String s) {
+    final dt = DateTime.parse(s);
+    return dt.isUtc ? dt.toLocal() : dt;
+  }
+
+  factory AppointmentItem.fromJson(Map<String, dynamic> j) {
+    final hasIso =
+        j.containsKey('start') && j.containsKey('end'); // full ISO variant
+    final hasDateTime =
+        j.containsKey('date') && j.containsKey('startTime'); // split variant
+
+    DateTime start, end;
+    if (hasIso) {
+      start = _parseIsoSmart(j['start'].toString());
+      end = _parseIsoSmart(j['end'].toString());
+    } else if (hasDateTime) {
+      start = _combineLocal(j['date'].toString(), j['startTime'].toString());
+      end = _combineLocal(j['date'].toString(), j['endTime'].toString());
+    } else {
+      // fallback
+      start = DateTime.now();
+      end = start.add(const Duration(minutes: 30));
+    }
 
     return AppointmentItem(
-      id: j['id'] as String,
-      start: DateTime.parse('${date}T${norm(startTime)}'),
-      end: DateTime.parse('${date}T${norm(endTime)}'),
-      status: (j['status'] ?? 'BOOKED') as String,
-      workerName: j['workerName'] as String?,
-      providerName: j['providerName'] as String?,
-      serviceName: j['serviceName'] as String?,
+      id: j['id'].toString(),
+      start: start,
+      end: end,
+      status: (j['status'] ?? '').toString(),
+      providerName: j['providerName']?.toString(),
+      serviceName: j['serviceName']?.toString(),
+      workerName: j['workerName']?.toString(),
+      addressLine1: j['addressLine1']?.toString(),
+      city: j['city']?.toString(),
+      countryIso2: j['countryIso2']?.toString(),
+      price: (j['price'] is num) ? (j['price'] as num).toDouble() : null,
     );
   }
 }
