@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/home_service.dart' as hs;
 import '../providers/provider_screen.dart';
+import '../../services/api_service.dart'; // <-- for normalizeMediaUrl
 import '../providers/providers_list_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
@@ -327,6 +328,33 @@ class _ProviderRow extends StatelessWidget {
   final List<hs.ProviderItem> shops;
   const _ProviderRow({required this.shops});
 
+  Widget _logoBox(String? url) {
+    final placeholder = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xFFF2F4F7),
+      ),
+      child: const Center(child: Icon(Icons.storefront, size: 28)),
+    );
+
+    if ((url ?? '').isEmpty) return placeholder;
+    final normalized = ApiService.normalizeMediaUrl(url);
+    if (normalized == null) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Image.network(
+        normalized,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, __, ___) => placeholder,
+        loadingBuilder: (ctx, child, progress) =>
+            progress == null ? child : placeholder,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -346,7 +374,6 @@ class _ProviderRow extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
-                  // use root navigator so it sees global routes
                   Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
                       builder: (_) => ProviderScreen(providerId: s.id),
@@ -358,14 +385,7 @@ class _ProviderRow extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xFFF2F4F7),
-                          ),
-                        ),
-                      ),
+                      Expanded(child: _logoBox(s.logoUrl)),
                       const SizedBox(height: 8),
                       Text(
                         s.name,

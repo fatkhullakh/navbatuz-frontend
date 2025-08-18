@@ -948,6 +948,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload failed'**
   String get error_upload_failed;
+
+  /// No description provided for @action_change_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get action_change_photo;
+
+  /// No description provided for @action_remove_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get action_remove_photo;
+
+  /// No description provided for @action_view_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'View photo'**
+  String get action_view_photo;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -437,4 +437,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_upload_failed => 'Upload failed';
+
+  @override
+  String get action_change_photo => 'Change photo';
+
+  @override
+  String get action_remove_photo => 'Remove photo';
+
+  @override
+  String get action_view_photo => 'View photo';
 }

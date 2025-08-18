@@ -437,4 +437,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get error_upload_failed => 'Yuklash amalga oshmadi';
+
+  @override
+  String get action_change_photo => 'Rasmni o\'zgartirish';
+
+  @override
+  String get action_remove_photo => 'Rasmni o\'chirish';
+
+  @override
+  String get action_view_photo => 'Rasmni ko\'rish';
 }

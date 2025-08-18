@@ -160,5 +160,9 @@
   "action_pick_from_gallery": "Galereyadan tanlash",
   "action_take_photo": "Suratga olish",
   "provider_logo_updated": "Logotip yangilandi",
-  "error_upload_failed": "Yuklash amalga oshmadi"
+  "error_upload_failed": "Yuklash amalga oshmadi",
+
+  "action_change_photo": "Rasmni o'zgartirish",
+  "action_remove_photo": "Rasmni o'chirish",
+  "action_view_photo": "Rasmni ko'rish"
 }

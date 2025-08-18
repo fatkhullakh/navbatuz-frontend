@@ -437,4 +437,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_upload_failed => 'Загрузка не удалась';
+
+  @override
+  String get action_change_photo => 'Изменить фото';
+
+  @override
+  String get action_remove_photo => 'Удалить фото';
+
+  @override
+  String get action_view_photo => 'Просмотреть фото';
 }

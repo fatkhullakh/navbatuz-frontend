@@ -37,6 +37,8 @@ class ProviderItem {
   final double rating;
   final String category;
   final ProviderLocation? location;
+  final String? logoUrl; // <-- NEW
+
   ProviderItem({
     required this.id,
     required this.name,
@@ -44,6 +46,7 @@ class ProviderItem {
     required this.rating,
     required this.category,
     required this.location,
+    this.logoUrl,
   });
 
   factory ProviderItem.fromJson(Map<String, dynamic> m) {
@@ -52,6 +55,7 @@ class ProviderItem {
     if (raw is Map) {
       loc = ProviderLocation.fromJson(Map<String, dynamic>.from(raw));
     }
+    final rawLogo = m['logoUrl']?.toString();
     return ProviderItem(
       id: (m['id'] ?? '').toString(),
       name: (m['name'] ?? '').toString(),
@@ -60,6 +64,7 @@ class ProviderItem {
           (m['avgRating'] is num) ? (m['avgRating'] as num).toDouble() : 0.0,
       category: (m['category'] ?? '').toString(),
       location: loc,
+      logoUrl: ApiService.normalizeMediaUrl(rawLogo),
     );
   }
 }
@@ -98,7 +103,7 @@ class HomeService {
 
   Future<HomeData> loadAll() async {
     final results = await Future.wait([
-      _dio.get('/providers'), // categories (adjust if needed)
+      _dio.get('/providers'), // categories
       _dio.get('/appointments/me', queryParameters: {'onlyNext': true}),
       _dio.get('/customers/favourites'), // favorites
       _dio.get('/providers/public/all',
@@ -146,7 +151,7 @@ class HomeService {
       }
     }
 
-    // ---------- Providers page (used for recommended or fallback) ----------
+    // ---------- Providers page (recommended/fallback) ----------
     final provRaw = results[3].data;
     final content = (provRaw is Map && provRaw['content'] is List)
         ? (provRaw['content'] as List)
@@ -157,26 +162,23 @@ class HomeService {
             (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
 
-    // ---------- Favorites (robust: supports IDs list or full objects) ----------
+    // ---------- Favorites ----------
     final favRaw = results[2].data;
     late final List<ProviderItem> favorites;
 
-    // Case A: backend returns full ProviderResponse objects (recommended)
     if (favRaw is List && favRaw.isNotEmpty && favRaw.first is Map) {
       favorites = favRaw
           .map(
               (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList();
-    }
-    // Case B: backend returns list of IDs (String/UUID)
-    else if (favRaw is List) {
+    } else if (favRaw is List) {
       final favIds = favRaw.map((e) => e.toString()).toSet();
       favorites = providers.where((p) => favIds.contains(p.id)).toList();
     } else {
       favorites = <ProviderItem>[];
     }
 
-    final recommended = providers; // naive recommended list
+    final recommended = providers; // simple placeholder
 
     return HomeData(
       categories: categories,
