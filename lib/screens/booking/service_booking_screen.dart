@@ -27,10 +27,9 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   final _workers = WorkerService();
   final _appointments = AppointmentService();
 
-  ServiceDetail? _service;
+  ServiceDetails? _service;
   ProvidersDetails? _provider;
-  String?
-      _selectedWorkerId; // null => "Anyone" (we'll use first allowed worker)
+  String? _selectedWorkerId; // null => "Anyone"
   DateTime _selectedDate = DateTime.now();
   Future<List<String>>? _slotsFuture; // "HH:mm:ss"
   String? _selectedStart; // "HH:mm:ss"
@@ -38,7 +37,9 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
 
   List<WorkerLite> get _allowedWorkers {
     if (_service == null || _provider == null) return const [];
-    final ids = _service!.workerIds.toSet();
+    final ids = _service!.workerIds;
+    if (ids.isEmpty)
+      return _provider!.workers; // fallback: all provider workers
     return _provider!.workers.where((w) => ids.contains(w.id)).toList();
   }
 
@@ -51,13 +52,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   Future<void> _bootstrap() async {
     setState(() => _error = null);
     try {
-      final svc = await _services.getDetail(widget.serviceId);
+      // use the new .details(...) (kept alias below if you prefer .getDetail)
+      final svc = await _services.details(
+        serviceId: widget.serviceId,
+        providerId: widget.providerId,
+      );
       final prov = await _providers.getDetails(widget.providerId);
       setState(() {
         _service = svc;
         _provider = prov;
+        _selectedWorkerId =
+            svc.workerIds.isNotEmpty ? svc.workerIds.first : null;
       });
-      _selectedWorkerId = svc.workerIds.isNotEmpty ? svc.workerIds.first : null;
       _loadSlots();
     } catch (e) {
       setState(() => _error = e.toString());
@@ -77,7 +83,7 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
       _slotsFuture = _workers.freeSlots(
         workerId: effectiveWorkerId,
         date: _selectedDate,
-        serviceDurationMinutes: _service!.duration.inMinutes,
+        serviceDurationMinutes: _service!.duration?.inMinutes ?? 30, // fallback
       );
     });
   }
@@ -97,7 +103,8 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   }
 
   Future<void> _book(AppLocalizations t) async {
-    if (_service == null) return;
+    final svc = _service;
+    if (svc == null) return;
     final workers = _allowedWorkers;
     if (workers.isEmpty) return;
     final workerId = _selectedWorkerId ?? workers.first.id;
@@ -109,18 +116,13 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
     }
     try {
       await _appointments.create(
-        serviceId: _service!.id,
+        serviceId: svc.id,
         workerId: workerId,
         date: _selectedDate,
         startTimeHHmmss: start,
       );
       if (!mounted) return;
-      // success → go to appointments tab
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/customers',
-        (r) => false,
-      );
-      // then select appointments tab (your NavRoot already exposes openAppointment from home; if needed, emit a route or use a deep link)
+      Navigator.of(context).pushNamedAndRemoveUntil('/customers', (_) => false);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -161,7 +163,7 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               children: [
-                // Worker chips (Anyone + allowed workers)
+                // Worker choice chips
                 if (workers.isNotEmpty) ...[
                   SizedBox(
                     height: 72,
@@ -189,15 +191,16 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                   const SizedBox(height: 8),
                 ],
 
-                // Calendar
+                // Month header + date picker
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                        DateFormat.yMMMM(
-                                Localizations.localeOf(context).toLanguageTag())
-                            .format(_selectedDate),
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                      DateFormat.yMMMM(
+                              Localizations.localeOf(context).toLanguageTag())
+                          .format(_selectedDate),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
                     TextButton.icon(
                       onPressed: _pickDate,
                       icon: const Icon(Icons.calendar_today_outlined, size: 18),
@@ -261,13 +264,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
 
                 const SizedBox(height: 12),
 
-                // Service card
+                // Service summary card
                 Card(
                   elevation: 0,
                   child: ListTile(
-                    title: Text(svc.name,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('${svc.duration.inMinutes}m'),
+                    title: Text(
+                      svc.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      '${(svc.duration ?? Duration.zero).inMinutes}m',
+                    ),
                     trailing: Text(
                       priceFmt.format(svc.price),
                       style: const TextStyle(fontWeight: FontWeight.w700),

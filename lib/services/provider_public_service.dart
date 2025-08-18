@@ -46,7 +46,7 @@ class BusinessHourItem {
 
 class WorkerLite {
   final String id;
-  final String name; // name + surname nicely combined
+  final String name;
 
   WorkerLite({required this.id, required this.name});
 
@@ -70,6 +70,7 @@ class ProviderResponse {
   final double avgRating;
   final String category;
   final LocationSummary? location;
+  final String? logoUrl; // <-- added
 
   ProviderResponse({
     required this.id,
@@ -78,6 +79,7 @@ class ProviderResponse {
     required this.avgRating,
     required this.category,
     this.location,
+    this.logoUrl,
   });
 
   factory ProviderResponse.fromJson(Map<String, dynamic> j) => ProviderResponse(
@@ -88,8 +90,10 @@ class ProviderResponse {
             (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : 0,
         category: (j['category'] ?? '').toString(),
         location: (j['location'] != null)
-            ? LocationSummary.fromJson(j['location'])
+            ? LocationSummary.fromJson(
+                Map<String, dynamic>.from(j['location'] as Map))
             : null,
+        logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
       );
 }
 
@@ -101,6 +105,7 @@ class ProvidersDetails {
   final List<WorkerLite> workers;
   final String email;
   final String phone;
+  final String? logoUrl;
   final double avgRating;
   final List<BusinessHourItem> businessHours;
   final LocationSummary? location;
@@ -113,6 +118,7 @@ class ProvidersDetails {
     required this.workers,
     required this.email,
     required this.phone,
+    required this.logoUrl,
     required this.avgRating,
     required this.businessHours,
     this.location,
@@ -124,17 +130,20 @@ class ProvidersDetails {
         description: j['description']?.toString(),
         category: (j['category'] ?? '').toString(),
         workers: ((j['workers'] as List?) ?? const [])
-            .map((e) => WorkerLite.fromJson(e as Map<String, dynamic>))
+            .map((e) => WorkerLite.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
         email: (j['email'] ?? '').toString(),
         phone: (j['phone'] ?? '').toString(),
+        logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
         avgRating:
             (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : 0,
         businessHours: ((j['businessHours'] as List?) ?? const [])
-            .map((e) => BusinessHourItem.fromJson(e as Map<String, dynamic>))
+            .map((e) =>
+                BusinessHourItem.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList(),
         location: (j['location'] != null)
-            ? LocationSummary.fromJson(j['location'])
+            ? LocationSummary.fromJson(
+                Map<String, dynamic>.from(j['location'] as Map))
             : null,
       );
 }
@@ -142,20 +151,19 @@ class ProvidersDetails {
 class ProviderPublicService {
   final _dio = ApiService.client;
 
+  Future<void> setLogo(String providerId, String url) async {
+    await _dio.put('/providers/$providerId/logo', data: {'url': url});
+  }
+
   Future<ProviderResponse> getById(String id) async {
     final r = await _dio.get('/providers/public/$id');
-    return ProviderResponse.fromJson(r.data as Map<String, dynamic>);
+    return ProviderResponse.fromJson(Map<String, dynamic>.from(r.data));
   }
 
   Future<ProvidersDetails> getDetails(String id) async {
     final r = await _dio.get('/providers/public/$id/details');
-    return ProvidersDetails.fromJson(r.data as Map<String, dynamic>);
+    return ProvidersDetails.fromJson(Map<String, dynamic>.from(r.data));
   }
-
-  // Future<List<String>> getFavouriteIds() async {
-  //   final r = await _dio.get('/customers/favourites');
-  //   return (r.data as List).map((e) => e.toString()).toList();
-  // }
 
   Future<List<String>> getFavouriteIds() {
     return FavoriteService().listFavoriteIds();

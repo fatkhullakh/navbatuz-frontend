@@ -39,7 +39,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get favorites => 'Sevimlilar';
 
   @override
-  String get no_favorites => 'You have no favorite shops yet.';
+  String get no_favorites => 'Sevimli do‘konlaringiz hali yo‘q.';
 
   @override
   String get recommended => 'Tavsiya etilgan';
@@ -117,7 +117,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get action_reload => 'Yangilash';
 
   @override
-  String get error_generic => 'Something went wrong. Please try again.';
+  String get error_generic => 'Nimadir xato ketdi. Iltimos, yana bir bor urinib ko‘ring.';
 
   @override
   String get provider_tab_services => 'Xizmatlar';
@@ -415,11 +415,35 @@ class AppLocalizationsUz extends AppLocalizations {
   String get favorites_toggle_failed => 'Sevimlilarni yangilab bo‘lmadi. Iltimos, qayta urinib ko‘ring.';
 
   @override
-  String get providers => 'Providers';
+  String get providers => 'Xizmat ko‘rsatuvchilar';
 
   @override
-  String get no_results => 'No results';
+  String get no_results => 'Natijalar topilmadi';
 
   @override
-  String get remove_from_favorites => 'Remove from favorites';
+  String get remove_from_favorites => 'Sevimlilardan olib tashlash';
+
+  @override
+  String get provider_change_logo => 'Logotipni o‘zgartirish';
+
+  @override
+  String get action_pick_from_gallery => 'Galereyadan tanlash';
+
+  @override
+  String get action_take_photo => 'Suratga olish';
+
+  @override
+  String get provider_logo_updated => 'Logotip yangilandi';
+
+  @override
+  String get error_upload_failed => 'Yuklash amalga oshmadi';
+
+  @override
+  String get action_change_photo => 'Rasmni o\'zgartirish';
+
+  @override
+  String get action_remove_photo => 'Rasmni o\'chirish';
+
+  @override
+  String get action_view_photo => 'Rasmni ko\'rish';
 }

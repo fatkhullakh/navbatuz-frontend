@@ -6,7 +6,7 @@ import '../providers/provider_screen.dart';
 
 class ProvidersListScreen extends StatefulWidget {
   /// 'favorites' => list user’s favorite providers
-  /// 'all'       => list all providers (placeholder for recommendations)
+  /// 'all'       => list all providers
   final String? filter;
   final String? categoryId; // (future)
   const ProvidersListScreen({super.key, this.filter, this.categoryId});
@@ -121,7 +121,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         itemBuilder: (_, i) {
                           final p = _items[i];
 
-                          // Top line: category • rating
                           final bits = <String>[];
                           if ((p.category ?? '').isNotEmpty)
                             bits.add(p.category!);
@@ -129,14 +128,31 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                             bits.add(p.rating!.toStringAsFixed(1));
                           final top = bits.join(' • ');
 
+                          Widget leading;
+                          if ((p.logoUrl ?? '').isNotEmpty) {
+                            leading = ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                p.logoUrl!,
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    _fallbackAvatar(p.name),
+                              ),
+                            );
+                          } else {
+                            leading = _fallbackAvatar(p.name);
+                          }
+
                           return Card(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ListTile(
+                              leading: leading,
                               onTap: () {
-                                // Open provider details screen
                                 Navigator.of(context, rootNavigator: true).push(
                                   MaterialPageRoute(
                                     builder: (_) =>
@@ -176,6 +192,14 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
       ),
     );
   }
+
+  Widget _fallbackAvatar(String name) {
+    final letter = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return CircleAvatar(
+      radius: 28,
+      child: Text(letter, style: const TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
 }
 
 class _ProviderSummary {
@@ -185,6 +209,7 @@ class _ProviderSummary {
   final double? rating; // from avgRating
   final String? category; // “CLINIC”, etc.
   final String? locationCompact;
+  final String? logoUrl;
 
   _ProviderSummary({
     required this.id,
@@ -193,6 +218,7 @@ class _ProviderSummary {
     this.rating,
     this.category,
     this.locationCompact,
+    this.logoUrl,
   });
 
   factory _ProviderSummary.fromJson(Map<String, dynamic> j) {
@@ -219,6 +245,7 @@ class _ProviderSummary {
           (j['avgRating'] is num) ? (j['avgRating'] as num).toDouble() : null,
       category: j['category']?.toString(),
       locationCompact: compactLocation(),
+      logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
     );
   }
 }

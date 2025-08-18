@@ -155,5 +155,15 @@
   "no_results": "No results",
   "no_favorites": "You have no favorite shops yet.",
   "remove_from_favorites": "Remove from favorites",
-  "error_generic": "Something went wrong. Please try again."
+  "error_generic": "Something went wrong. Please try again.",
+
+  "provider_change_logo": "Change logo",
+  "action_pick_from_gallery": "Pick from gallery",
+  "action_take_photo": "Take a photo",
+  "provider_logo_updated": "Logo updated",
+  "error_upload_failed": "Upload failed",
+
+  "action_change_photo": "Change photo",
+  "action_remove_photo": "Remove photo",
+  "action_view_photo": "View photo"
 }
