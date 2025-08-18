@@ -5,6 +5,8 @@ import '../../l10n/app_localizations.dart';
 import '../../services/provider_public_service.dart';
 import '../../services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
+// ⬇️ adjust the import path if needed
+import '../../widgets/favorite_toggle_button.dart';
 
 class ProviderScreen extends StatefulWidget {
   final String providerId;
@@ -22,8 +24,9 @@ class _ProviderScreenState extends State<ProviderScreen>
 
   ProvidersDetails? _details;
   String? _error;
-  bool _isFav = false;
-  bool _favBusy = false;
+
+  // only used to seed the FavoriteToggleButton quickly; the button manages itself
+  bool? _initialFav;
 
   late Future<List<ServiceSummary>> _futureServices;
 
@@ -39,28 +42,13 @@ class _ProviderScreenState extends State<ProviderScreen>
     setState(() => _error = null);
     try {
       final d = await _providers.getDetails(widget.providerId);
-      final favs = await _providers.getFavouriteIds();
+      final favIds = await _providers.getFavouriteIds(); // List<String>
       setState(() {
         _details = d;
-        _isFav = favs.contains(d.id);
+        _initialFav = favIds.contains(d.id);
       });
     } catch (e) {
       setState(() => _error = e.toString());
-    }
-  }
-
-  Future<void> _toggleFav() async {
-    if (_details == null) return;
-    setState(() => _favBusy = true);
-    try {
-      await _providers.setFavourite(_details!.id, !_isFav);
-      setState(() => _isFav = !_isFav);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed: $e')));
-    } finally {
-      if (mounted) setState(() => _favBusy = false);
     }
   }
 
@@ -81,7 +69,7 @@ class _ProviderScreenState extends State<ProviderScreen>
             pinned: true,
             expandedHeight: 200,
             flexibleSpace: const FlexibleSpaceBar(
-              background: ColoredBox(color: Color(0xFFF2F4F7)), // placeholder
+              background: ColoredBox(color: Color(0xFFF2F4F7)),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(104),
@@ -113,8 +101,7 @@ class _ProviderScreenState extends State<ProviderScreen>
                   MaterialPageRoute(
                     builder: (_) => ServiceBookingScreen(
                       serviceId: s.id,
-                      providerId:
-                          widget.providerId, // <-- use this, always available
+                      providerId: widget.providerId,
                     ),
                   ),
                 );
@@ -125,14 +112,6 @@ class _ProviderScreenState extends State<ProviderScreen>
           ],
         ),
       ),
-      floatingActionButton: (_details == null || _error != null)
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: _favBusy ? null : _toggleFav,
-              icon: Icon(_isFav ? Icons.favorite : Icons.favorite_border),
-              label:
-                  Text(_isFav ? t.provider_favourited : t.provider_favourite),
-            ),
     );
   }
 
@@ -170,7 +149,7 @@ class _ProviderScreenState extends State<ProviderScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + rating + share
+          // Title + rating + favorite + share
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -183,13 +162,30 @@ class _ProviderScreenState extends State<ProviderScreen>
                       fontSize: 20, fontWeight: FontWeight.w800),
                 ),
               ),
+              const SizedBox(width: 8),
               const Icon(Icons.star_rate_rounded, size: 18),
               const SizedBox(width: 4),
-              Text(d.avgRating.toStringAsFixed(1),
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(width: 8),
+              Text(
+                d.avgRating.toStringAsFixed(1),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(width: 6),
+
+              // ✅ Correct usage of FavoriteToggleButton
+              FavoriteToggleButton(
+                providerId: d.id, // <-- required
+                initialIsFavorite: _initialFav, // <-- optional, seeds state
+                onChanged: () {
+                  // If you need to refresh other UI based on fav state, do it here.
+                  // setState(() {}); // not strictly needed now
+                },
+              ),
+
               IconButton(
-                  onPressed: () {}, icon: const Icon(Icons.share_outlined)),
+                onPressed: () {}, // TODO: share deep link
+                icon: const Icon(Icons.share_outlined),
+                tooltip: t.provider_tab_details,
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -268,12 +264,13 @@ class _ServicesTab extends StatelessWidget {
             if (d != null) {
               final h = d.inHours;
               final m = d.inMinutes % 60;
-              if (h > 0 && m > 0)
+              if (h > 0 && m > 0) {
                 parts.add('${h}h ${m}m');
-              else if (h > 0)
+              } else if (h > 0) {
                 parts.add('${h}h');
-              else
+              } else {
                 parts.add('${m}m');
+              }
             }
             final priceText =
                 s.price == 0 ? t.provider_free : priceFmt.format(s.price);
@@ -295,7 +292,7 @@ class _ServicesTab extends StatelessWidget {
                       width: 76,
                       height: 28,
                       child: ElevatedButton(
-                        onPressed: () => onBook(s), // <-- use the callback
+                        onPressed: () => onBook(s),
                         child: Text(t.provider_book,
                             style: const TextStyle(fontSize: 12)),
                       ),
@@ -324,7 +321,6 @@ class _DetailsTab extends StatelessWidget {
   final ProvidersDetails? details;
   const _DetailsTab({required this.details});
 
-  // Localize server day name ("MONDAY") to full day name in current locale.
   String _localizedDay(BuildContext context, String serverDay) {
     final map = {
       'MONDAY': 1,
@@ -374,13 +370,11 @@ class _DetailsTab extends StatelessWidget {
           Text(d.description!),
           const SizedBox(height: 16),
         ],
-
         Text(t.provider_category,
             style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
         Text(d.category),
         const SizedBox(height: 16),
-
         if ((d.location?.compact ?? '').isNotEmpty) ...[
           Text(t.provider_address,
               style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -392,8 +386,6 @@ class _DetailsTab extends StatelessWidget {
           ]),
           const SizedBox(height: 16),
         ],
-
-        // Contacts
         if (d.email.isNotEmpty || d.phone.isNotEmpty) ...[
           Text(t.provider_contacts,
               style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -416,8 +408,6 @@ class _DetailsTab extends StatelessWidget {
             ),
           const SizedBox(height: 8),
         ],
-
-        // Workers
         if (d.workers.isNotEmpty) ...[
           Text(t.provider_team,
               style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -434,8 +424,6 @@ class _DetailsTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
         ],
-
-        // Working hours
         if (d.businessHours.isNotEmpty) ...[
           Text(t.provider_hours,
               style: const TextStyle(fontWeight: FontWeight.w700)),

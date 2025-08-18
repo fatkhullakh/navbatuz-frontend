@@ -160,7 +160,7 @@ abstract class AppLocalizations {
   /// No description provided for @no_favorites.
   ///
   /// In en, this message translates to:
-  /// **'No favorites yet.'**
+  /// **'You have no favorite shops yet.'**
   String get no_favorites;
 
   /// No description provided for @recommended.
@@ -316,7 +316,7 @@ abstract class AppLocalizations {
   /// No description provided for @error_generic.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong.'**
+  /// **'Something went wrong. Please try again.'**
   String get error_generic;
 
   /// No description provided for @provider_tab_services.
@@ -852,6 +852,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Provider'**
   String get common_provider;
+
+  /// No description provided for @providers_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get providers_title;
+
+  /// No description provided for @favorites_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite shops'**
+  String get favorites_title;
+
+  /// No description provided for @favorites_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t added any favorites yet.'**
+  String get favorites_empty;
+
+  /// No description provided for @providers_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers to show.'**
+  String get providers_empty;
+
+  /// No description provided for @error_favorites_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load favorites.'**
+  String get error_favorites_failed;
+
+  /// No description provided for @favorites_added_snack.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get favorites_added_snack;
+
+  /// No description provided for @favorites_removed_snack.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get favorites_removed_snack;
+
+  /// No description provided for @favorites_toggle_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update favorite. Please try again.'**
+  String get favorites_toggle_failed;
+
+  /// No description provided for @providers.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get providers;
+
+  /// No description provided for @no_results.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get no_results;
+
+  /// No description provided for @remove_from_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get remove_from_favorites;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

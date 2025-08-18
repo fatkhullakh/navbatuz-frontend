@@ -39,7 +39,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get favorites => 'Sevimlilar';
 
   @override
-  String get no_favorites => 'Hozircha sevimlilar yo‘q.';
+  String get no_favorites => 'You have no favorite shops yet.';
 
   @override
   String get recommended => 'Tavsiya etilgan';
@@ -117,7 +117,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get action_reload => 'Yangilash';
 
   @override
-  String get error_generic => 'Nimadir xato ketdi.';
+  String get error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get provider_tab_services => 'Xizmatlar';
@@ -389,4 +389,37 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get common_provider => 'Provayder';
+
+  @override
+  String get providers_title => 'Xizmat ko‘rsatuvchilar';
+
+  @override
+  String get favorites_title => 'Sevimli do‘konlar';
+
+  @override
+  String get favorites_empty => 'Siz hali sevimlilarga hech narsa qo‘shmagansiz.';
+
+  @override
+  String get providers_empty => 'Xizmat ko‘rsatuvchilar topilmadi.';
+
+  @override
+  String get error_favorites_failed => 'Sevimlilarni yuklashda xatolik.';
+
+  @override
+  String get favorites_added_snack => 'Sevimlilarga qo‘shildi';
+
+  @override
+  String get favorites_removed_snack => 'Sevimlilardan olib tashlandi';
+
+  @override
+  String get favorites_toggle_failed => 'Sevimlilarni yangilab bo‘lmadi. Iltimos, qayta urinib ko‘ring.';
+
+  @override
+  String get providers => 'Providers';
+
+  @override
+  String get no_results => 'No results';
+
+  @override
+  String get remove_from_favorites => 'Remove from favorites';
 }

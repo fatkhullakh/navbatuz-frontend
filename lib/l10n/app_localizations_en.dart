@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favorites => 'Favorites';
 
   @override
-  String get no_favorites => 'No favorites yet.';
+  String get no_favorites => 'You have no favorite shops yet.';
 
   @override
   String get recommended => 'Recommended';
@@ -117,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get action_reload => 'Reload';
 
   @override
-  String get error_generic => 'Something went wrong.';
+  String get error_generic => 'Something went wrong. Please try again.';
 
   @override
   String get provider_tab_services => 'Services';
@@ -389,4 +389,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_provider => 'Provider';
+
+  @override
+  String get providers_title => 'Providers';
+
+  @override
+  String get favorites_title => 'Favorite shops';
+
+  @override
+  String get favorites_empty => 'You haven\'t added any favorites yet.';
+
+  @override
+  String get providers_empty => 'No providers to show.';
+
+  @override
+  String get error_favorites_failed => 'Failed to load favorites.';
+
+  @override
+  String get favorites_added_snack => 'Added to favorites';
+
+  @override
+  String get favorites_removed_snack => 'Removed from favorites';
+
+  @override
+  String get favorites_toggle_failed => 'Could not update favorite. Please try again.';
+
+  @override
+  String get providers => 'Providers';
+
+  @override
+  String get no_results => 'No results';
+
+  @override
+  String get remove_from_favorites => 'Remove from favorites';
 }

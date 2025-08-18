@@ -1,4 +1,3 @@
-// lib/services/home_service.dart
 import 'package:dio/dio.dart';
 import 'api_service.dart';
 
@@ -46,6 +45,23 @@ class ProviderItem {
     required this.category,
     required this.location,
   });
+
+  factory ProviderItem.fromJson(Map<String, dynamic> m) {
+    ProviderLocation? loc;
+    final raw = m['location'];
+    if (raw is Map) {
+      loc = ProviderLocation.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return ProviderItem(
+      id: (m['id'] ?? '').toString(),
+      name: (m['name'] ?? '').toString(),
+      description: (m['description'] ?? '').toString(),
+      rating:
+          (m['avgRating'] is num) ? (m['avgRating'] as num).toDouble() : 0.0,
+      category: (m['category'] ?? '').toString(),
+      location: loc,
+    );
+  }
 }
 
 class HomeAppointment {
@@ -61,7 +77,6 @@ class HomeAppointment {
   });
 
   get date => null;
-
   get startTime => null;
 }
 
@@ -80,27 +95,27 @@ class HomeData {
 
 class HomeService {
   final Dio _dio = ApiService.client;
-  static const _prefix = ''; // see note in ProfileService
 
   Future<HomeData> loadAll() async {
     final results = await Future.wait([
-      _dio.get('$_prefix/providers'), // categories
-      _dio.get('$_prefix/appointments/me', queryParameters: {'onlyNext': true}),
-      _dio.get('$_prefix/customers/favourites'),
-      _dio.get('$_prefix/providers/public/all',
+      _dio.get('/providers'), // categories (adjust if needed)
+      _dio.get('/appointments/me', queryParameters: {'onlyNext': true}),
+      _dio.get('/customers/favourites'), // favorites
+      _dio.get('/providers/public/all',
           queryParameters: {'page': 0, 'size': 50, 'sortBy': 'name'}),
     ]);
 
-    // Categories
+    // ---------- Categories ----------
     final catsRaw = results[0].data;
     final categories = (catsRaw is List)
         ? catsRaw
+            .where((e) => e is Map)
             .map((e) =>
                 CategoryItem.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList()
         : <CategoryItem>[];
 
-    // Upcoming (pick the earliest future BOOKED/CONFIRMED)
+    // ---------- Upcoming appointment ----------
     final apptsRaw = results[1].data;
     HomeAppointment? upcoming;
     final now = DateTime.now();
@@ -131,41 +146,37 @@ class HomeService {
       }
     }
 
-    // Favourites: list of provider IDs
-    final favIds = <String>{};
-    final favRaw = results[2].data;
-    if (favRaw is List) {
-      for (final e in favRaw) {
-        favIds.add(e.toString());
-      }
-    }
-
-    // Providers (page content)
+    // ---------- Providers page (used for recommended or fallback) ----------
     final provRaw = results[3].data;
     final content = (provRaw is Map && provRaw['content'] is List)
         ? (provRaw['content'] as List)
         : const <dynamic>[];
+    final providers = content
+        .where((e) => e is Map)
+        .map<ProviderItem>(
+            (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
 
-    final providers = content.map((e) {
-      final m = Map<String, dynamic>.from(e as Map);
-      ProviderLocation? loc;
-      final locRaw = m['location'];
-      if (locRaw is Map) {
-        loc = ProviderLocation.fromJson(Map<String, dynamic>.from(locRaw));
-      }
-      return ProviderItem(
-        id: (m['id'] ?? '').toString(),
-        name: (m['name'] ?? '').toString(),
-        description: (m['description'] ?? '').toString(),
-        rating:
-            (m['avgRating'] is num) ? (m['avgRating'] as num).toDouble() : 0.0,
-        category: (m['category'] ?? '').toString(),
-        location: loc,
-      );
-    }).toList();
+    // ---------- Favorites (robust: supports IDs list or full objects) ----------
+    final favRaw = results[2].data;
+    late final List<ProviderItem> favorites;
 
-    final favorites = providers.where((p) => favIds.contains(p.id)).toList();
-    final recommended = providers; // naive
+    // Case A: backend returns full ProviderResponse objects (recommended)
+    if (favRaw is List && favRaw.isNotEmpty && favRaw.first is Map) {
+      favorites = favRaw
+          .map(
+              (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+    }
+    // Case B: backend returns list of IDs (String/UUID)
+    else if (favRaw is List) {
+      final favIds = favRaw.map((e) => e.toString()).toSet();
+      favorites = providers.where((p) => favIds.contains(p.id)).toList();
+    } else {
+      favorites = <ProviderItem>[];
+    }
+
+    final recommended = providers; // naive recommended list
 
     return HomeData(
       categories: categories,
