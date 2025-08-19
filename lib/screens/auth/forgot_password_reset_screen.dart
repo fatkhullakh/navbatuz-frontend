@@ -1,7 +1,15 @@
-// lib/screens/auth/forgot_password_reset_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../services/api_service.dart';
+
+/* ---------------------------- Brand constants ---------------------------- */
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const ink = Color(0xFF384959);
+  static const border = Color(0xFFE6ECF2);
+  static const surfaceSoft = Color(0xFFF6F9FC);
+  static const subtle = Color(0xFF7C8B9B);
+}
 
 class ForgotPasswordResetScreen extends StatefulWidget {
   final String email;
@@ -27,6 +35,23 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
     _confirm.dispose();
     super.dispose();
   }
+
+  InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
+        labelText: label,
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.primary, width: 1.5),
+        ),
+      );
 
   Future<void> _reset() async {
     if (!_form.currentState!.validate()) return;
@@ -58,18 +83,24 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      backgroundColor: _Brand.surfaceSoft,
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
       body: Form(
         key: _form,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Email: ${widget.email}'),
+            Text('Email: ${widget.email}',
+                style: const TextStyle(color: _Brand.subtle)),
             const SizedBox(height: 16),
             TextFormField(
               controller: _code,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: '6-digit code'),
+              decoration: _dec('6-digit code'),
               validator: (v) => (v == null || v.trim().length != 6)
                   ? 'Enter the 6-digit code'
                   : null,
@@ -77,9 +108,9 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _new,
-              decoration: InputDecoration(
-                labelText: 'New password',
-                suffixIcon: IconButton(
+              decoration: _dec(
+                'New password',
+                suffix: IconButton(
                   icon:
                       Icon(_showNew ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => _showNew = !_showNew),
@@ -92,9 +123,9 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _confirm,
-              decoration: InputDecoration(
-                labelText: 'Confirm new password',
-                suffixIcon: IconButton(
+              decoration: _dec(
+                'Confirm new password',
+                suffix: IconButton(
                   icon: Icon(
                       _showConfirm ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => _showConfirm = !_showConfirm),
@@ -105,13 +136,20 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
             ),
             const SizedBox(height: 24),
             SizedBox(
+              height: 48,
               width: double.infinity,
               child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _Brand.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: _saving ? null : _reset,
                 child: _saving
                     ? const SizedBox(
-                        height: 18,
-                        width: 18,
+                        height: 20,
+                        width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
                     : const Text('Reset password'),
               ),

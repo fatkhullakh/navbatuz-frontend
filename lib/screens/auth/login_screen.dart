@@ -10,12 +10,48 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+/* ---------------------------- Brand constants ---------------------------- */
+class _Brand {
+  static const primary = Color(0xFF6A89A7); // #6A89A7
+  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
+  static const ink = Color(0xFF384959); // #384959
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+  static const surfaceSoft = Color(0xFFF6F9FC);
+}
+
 class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  bool _showPassword = false;
   final storage = const FlutterSecureStorage();
+
+  InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
+        labelText: label,
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.primary, width: 1.5),
+        ),
+      );
+
+  String _extractRole(dynamic raw) {
+    if (raw == null) return 'CUSTOMER';
+    if (raw is List) {
+      return raw.map((e) => e.toString().toUpperCase()).join(',');
+    }
+    return raw.toString().toUpperCase();
+  }
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -25,34 +61,36 @@ class _LoginScreenState extends State<LoginScreen> {
           await ApiService.login(_email.text.trim(), _password.text);
       final token = response.data?['token'];
       if (token == null || token is! String || token.isEmpty) {
-        throw Exception('Malformed login response: ${response.data}');
+        throw Exception('Malformed login response');
       }
-      final Map<String, dynamic> claims = Jwt.parseJwt(token);
-      final rawRole = (claims['role'] ??
-              claims['roles'] ??
-              claims['authorities'] ??
-              'CUSTOMER')
-          .toString()
-          .toUpperCase();
+      final claims = Jwt.parseJwt(token);
+      final rawRole = _extractRole(
+        claims['role'] ??
+            claims['roles'] ??
+            claims['authorities'] ??
+            'CUSTOMER',
+      );
+
       await storage.write(key: 'jwt_token', value: token);
       await storage.write(key: 'user_role', value: rawRole);
 
       if (!mounted) return;
-      if (rawRole.contains('CUSTOMER')) {
-        Navigator.pushReplacementNamed(context, '/customers');
-      } else if (rawRole.contains('OWNER') || rawRole.contains('PROVIDER')) {
-        Navigator.pushReplacementNamed(context, '/providers');
-      } else if (rawRole.contains('WORKER')) {
-        Navigator.pushReplacementNamed(context, '/customers'); // adjust later
+      // Simple routing by role
+      if (rawRole.contains('OWNER') || rawRole.contains('PROVIDER')) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/providers', (_) => false);
       } else {
-        Navigator.pushReplacementNamed(context, '/customers');
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/customers', (_) => false);
       }
     } on DioException catch (dioErr) {
       if (!mounted) return;
       final code = dioErr.response?.statusCode;
-      final body = dioErr.response?.data;
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: $code ${body ?? ''}')));
+      final message = (code == 401 || code == 403)
+          ? 'Invalid email or password.'
+          : 'Login failed. Try again.';
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -65,48 +103,90 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _Brand.surfaceSoft,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const Text("NavbatUz Login",
-                    style:
-                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 40),
-                TextFormField(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "NavbatUz Login",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: _Brand.ink,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
                     controller: _email,
-                    decoration: const InputDecoration(labelText: "Email"),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Enter email" : null),
-                const SizedBox(height: 16),
-                TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: _dec("Email"),
+                    validator: (v) {
+                      if ((v ?? '').trim().isEmpty) return "Enter email";
+                      final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                          .hasMatch(v!.trim());
+                      return ok ? null : 'Invalid email';
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
                     controller: _password,
-                    decoration: const InputDecoration(labelText: "Password"),
-                    obscureText: true,
+                    decoration: _dec(
+                      "Password",
+                      suffix: IconButton(
+                        icon: Icon(_showPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
+                        onPressed: () =>
+                            setState(() => _showPassword = !_showPassword),
+                      ),
+                    ),
+                    obscureText: !_showPassword,
                     validator: (v) =>
-                        (v == null || v.isEmpty) ? "Enter password" : null),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _loading ? null : _handleLogin,
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : const Text("Login"),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/register'),
-                  child: const Text("Don't have an account? Register"),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/forgot-password'),
-                  child: const Text("Forgot password?"),
-                ),
-              ],
+                        (v == null || v.isEmpty) ? "Enter password" : null,
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 48,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _Brand.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: _loading ? null : _handleLogin,
+                      child: _loading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Text("Login"),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () => Navigator.pushNamed(context, '/register'),
+                    child: const Text("Don't have an account? Register"),
+                  ),
+                  TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () =>
+                            Navigator.pushNamed(context, '/forgot-password'),
+                    child: const Text("Forgot password?"),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

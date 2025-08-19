@@ -7,7 +7,54 @@ import '../../services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
 import '../../screens/services/service_details_screen.dart';
+import '../../screens/worker/worker_screen.dart';
 
+/* ---------------------------- Brand constants ---------------------------- */
+class _Brand {
+  static const primary = Color(0xFF6A89A7); // #6A89A7
+  static const accent = Color(0xFF88BDF2); // #88BDF2
+  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
+  static const ink = Color(0xFF384959); // #384959
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+}
+
+/* ------------------------------ Helpers --------------------------------- */
+String _normCat(String? s) =>
+    (s ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+
+String _localizedCategory(BuildContext context, String? idOrName) {
+  final t = AppLocalizations.of(context)!;
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return t.cat_barbershop;
+    case 'dental':
+    case 'dentist':
+      return t.cat_dental;
+    case 'clinic':
+      return t.cat_clinic;
+    case 'spa':
+      return t.cat_spa;
+    case 'gym':
+      return t.cat_gym;
+    case 'nail_salon':
+      return t.cat_nail_salon;
+    case 'beauty_clinic':
+      return t.cat_beauty_clinic;
+    case 'tattoo_studio':
+      return t.cat_tattoo_studio;
+    case 'massage_center':
+      return t.cat_massage_center;
+    case 'physiotherapy_clinic':
+      return t.cat_physiotherapy_clinic;
+    case 'makeup_studio':
+      return t.cat_makeup_studio;
+    default:
+      return idOrName ?? '';
+  }
+}
+
+/* ------------------------------ Screen ---------------------------------- */
 class ProviderScreen extends StatefulWidget {
   final String providerId;
   const ProviderScreen({super.key, required this.providerId});
@@ -24,7 +71,6 @@ class _ProviderScreenState extends State<ProviderScreen>
 
   ProvidersDetails? _details;
   String? _error;
-
   bool? _initialFav;
 
   late Future<List<ServiceSummary>> _futureServices;
@@ -76,11 +122,9 @@ class _ProviderScreenState extends State<ProviderScreen>
                         Image.network(
                           logo,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const ColoredBox(
-                            color: Color(0xFFF2F4F7),
-                          ),
+                          errorBuilder: (_, __, ___) =>
+                              const ColoredBox(color: Color(0xFFF2F4F7)),
                         ),
-                        // Optional subtle overlay for contrast
                         Container(color: Colors.black.withOpacity(0.12)),
                       ],
                     ),
@@ -88,20 +132,36 @@ class _ProviderScreenState extends State<ProviderScreen>
                 : const FlexibleSpaceBar(
                     background: ColoredBox(color: Color(0xFFF2F4F7)),
                   ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(104),
-              child: _buildHeader(t),
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(116),
+              child: SizedBox.shrink(),
             ),
           ),
           SliverPersistentHeader(
             pinned: true,
-            delegate: _TabBarDelegate(
-              TabBar(
-                controller: _tabs,
-                tabs: [
-                  Tab(text: t.provider_tab_services),
-                  Tab(text: t.provider_tab_reviews),
-                  Tab(text: t.provider_tab_details),
+            delegate: _StickyHeaderDelegate(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _HeaderSection(
+                      details: _details, error: _error, onRetry: _loadHeader),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border(bottom: BorderSide(color: _Brand.border)),
+                    ),
+                    child: TabBar(
+                      controller: _tabs,
+                      indicatorColor: _Brand.primary,
+                      labelColor: _Brand.ink,
+                      unselectedLabelColor: _Brand.subtle,
+                      tabs: [
+                        Tab(text: t.provider_tab_services),
+                        Tab(text: t.provider_tab_reviews),
+                        Tab(text: t.provider_tab_details),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -111,6 +171,7 @@ class _ProviderScreenState extends State<ProviderScreen>
           controller: _tabs,
           children: [
             _ServicesTab(
+              providerId: widget.providerId,
               future: _futureServices,
               onBook: (s) {
                 Navigator.push(
@@ -125,48 +186,83 @@ class _ProviderScreenState extends State<ProviderScreen>
               },
             ),
             const _ReviewsTab(),
-            _DetailsTab(details: _details),
+            _DetailsTab(
+              details: _details,
+              providerId: widget.providerId,
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(AppLocalizations t) {
-    if (_error != null) {
+/* --------------------------- Sticky header UI --------------------------- */
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  const _StickyHeaderDelegate({required this.child});
+  @override
+  Widget build(context, shrink, overlap) =>
+      Material(color: Colors.white, child: child);
+  @override
+  double get maxExtent => 123 + kTextTabBarHeight; // header + TabBar
+  @override
+  double get minExtent => 123 + kTextTabBarHeight;
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
+}
+
+class _HeaderSection extends StatelessWidget {
+  final ProvidersDetails? details;
+  final String? error;
+  final Future<void> Function() onRetry;
+  const _HeaderSection(
+      {required this.details, required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
+    if (error != null) {
       return Container(
         color: Colors.white,
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text('Failed to load: $_error'),
+            Text('Failed to load: $error'),
             const SizedBox(height: 8),
-            OutlinedButton(
-                onPressed: _loadHeader, child: Text(t.provider_retry)),
+            OutlinedButton(onPressed: onRetry, child: Text(t.provider_retry)),
           ],
         ),
       );
     }
-    if (_details == null) {
+    if (details == null) {
       return const SizedBox(
-        height: 104,
+        height: 116,
         child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: CircularProgressIndicator(),
-          ),
-        ),
+            child: Padding(
+                padding: EdgeInsets.all(12),
+                child: CircularProgressIndicator())),
       );
     }
 
-    final d = _details!;
+    final d = details!;
+    final catLabel = _localizedCategory(context, d.category);
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: _Brand.border),
+          bottom: BorderSide(color: _Brand.border),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + rating + favorite + share
+          // Title + rating + fav + share
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -176,42 +272,51 @@ class _ProviderScreenState extends State<ProviderScreen>
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w800),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: _Brand.ink),
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.star_rate_rounded, size: 18),
+              const Icon(Icons.star_rate_rounded,
+                  size: 18, color: _Brand.primary),
               const SizedBox(width: 4),
-              Text(
-                d.avgRating.toStringAsFixed(1),
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
+              Text(d.avgRating.toStringAsFixed(1),
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(width: 6),
               FavoriteToggleButton(
-                providerId: d.id,
-                initialIsFavorite: _initialFav,
-                onChanged: () {
-                  // If you need to react to fav change, do it here.
-                },
-              ),
+                  providerId: d.id, initialIsFavorite: null, onChanged: () {}),
               IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.share_outlined),
-                tooltip: t.provider_tab_details,
-              ),
+                  onPressed: () {},
+                  icon: const Icon(Icons.share_outlined),
+                  tooltip: t.provider_tab_details),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
+          if (catLabel.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.category_outlined,
+                      size: 16, color: _Brand.subtle),
+                  const SizedBox(width: 6),
+                  Text(catLabel, style: const TextStyle(color: _Brand.subtle)),
+                ],
+              ),
+            ),
           if ((d.location?.compact ?? '').isNotEmpty)
             Row(
               children: [
-                const Icon(Icons.place_outlined, size: 16),
-                const SizedBox(width: 4),
+                const Icon(Icons.place_outlined,
+                    size: 16, color: _Brand.subtle),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     d.location!.compact,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _Brand.subtle),
                   ),
                 ),
               ],
@@ -222,25 +327,16 @@ class _ProviderScreenState extends State<ProviderScreen>
   }
 }
 
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-  _TabBarDelegate(this.tabBar);
-  @override
-  Widget build(context, shrink, overlap) =>
-      Container(color: Colors.white, child: tabBar);
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
-}
-
+/* ------------------------------ Services tab ---------------------------- */
 class _ServicesTab extends StatelessWidget {
+  final String providerId;
   final Future<List<ServiceSummary>> future;
   final void Function(ServiceSummary) onBook;
-  const _ServicesTab({required this.future, required this.onBook});
+  const _ServicesTab({
+    required this.providerId,
+    required this.future,
+    required this.onBook,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +344,15 @@ class _ServicesTab extends StatelessWidget {
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final priceFmt =
         NumberFormat.currency(locale: localeTag, symbol: '', decimalDigits: 0);
+
+    String _durText(Duration? d) {
+      if (d == null) return '';
+      final h = d.inHours;
+      final m = d.inMinutes % 60;
+      if (h > 0 && m > 0) return '${h}h ${m}m';
+      if (h > 0) return '${h}h';
+      return '${m}m';
+    }
 
     return FutureBuilder<List<ServiceSummary>>(
       future: future,
@@ -269,57 +374,80 @@ class _ServicesTab extends StatelessWidget {
 
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemCount: items.length,
           itemBuilder: (_, i) {
             final s = items[i];
-            final parts = <String>[];
-            if (s.category.isNotEmpty) parts.add(s.category);
-            final d = s.duration;
-            if (d != null) {
-              final h = d.inHours;
-              final m = d.inMinutes % 60;
-              if (h > 0 && m > 0) {
-                parts.add('${h}h ${m}m');
-              } else if (h > 0) {
-                parts.add('${h}h');
-              } else {
-                parts.add('${m}m');
-              }
-            }
+            final desc = (s.description ?? '').trim();
+            final dur = _durText(s.duration);
             final priceText =
                 s.price == 0 ? t.provider_free : priceFmt.format(s.price);
 
             return Card(
               elevation: 0,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: _Brand.border, width: 1),
+              ),
               child: ListTile(
                 onTap: () {
-                  // Open details screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => ServiceDetailsScreen(
                         serviceId: s.id,
-                        providerId: (context.findAncestorStateOfType<
-                                _ProviderScreenState>()!)
-                            .widget
-                            .providerId, // pass through providerId
+                        providerId: providerId,
                       ),
                     ),
                   );
                 },
-                title:
-                    Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: parts.isNotEmpty ? Text(parts.join(' • ')) : null,
+                title: Text(
+                  s.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: _Brand.ink, fontWeight: FontWeight.w800),
+                ),
+                // Show description (2 lines) + duration pill with top gap if needed
+                subtitle: (desc.isNotEmpty || dur.isNotEmpty)
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (desc.isNotEmpty)
+                            Text(
+                              desc,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: _Brand.subtle),
+                            ),
+                          if (dur.isNotEmpty)
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(top: desc.isNotEmpty ? 6 : 0),
+                              child: _Pill(icon: Icons.schedule, label: dur),
+                            ),
+                        ],
+                      )
+                    : null,
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(priceText,
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, color: _Brand.ink)),
                     const SizedBox(height: 6),
                     SizedBox(
-                      width: 76,
-                      height: 28,
-                      child: ElevatedButton(
+                      height: 30,
+                      child: FilledButton.tonal(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _Brand.accentSoft.withOpacity(.75),
+                          foregroundColor: _Brand.ink,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
                         onPressed: () => onBook(s),
                         child: Text(t.provider_book,
                             style: const TextStyle(fontSize: 12)),
@@ -330,14 +458,13 @@ class _ServicesTab extends StatelessWidget {
               ),
             );
           },
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemCount: items.length,
         );
       },
     );
   }
 }
 
+/* ------------------------------ Reviews tab ----------------------------- */
 class _ReviewsTab extends StatelessWidget {
   const _ReviewsTab();
   @override
@@ -345,9 +472,11 @@ class _ReviewsTab extends StatelessWidget {
       Center(child: Text(AppLocalizations.of(context)!.provider_no_reviews));
 }
 
+/* ------------------------------ Details tab ----------------------------- */
 class _DetailsTab extends StatelessWidget {
   final ProvidersDetails? details;
-  const _DetailsTab({required this.details});
+  final String providerId;
+  const _DetailsTab({required this.details, required this.providerId});
 
   String _localizedDay(BuildContext context, String serverDay) {
     final map = {
@@ -388,41 +517,49 @@ class _DetailsTab extends StatelessWidget {
       );
     }
 
+    final catLabel = _localizedCategory(context, d.category);
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: [
         if ((d.description ?? '').isNotEmpty) ...[
           Text(t.provider_about,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: _Brand.ink)),
           const SizedBox(height: 6),
-          Text(d.description!),
+          Text(d.description!, style: const TextStyle(color: _Brand.ink)),
           const SizedBox(height: 16),
         ],
         Text(t.provider_category,
-            style: const TextStyle(fontWeight: FontWeight.w700)),
+            style: const TextStyle(
+                fontWeight: FontWeight.w700, color: _Brand.ink)),
         const SizedBox(height: 6),
-        Text(d.category),
+        Text(catLabel, style: const TextStyle(color: _Brand.subtle)),
         const SizedBox(height: 16),
         if ((d.location?.compact ?? '').isNotEmpty) ...[
           Text(t.provider_address,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: _Brand.ink)),
           const SizedBox(height: 6),
           Row(children: [
-            const Icon(Icons.place_outlined, size: 18),
+            const Icon(Icons.place_outlined, size: 18, color: _Brand.subtle),
             const SizedBox(width: 6),
-            Expanded(child: Text(d.location!.compact)),
+            Expanded(
+                child: Text(d.location!.compact,
+                    style: const TextStyle(color: _Brand.subtle))),
           ]),
           const SizedBox(height: 16),
         ],
         if (d.email.isNotEmpty || d.phone.isNotEmpty) ...[
           Text(t.provider_contacts,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: _Brand.ink)),
           const SizedBox(height: 8),
           if (d.email.isNotEmpty)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.email_outlined),
+              leading: const Icon(Icons.email_outlined, color: _Brand.ink),
               title: Text(t.provider_email_label),
               subtitle: Text(d.email),
             ),
@@ -430,7 +567,7 @@ class _DetailsTab extends StatelessWidget {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.phone_outlined),
+              leading: const Icon(Icons.phone_outlined, color: _Brand.ink),
               title: Text(t.provider_phone_label),
               subtitle: Text(d.phone),
             ),
@@ -438,15 +575,29 @@ class _DetailsTab extends StatelessWidget {
         ],
         if (d.workers.isNotEmpty) ...[
           Text(t.provider_team,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: _Brand.ink)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: d.workers.map((w) {
-              return Chip(
+              return InputChip(
+                avatar: const Icon(Icons.person, size: 16, color: _Brand.ink),
                 label: Text(w.name, overflow: TextOverflow.ellipsis),
-                avatar: const Icon(Icons.person, size: 16),
+                side: const BorderSide(color: _Brand.border),
+                backgroundColor: _Brand.accentSoft.withOpacity(.35),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => WorkerScreen(
+                        workerId: w.id,
+                        providerId: providerId,
+                        workerNameFallback: w.name,
+                      ),
+                    ),
+                  );
+                },
               );
             }).toList(),
           ),
@@ -454,7 +605,8 @@ class _DetailsTab extends StatelessWidget {
         ],
         if (d.businessHours.isNotEmpty) ...[
           Text(t.provider_hours,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: _Brand.ink)),
           const SizedBox(height: 8),
           for (final h in d.businessHours)
             Padding(
@@ -465,19 +617,43 @@ class _DetailsTab extends StatelessWidget {
                     width: 160,
                     child: Text(
                       _localizedDay(context, h.day),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, color: _Brand.ink),
                     ),
                   ),
                   Expanded(
                     child: (h.start == null || h.end == null)
-                        ? Text(t.provider_closed)
-                        : Text('${_trimHHmm(h.start)} – ${_trimHHmm(h.end)}'),
+                        ? Text(t.provider_closed,
+                            style: const TextStyle(color: _Brand.subtle))
+                        : Text('${_trimHHmm(h.start)} – ${_trimHHmm(h.end)}',
+                            style: const TextStyle(color: _Brand.subtle)),
                   ),
                 ],
               ),
             ),
         ],
       ],
+    );
+  }
+}
+
+/* ----------------------------- Tiny UI bits ----------------------------- */
+class _Pill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _Pill({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      avatar: Icon(icon, size: 16, color: _Brand.ink),
+      label: Text(label, overflow: TextOverflow.ellipsis),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      side: const BorderSide(color: _Brand.border),
+      backgroundColor: _Brand.accentSoft.withOpacity(.35),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

@@ -984,6 +984,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get all;
+
+  /// No description provided for @cat_barbershop.
+  ///
+  /// In en, this message translates to:
+  /// **'Barbershop'**
+  String get cat_barbershop;
+
+  /// No description provided for @cat_dental.
+  ///
+  /// In en, this message translates to:
+  /// **'Dental'**
+  String get cat_dental;
+
+  /// No description provided for @cat_clinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get cat_clinic;
+
+  /// No description provided for @cat_spa.
+  ///
+  /// In en, this message translates to:
+  /// **'Spa'**
+  String get cat_spa;
+
+  /// No description provided for @cat_gym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get cat_gym;
+
+  /// No description provided for @cat_nail_salon.
+  ///
+  /// In en, this message translates to:
+  /// **'Nail salon'**
+  String get cat_nail_salon;
+
+  /// No description provided for @cat_beauty_clinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty clinic'**
+  String get cat_beauty_clinic;
+
+  /// No description provided for @cat_tattoo_studio.
+  ///
+  /// In en, this message translates to:
+  /// **'Tattoo studio'**
+  String get cat_tattoo_studio;
+
+  /// No description provided for @cat_massage_center.
+  ///
+  /// In en, this message translates to:
+  /// **'Massage center'**
+  String get cat_massage_center;
+
+  /// No description provided for @cat_physiotherapy_clinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Physiotherapy'**
+  String get cat_physiotherapy_clinic;
+
+  /// No description provided for @cat_makeup_studio.
+  ///
+  /// In en, this message translates to:
+  /// **'Makeup studio'**
+  String get cat_makeup_studio;
+
+  /// No description provided for @appointments_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get appointments_title;
+
+  /// No description provided for @appointments_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Appointments'**
+  String get appointments_upcoming;
+
+  /// No description provided for @appointments_finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished Appointments'**
+  String get appointments_finished;
+
+  /// No description provided for @appointment_action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get appointment_action_cancel;
+
+  /// No description provided for @appointment_action_book_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Book again'**
+  String get appointment_action_book_again;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

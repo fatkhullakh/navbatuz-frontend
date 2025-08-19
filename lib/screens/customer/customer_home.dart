@@ -39,10 +39,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F9),
+      backgroundColor: cs.surface,
       body: RefreshIndicator(
+        color: _Brand.primary,
         onRefresh: _refresh,
         child: FutureBuilder<hs.HomeData>(
           future: _future,
@@ -83,10 +85,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     child: _CategoryChips(
                       categories: data.categories,
                       onTap: (c) {
-                        // Try to open Search with preselected category
                         final args = {
                           'initialCategory': c.id,
-                          'initialQuery': '',
+                          'initialQuery': ''
                         };
                         bool pushed = false;
                         try {
@@ -94,9 +95,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                               .pushNamed('/search', arguments: args);
                           pushed = true;
                         } catch (_) {}
-                        if (!pushed) {
-                          widget.onOpenSearch(); // fallback
-                        }
+                        if (!pushed) widget.onOpenSearch();
                       },
                     ),
                   ),
@@ -139,6 +138,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.favorites,
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF88BDF2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).push(
                                 MaterialPageRoute(
@@ -151,7 +157,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           )
                         : null,
                     child: data.favoriteShops.isNotEmpty
-                        ? _ProviderRow(shops: data.favoriteShops)
+                        ? _ProviderRow(
+                            shops: data.favoriteShops,
+                            borderColor: cs.outlineVariant,
+                          )
                         : _MutedNote(t.no_favorites),
                   ),
                 ),
@@ -162,6 +171,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.recommended,
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF88BDF2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).push(
                                 MaterialPageRoute(
@@ -174,10 +190,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           )
                         : null,
                     child: data.recommendedShops.isNotEmpty
-                        ? _ProviderRow(shops: data.recommendedShops)
+                        ? _ProviderRow(
+                            shops: data.recommendedShops,
+                            borderColor: cs.outlineVariant,
+                          )
                         : _MutedNote(t.no_recommended),
                   ),
                 ),
+
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
               ],
             );
@@ -188,6 +208,81 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
+/* ---------------------------- Brand helpers ---------------------------- */
+
+class _Brand {
+  static const primary = Color(0xFF6A89A7); // #6A89A7
+  static const accent = Color(0xFF88BDF2); // #88BDF2
+  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
+  static const ink = Color(0xFF384959); // #384959
+
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+}
+
+String _normCat(String? s) =>
+    (s ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+
+String _localizedCategory(BuildContext context, String? idOrName) {
+  final t = AppLocalizations.of(context)!;
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return t.cat_barbershop;
+    case 'dental':
+    case 'dentist':
+      return t.cat_dental;
+    case 'clinic':
+      return t.cat_clinic;
+    case 'spa':
+      return t.cat_spa;
+    case 'gym':
+      return t.cat_gym;
+    case 'nail_salon':
+      return t.cat_nail_salon;
+    case 'beauty_clinic':
+      return t.cat_beauty_clinic;
+    case 'tattoo_studio':
+      return t.cat_tattoo_studio;
+    case 'massage_center':
+      return t.cat_massage_center;
+    case 'physiotherapy_clinic':
+      return t.cat_physiotherapy_clinic;
+    case 'makeup_studio':
+      return t.cat_makeup_studio;
+    default:
+      return idOrName ?? '';
+  }
+}
+
+Color _borderForCategory(String? idOrName) {
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return _Brand.primary;
+    case 'dental':
+    case 'dentist':
+      return _Brand.accent;
+    case 'clinic':
+    case 'beauty_clinic':
+      return _Brand.primary.withOpacity(.75);
+    case 'spa':
+    case 'massage_center':
+      return _Brand.accent.withOpacity(.75);
+    case 'gym':
+      return _Brand.ink.withOpacity(.55);
+    case 'nail_salon':
+    case 'makeup_studio':
+      return _Brand.accent;
+    case 'tattoo_studio':
+      return _Brand.ink;
+    case 'physiotherapy_clinic':
+      return _Brand.primary;
+    default:
+      return _Brand.border;
+  }
+}
+
+/* ------------------------------ Widgets ------------------------------- */
+
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
   final String hint;
@@ -195,6 +290,9 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -203,24 +301,25 @@ class _SearchBar extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             child: Ink(
-              height: 48,
+              height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                color: _Brand.accentSoft.withOpacity(.30),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _Brand.border, width: 1),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded),
-                  const SizedBox(width: 8),
+                  Icon(Icons.search_rounded, color: _Brand.ink),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       hint,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.black54),
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: _Brand.ink.withOpacity(.7)),
                     ),
                   ),
                 ],
@@ -241,6 +340,8 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 12),
       child: Column(
@@ -253,13 +354,26 @@ class _Section extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .2,
+                      color: _Brand.ink,
                     ),
                   ),
                 ),
-                if (trailing != null) trailing!,
+                if (trailing != null)
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest.withOpacity(.4),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _Brand.border, width: 1),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      child: trailing!,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -311,9 +425,10 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox();
+    final t = AppLocalizations.of(context)!;
 
     return SizedBox(
-      height: 110, // extra headroom => no overflow
+      height: 110,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
@@ -321,6 +436,9 @@ class _CategoryChips extends StatelessWidget {
         itemBuilder: (_, i) {
           final c = categories[i];
           final icon = _iconFor(c.id);
+          final label =
+              _localizedCategory(context, c.id.isNotEmpty ? c.id : c.name);
+
           return InkWell(
             onTap: () => onTap(c),
             borderRadius: BorderRadius.circular(16),
@@ -329,9 +447,9 @@ class _CategoryChips extends StatelessWidget {
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _Brand.accentSoft.withOpacity(.25),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: _Brand.border, width: 1),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x0F000000),
@@ -343,15 +461,26 @@ class _CategoryChips extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: const Color(0xFFEBF2FB),
-                    child: Icon(icon, size: 22, color: const Color(0xFF246BCE)),
+                  Container(
+                    height: 44,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _Brand.primary.withOpacity(.18),
+                          _Brand.primary.withOpacity(.08),
+                        ],
+                      ),
+                    ),
+                    child: Icon(icon, size: 22, color: _Brand.primary),
                   ),
                   const SizedBox(height: 6),
                   Flexible(
                     child: Text(
-                      (c.name.isNotEmpty) ? c.name : c.id,
+                      label,
                       maxLines: 2,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
@@ -359,6 +488,7 @@ class _CategoryChips extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
+                        color: _Brand.ink,
                       ),
                     ),
                   ),
@@ -375,12 +505,13 @@ class _CategoryChips extends StatelessWidget {
 /// Providers row
 class _ProviderRow extends StatelessWidget {
   final List<hs.ProviderItem> shops;
-  const _ProviderRow({required this.shops});
+  final Color? borderColor;
+  const _ProviderRow({required this.shops, this.borderColor});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 250, // fixed track height for the horizontal list
+      height: 250,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(right: 12),
@@ -390,55 +521,90 @@ class _ProviderRow extends StatelessWidget {
         itemBuilder: (_, i) {
           final s = shops[i];
           final img = ApiService.normalizeMediaUrl(s.logoUrl);
+          final catLabel = _localizedCategory(context, s.category);
 
-          // ✅ fixed width + height so Column is bounded
           return SizedBox(
             width: 270,
             height: 210,
             child: Card(
               elevation: 0,
-              clipBehavior: Clip.antiAlias, // keep rounded corners on image
+              clipBehavior: Clip.antiAlias,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: _borderForCategory(s.category),
+                  width: 1.25,
+                ),
               ),
+              color: _Brand.accentSoft.withOpacity(.18),
               child: InkWell(
                 onTap: () {
                   Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
-                      builder: (_) => ProviderScreen(providerId: s.id),
-                    ),
+                        builder: (_) => ProviderScreen(providerId: s.id)),
                   );
                 },
                 child: Column(
-                  mainAxisSize: MainAxisSize.max, // make Column fill 210
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // top image (fixed height)
-                    if (img == null)
-                      Container(
-                        height: 140,
-                        width: double.infinity,
-                        color: const Color(0xFFF2F4F7),
-                        child: const Center(
-                          child: Icon(Icons.store_mall_directory_outlined),
-                        ),
-                      )
-                    else
-                      Image.network(
-                        img,
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 140,
-                          color: const Color(0xFFF2F4F7),
-                          child: const Center(
-                            child: Icon(Icons.broken_image_outlined),
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Stack(
+                        children: [
+                          if (img == null)
+                            Container(
+                              height: 140,
+                              width: double.infinity,
+                              color: _Brand.accentSoft.withOpacity(.5),
+                              child: const Icon(
+                                  Icons.store_mall_directory_outlined,
+                                  color: _Brand.subtle),
+                            )
+                          else
+                            Image.network(
+                              img,
+                              height: 140,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 140,
+                                color: _Brand.accentSoft.withOpacity(.5),
+                                child: const Icon(Icons.broken_image_outlined,
+                                    color: _Brand.subtle),
+                              ),
+                            ),
+                          // subtle top gradient
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              ignoring: true,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withOpacity(.10),
+                                      Colors.transparent
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          // rating pill
+                          if (s.rating > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: _ChipPill(
+                                icon: Icons.star_rounded,
+                                text: s.rating.toStringAsFixed(1),
+                              ),
+                            ),
+                        ],
                       ),
-
-                    // content
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                       child: Column(
@@ -449,28 +615,19 @@ class _ProviderRow extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: _Brand.ink),
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(Icons.star_rate_rounded, size: 16),
-                              const SizedBox(width: 2),
-                              Text(
-                                s.rating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  s.category,
+                                  catLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.black54),
+                                  style: const TextStyle(color: _Brand.subtle),
                                 ),
                               ),
                             ],
@@ -481,10 +638,10 @@ class _ProviderRow extends StatelessWidget {
                               s.location!.compact,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.black54),
+                              style: const TextStyle(color: _Brand.subtle),
                             ),
                           ],
-                          const SizedBox(height: 2), // ← replaces Spacer()
+                          const SizedBox(height: 2),
                         ],
                       ),
                     ),
@@ -504,11 +661,20 @@ class _NoUpcoming extends StatelessWidget {
   final String label;
   const _NoUpcoming({required this.onTap, required this.label});
   @override
-  Widget build(BuildContext context) => OutlinedButton.icon(
-        onPressed: onTap,
-        icon: const Icon(Icons.event_note_rounded),
-        label: Text(label),
-      );
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(Icons.event_note_rounded, color: _Brand.ink),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(color: _Brand.border),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: _Brand.accentSoft.withOpacity(.35),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        foregroundColor: _Brand.ink,
+      ),
+    );
+  }
 }
 
 class _UpcomingCard extends StatelessWidget {
@@ -518,7 +684,6 @@ class _UpcomingCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _UpcomingCard({
-    super.key,
     required this.start,
     required this.serviceName,
     required this.providerName,
@@ -536,15 +701,63 @@ class _UpcomingCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      child: ListTile(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: _Brand.border, width: 1.25),
+      ),
+      color: _Brand.accentSoft.withOpacity(.2),
+      child: InkWell(
         onTap: onTap,
-        leading: const Icon(Icons.event_available),
-        title: Text((serviceName ?? 'Service'),
-            maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: subtitle.isNotEmpty
-            ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
-            : null,
-        trailing: const Icon(Icons.chevron_right),
+        child: Stack(
+          children: [
+            // left status accent
+            Positioned.fill(
+              left: 0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: _Brand.primary,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+              leading: Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _Brand.primary.withOpacity(.20),
+                      _Brand.primary.withOpacity(.08)
+                    ],
+                  ),
+                ),
+                child: const Icon(Icons.event_available, color: _Brand.primary),
+              ),
+              title: Text((serviceName ?? 'Service'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: _Brand.ink)),
+              subtitle: subtitle.isNotEmpty
+                  ? Text(subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: _Brand.subtle))
+                  : null,
+              trailing: const Icon(Icons.chevron_right, color: _Brand.subtle),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -554,10 +767,15 @@ class _MutedNote extends StatelessWidget {
   final String text;
   const _MutedNote(this.text);
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Text(text, style: const TextStyle(color: Colors.black54)),
-      );
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        text,
+        style: const TextStyle(color: _Brand.subtle),
+      ),
+    );
+  }
 }
 
 class _ErrorBox extends StatelessWidget {
@@ -568,9 +786,13 @@ class _ErrorBox extends StatelessWidget {
   Widget build(BuildContext context) => Center(
         child: Column(
           children: [
-            Text(text),
+            Text(text, style: const TextStyle(color: _Brand.ink)),
             const SizedBox(height: 8),
             OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _Brand.border),
+                foregroundColor: _Brand.ink,
+              ),
               onPressed: () => onRetry(),
               child: Text(AppLocalizations.of(context)!.action_reload),
             ),
@@ -587,10 +809,46 @@ class _Skeleton extends StatelessWidget {
           height: h,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F2F5),
+            color: _Brand.accentSoft.withOpacity(.5),
             borderRadius: BorderRadius.circular(12),
           ),
         );
-    return ListView(children: [box(48), box(110), box(96), box(210), box(210)]);
+    return ListView(children: [box(50), box(110), box(96), box(210), box(210)]);
+  }
+}
+
+/* ---------------------------- Tiny primitives --------------------------- */
+
+class _ChipPill extends StatelessWidget {
+  final IconData? icon;
+  final String text;
+  const _ChipPill({this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: _Brand.primary.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

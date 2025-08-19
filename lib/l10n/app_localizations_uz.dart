@@ -330,7 +330,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get appointments_finished_title => 'Tugallangan uchrashuvlar';
 
   @override
-  String get appointments_empty => 'Sizda hali uchrashuvlar yo\'q.';
+  String get appointments_empty => 'Sizda hali hech qanday uchrashuv yo‘q.';
 
   @override
   String get appointment_cancel_button => 'Uchrashuvni bekor qilish';
@@ -455,4 +455,52 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get all => 'Barchasi';
+
+  @override
+  String get cat_barbershop => 'Sartaroshxona';
+
+  @override
+  String get cat_dental => 'Stomatologiya klinikasi';
+
+  @override
+  String get cat_clinic => 'Tibbiyot klinikasi';
+
+  @override
+  String get cat_spa => 'Spa';
+
+  @override
+  String get cat_gym => 'Sport zali';
+
+  @override
+  String get cat_nail_salon => 'Tirnoq saloni';
+
+  @override
+  String get cat_beauty_clinic => 'Go\'zallik klinikasi';
+
+  @override
+  String get cat_tattoo_studio => 'Tatuirovka studiyasi';
+
+  @override
+  String get cat_massage_center => 'Massaj markazi';
+
+  @override
+  String get cat_physiotherapy_clinic => 'Fizioterapiya klinikasi';
+
+  @override
+  String get cat_makeup_studio => 'Makiyaj studiyasi';
+
+  @override
+  String get appointments_title => 'Uchrashuvlar';
+
+  @override
+  String get appointments_upcoming => 'Yaqinlashayotgan uchrashuvlar';
+
+  @override
+  String get appointments_finished => 'Tugallangan uchrashuvlar';
+
+  @override
+  String get appointment_action_cancel => 'Bekor qilish';
+
+  @override
+  String get appointment_action_book_again => 'Qayta bron qilish';
 }

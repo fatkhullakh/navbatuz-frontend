@@ -11,10 +11,12 @@ import 'review_confirm_screen.dart';
 class ServiceBookingScreen extends StatefulWidget {
   final String serviceId;
   final String providerId;
+  final String? initialWorkerId;
   const ServiceBookingScreen({
     super.key,
     required this.serviceId,
     required this.providerId,
+    this.initialWorkerId,
   });
 
   @override
@@ -52,18 +54,33 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   Future<void> _bootstrap() async {
     setState(() => _error = null);
     try {
-      // use the new .details(...) (kept alias below if you prefer .getDetail)
+      // Get the service first (works even if /details is 403; we fallback internally)
       final svc = await _services.details(
         serviceId: widget.serviceId,
         providerId: widget.providerId,
       );
-      final prov = await _providers.getDetails(widget.providerId);
+
+      // Resolve providerId:
+      String? pid =
+          (widget.providerId).trim().isEmpty ? null : widget.providerId;
+      pid ??= svc.providerId; // from service payload if present
+      pid ??= await _services
+          .getProviderIdForService(widget.serviceId); // final fallback
+
+      if (pid == null || pid.isEmpty) {
+        throw Exception('Provider id is missing for the selected service.');
+      }
+
+      final prov = await _providers.getDetails(pid);
+
       setState(() {
         _service = svc;
         _provider = prov;
-        _selectedWorkerId =
-            svc.workerIds.isNotEmpty ? svc.workerIds.first : null;
+        _selectedWorkerId = widget.initialWorkerId // prefer deep-linked worker
+            ??
+            (svc.workerIds.isNotEmpty ? svc.workerIds.first : null);
       });
+
       _loadSlots();
     } catch (e) {
       setState(() => _error = e.toString());
@@ -72,18 +89,25 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
 
   void _loadSlots() {
     if (_service == null) return;
+
     final list = _allowedWorkers;
     if (list.isEmpty) {
       setState(() => _slotsFuture = Future.value(const <String>[]));
       return;
     }
+
     final effectiveWorkerId = _selectedWorkerId ?? list.first.id;
+
+    // ⛑️ Clamp to a sane minimum (handles PT0S, nulls, etc.)
+    final rawMin = _service!.duration?.inMinutes ?? 0;
+    final durationMin = rawMin <= 0 ? 30 : rawMin;
+
     setState(() {
       _selectedStart = null;
       _slotsFuture = _workers.freeSlots(
         workerId: effectiveWorkerId,
         date: _selectedDate,
-        serviceDurationMinutes: _service!.duration?.inMinutes ?? 30, // fallback
+        serviceDurationMinutes: durationMin,
       );
     });
   }
@@ -226,25 +250,31 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                     if (snap.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
+
+                    // If the API errored, show the same friendly text as "no slots".
                     if (snap.hasError) {
-                      return Column(
-                        children: [
-                          Text('Failed to load slots: ${snap.error}'),
-                          const SizedBox(height: 8),
-                          OutlinedButton(
-                            onPressed: _loadSlots,
-                            child: Text(t.booking_slots_retry),
-                          ),
-                        ],
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          // Use your existing translation:
+                          // "booking_no_slots": "Bu kunda bo‘sh vaqt yo‘q."
+                          t.booking_no_slots,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                       );
                     }
+
                     final slots = snap.data ?? const <String>[];
                     if (slots.isEmpty) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(t.booking_no_slots),
+                        child: Text(
+                          t.booking_no_slots, // “worker is not available on that day”
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                       );
                     }
+
                     return Wrap(
                       spacing: 8,
                       runSpacing: 8,

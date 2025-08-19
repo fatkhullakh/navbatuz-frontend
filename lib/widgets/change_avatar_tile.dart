@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../services/upload_service.dart';
 import '../services/api_service.dart';
-import 'package:dio/dio.dart';
 
 class ChangeAvatarTile extends StatefulWidget {
   final String userId; // current user id

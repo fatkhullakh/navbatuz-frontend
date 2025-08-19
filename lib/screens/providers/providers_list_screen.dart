@@ -1,9 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+
 import '../../services/api_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/provider_screen.dart';
 
+/* ---------------------------- Brand constants ---------------------------- */
+class _Brand {
+  static const primary = Color(0xFF6A89A7); // #6A89A7
+  static const accent = Color(0xFF88BDF2); // #88BDF2
+  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
+  static const ink = Color(0xFF384959); // #384959
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+}
+
+/* ------------------------------ Helpers --------------------------------- */
+String _normCat(String? s) =>
+    (s ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+
+String _localizedCategory(BuildContext context, String? idOrName) {
+  final t = AppLocalizations.of(context)!;
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return t.cat_barbershop;
+    case 'dental':
+    case 'dentist':
+      return t.cat_dental;
+    case 'clinic':
+      return t.cat_clinic;
+    case 'spa':
+      return t.cat_spa;
+    case 'gym':
+      return t.cat_gym;
+    case 'nail_salon':
+      return t.cat_nail_salon;
+    case 'beauty_clinic':
+      return t.cat_beauty_clinic;
+    case 'tattoo_studio':
+      return t.cat_tattoo_studio;
+    case 'massage_center':
+      return t.cat_massage_center;
+    case 'physiotherapy_clinic':
+      return t.cat_physiotherapy_clinic;
+    case 'makeup_studio':
+      return t.cat_makeup_studio;
+    default:
+      return idOrName ?? '';
+  }
+}
+
+Color _borderForCategory(String? idOrName) {
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return _Brand.primary;
+    case 'dental':
+    case 'dentist':
+      return _Brand.accent;
+    case 'clinic':
+    case 'beauty_clinic':
+      return _Brand.primary.withOpacity(.75);
+    case 'spa':
+    case 'massage_center':
+      return _Brand.accent.withOpacity(.75);
+    case 'gym':
+      return _Brand.ink.withOpacity(.55);
+    case 'nail_salon':
+    case 'makeup_studio':
+      return _Brand.accent;
+    case 'tattoo_studio':
+      return _Brand.ink;
+    case 'physiotherapy_clinic':
+      return _Brand.primary;
+    default:
+      return _Brand.border;
+  }
+}
+
+/* ---------------------------- Screen widget ----------------------------- */
 class ProvidersListScreen extends StatefulWidget {
   /// 'favorites' => list user’s favorite providers
   /// 'all'       => list all providers (placeholder for recommendations)
@@ -143,9 +217,10 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: RefreshIndicator(
+        color: _Brand.primary,
         onRefresh: _load,
         child: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const _Skeleton()
             : _error != null
                 ? ListView(
                     padding: const EdgeInsets.all(16),
@@ -161,7 +236,7 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                             (widget.filter == 'favorites')
                                 ? t.no_favorites
                                 : t.no_results,
-                            style: const TextStyle(color: Colors.black54),
+                            style: const TextStyle(color: _Brand.subtle),
                           ),
                         ],
                       )
@@ -172,20 +247,11 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         itemBuilder: (_, i) {
                           final p = _items[i];
                           final isFav = _favIds.contains(p.id);
-                          final subtitleBits = <String>[];
-                          if ((p.category ?? '').isNotEmpty) {
-                            subtitleBits.add(p.category!);
-                          }
-                          if (p.rating != null) {
-                            subtitleBits.add(p.rating!.toStringAsFixed(1));
-                          }
-                          if ((p.locationCompact ?? '').isNotEmpty) {
-                            subtitleBits.add(p.locationCompact!);
-                          }
-
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
+                          return _ProviderCard(
+                            item: p,
+                            isFavorite: isFav,
+                            onFavoriteToggle: () => _toggleFavorite(p),
+                            onOpen: () {
                               Navigator.of(context, rootNavigator: true).push(
                                 MaterialPageRoute(
                                   builder: (_) =>
@@ -193,99 +259,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                                 ),
                               );
                             },
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border:
-                                    Border.all(color: const Color(0xFFE6E8EB)),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      AspectRatio(
-                                        aspectRatio: 16 / 9,
-                                        child: (p.logoUrl == null)
-                                            ? Container(
-                                                color: const Color(0xFFF2F4F7),
-                                                child: const Center(
-                                                  child: Icon(
-                                                    Icons.storefront_rounded,
-                                                    size: 40,
-                                                  ),
-                                                ),
-                                              )
-                                            : Image.network(
-                                                p.logoUrl!,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, __, ___) =>
-                                                    Container(
-                                                  color:
-                                                      const Color(0xFFF2F4F7),
-                                                  child: const Center(
-                                                    child: Icon(
-                                                      Icons
-                                                          .broken_image_outlined,
-                                                      size: 40,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                      ),
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: Material(
-                                          color: Colors.white.withOpacity(0.92),
-                                          shape: const CircleBorder(),
-                                          clipBehavior: Clip.antiAlias,
-                                          child: IconButton(
-                                            tooltip: isFav
-                                                ? t.remove_from_favorites
-                                                : t.favorites_added_snack,
-                                            icon: Icon(isFav
-                                                ? Icons.favorite
-                                                : Icons.favorite_border),
-                                            color: isFav
-                                                ? Colors.redAccent
-                                                : Colors.black54,
-                                            onPressed: () => _toggleFavorite(p),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        12, 10, 12, 12),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          p.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          subtitleBits.join(' • '),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              color: Colors.black54),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           );
                         },
                       ),
@@ -294,6 +267,186 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
   }
 }
 
+/* ------------------------------ Card UI -------------------------------- */
+class _ProviderCard extends StatelessWidget {
+  final _ProviderSummary item;
+  final bool isFavorite;
+  final VoidCallback onFavoriteToggle;
+  final VoidCallback onOpen;
+
+  const _ProviderCard({
+    required this.item,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+    required this.onOpen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final catLabel = _localizedCategory(context, item.category);
+    final subtitleBits = <String>[
+      if (catLabel.isNotEmpty) catLabel,
+      if (item.rating != null) item.rating!.toStringAsFixed(1),
+      if ((item.locationCompact ?? '').isNotEmpty) item.locationCompact!,
+    ];
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onOpen,
+      child: Ink(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _borderForCategory(item.category),
+            width: 1.25,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // banner
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: (item.logoUrl == null)
+                        ? Container(
+                            color: _Brand.accentSoft.withOpacity(.5),
+                            child: const Center(
+                              child: Icon(Icons.storefront_rounded,
+                                  size: 40, color: _Brand.subtle),
+                            ),
+                          )
+                        : Image.network(
+                            item.logoUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: _Brand.accentSoft.withOpacity(.5),
+                              child: const Center(
+                                child: Icon(Icons.broken_image_outlined,
+                                    size: 40, color: _Brand.subtle),
+                              ),
+                            ),
+                          ),
+                  ),
+
+                  // gradient for readability
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      ignoring: true,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(.10),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // rating pill
+                  if ((item.rating ?? 0) > 0)
+                    Positioned(
+                      left: 8,
+                      top: 8,
+                      child: _ChipPill(
+                        icon: Icons.star_rounded,
+                        text: item.rating!.toStringAsFixed(1),
+                      ),
+                    ),
+
+                  // favorite
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Material(
+                      color: Colors.white.withOpacity(0.95),
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: IconButton(
+                        tooltip: isFavorite
+                            ? AppLocalizations.of(context)!
+                                .remove_from_favorites
+                            : AppLocalizations.of(context)!
+                                .favorites_added_snack,
+                        icon: Icon(isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border),
+                        color: isFavorite
+                            ? Colors.redAccent
+                            : _Brand.ink.withOpacity(.75),
+                        onPressed: onFavoriteToggle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // text
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: _Brand.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitleBits.join(' • '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _Brand.subtle),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/* ------------------------------ Skeleton -------------------------------- */
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
+  @override
+  Widget build(BuildContext context) {
+    Widget box({double h = 170, double r = 16}) => Container(
+          height: h,
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          decoration: BoxDecoration(
+            color: _Brand.accentSoft.withOpacity(.45),
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+    return ListView(children: [
+      box(h: 190),
+      box(h: 190),
+      box(h: 190),
+    ]);
+  }
+}
+
+/* ----------------------------- Data model ------------------------------- */
 class _ProviderSummary {
   final String id;
   final String name;
@@ -338,6 +491,41 @@ class _ProviderSummary {
       category: j['category']?.toString(),
       locationCompact: compactLocation(),
       logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
+    );
+  }
+}
+
+/* ----------------------------- Tiny UI bits ----------------------------- */
+class _ChipPill extends StatelessWidget {
+  final IconData? icon;
+  final String text;
+  const _ChipPill({this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: _Brand.primary.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

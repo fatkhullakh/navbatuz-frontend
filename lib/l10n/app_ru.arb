@@ -165,5 +165,24 @@
   "action_view_photo": "Просмотреть фото",
   "search": "Поиск",
   "services": "Услуги",
-  "all": "Все"
+  "all": "Все",
+
+  "cat_barbershop": "Барбершоп",
+  "cat_dental": "Стоматологическая клиника",
+  "cat_clinic": "Медицинская клиника",
+  "cat_spa": "Спа",
+  "cat_gym": "Тренажёрный зал",
+  "cat_nail_salon": "Ногтевой салон",
+  "cat_beauty_clinic": "Косметологическая клиника",
+  "cat_tattoo_studio": "Тату-студия",
+  "cat_massage_center": "Массажный центр",
+  "cat_physiotherapy_clinic": "Физиотерапевтическая клиника",
+  "cat_makeup_studio": "Студия макияжа",
+
+  "appointments_title": "Назначения",
+  "appointments_upcoming": "Ближайшие записи",
+  "appointments_finished": "Завершённые записи",
+  "appointments_empty": "У вас пока нет записей.",
+  "appointment_action_cancel": "Отменить",
+  "appointment_action_book_again": "Записаться снова"
 }

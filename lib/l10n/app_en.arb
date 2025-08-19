@@ -163,5 +163,24 @@
   "action_view_photo": "View photo",
   "search": "Search",
   "services": "Services",
-  "all": "All"
+  "all": "All",
+
+  "cat_barbershop": "Barbershop",
+  "cat_dental": "Dental",
+  "cat_clinic": "Clinic",
+  "cat_spa": "Spa",
+  "cat_gym": "Gym",
+  "cat_nail_salon": "Nail salon",
+  "cat_beauty_clinic": "Beauty clinic",
+  "cat_tattoo_studio": "Tattoo studio",
+  "cat_massage_center": "Massage center",
+  "cat_physiotherapy_clinic": "Physiotherapy",
+  "cat_makeup_studio": "Makeup studio",
+
+  "appointments_title": "Appointments",
+  "appointments_upcoming": "Upcoming Appointments",
+  "appointments_finished": "Finished Appointments",
+  "appointments_empty": "You don't have any appointments yet.",
+  "appointment_action_cancel": "Cancel",
+  "appointment_action_book_again": "Book again"
 }

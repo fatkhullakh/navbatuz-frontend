@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import '../services/favorites_service.dart';
 
 class FavoriteToggleButton extends StatefulWidget {
-  final String providerId;
-  final bool? initialIsFavorite; // optional if you already know on screen open
-  final VoidCallback? onChanged;
-
   const FavoriteToggleButton({
     super.key,
     required this.providerId,
     this.initialIsFavorite,
     this.onChanged,
+    this.activeColor, // optional brand color
   });
+
+  final String providerId;
+  final bool? initialIsFavorite;
+  final VoidCallback? onChanged;
+  final Color? activeColor;
 
   @override
   State<FavoriteToggleButton> createState() => _FavoriteToggleButtonState();
@@ -44,11 +46,12 @@ class _FavoriteToggleButtonState extends State<FavoriteToggleButton> {
     try {
       if (_isFav!) {
         await _favSvc.removeFavorite(widget.providerId);
-        setState(() => _isFav = false);
+        _isFav = false;
       } else {
         await _favSvc.addFavorite(widget.providerId);
-        setState(() => _isFav = true);
+        _isFav = true;
       }
+      if (mounted) setState(() {});
       widget.onChanged?.call();
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -58,12 +61,16 @@ class _FavoriteToggleButtonState extends State<FavoriteToggleButton> {
   @override
   Widget build(BuildContext context) {
     final fav = _isFav ?? false;
+    final active = widget.activeColor ?? const Color(0xFF384959);
 
     return FilledButton.icon(
       onPressed: _busy ? null : _toggle,
       style: FilledButton.styleFrom(
-        backgroundColor: fav ? Colors.pink.shade500 : Colors.grey.shade200,
-        foregroundColor: fav ? Colors.white : Colors.black87,
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: fav ? active : const Color(0xFFEFF3F7),
+        foregroundColor: fav ? Colors.white : active,
       ),
       icon: Icon(fav ? Icons.favorite : Icons.favorite_border),
       label: Text(fav ? 'Favorited' : 'Favorite'),

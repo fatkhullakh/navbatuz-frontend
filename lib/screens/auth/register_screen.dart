@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -8,6 +7,16 @@ class RegisterScreen extends StatefulWidget {
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+/* ---------------------------- Brand constants ---------------------------- */
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const accentSoft = Color(0xFFBDDDFC);
+  static const ink = Color(0xFF384959);
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+  static const surfaceSoft = Color(0xFFF6F9FC);
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
@@ -19,12 +28,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
-  String _role = 'CUSTOMER'; // CUSTOMER | OWNER | WORKER (adjust as you like)
+  String _role = 'CUSTOMER'; // CUSTOMER | OWNER | WORKER
   String? _gender; // MALE | FEMALE
   String _language = 'EN'; // EN | RU | UZ
   DateTime? _dob;
 
   bool _loading = false;
+  bool _showPassword = false;
 
   @override
   void dispose() {
@@ -35,6 +45,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _password.dispose();
     super.dispose();
   }
+
+  InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
+        labelText: label,
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.primary, width: 1.5),
+        ),
+      );
 
   Future<void> _pickDob() async {
     final now = DateTime.now();
@@ -66,7 +93,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               '${_dob!.year.toString().padLeft(4, '0')}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
       };
 
-      // NOTE: ApiService.register takes a Map body (not named params)
       await ApiService.register(body);
 
       if (!mounted) return;
@@ -99,7 +125,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final inputPad = const SizedBox(height: 12);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      backgroundColor: _Brand.surfaceSoft,
+      appBar: AppBar(
+        title: const Text('Register'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
       body: Form(
         key: _form,
         child: ListView(
@@ -107,39 +138,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             TextFormField(
               controller: _name,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: _dec('Name'),
               validator: _req,
             ),
             inputPad,
             TextFormField(
               controller: _surname,
-              decoration: const InputDecoration(labelText: 'Surname'),
+              decoration: _dec('Surname'),
               validator: _req,
             ),
             inputPad,
             TextFormField(
               controller: _phone,
-              decoration: const InputDecoration(labelText: 'Phone (+998...)'),
-              validator: _req,
+              decoration: _dec('Phone (+998...)'),
               keyboardType: TextInputType.phone,
+              validator: (v) {
+                if ((v ?? '').trim().isEmpty) return 'Required';
+                // Basic sanity (don’t over-restrict)
+                final ok = RegExp(r'^\+?\d{9,15}$').hasMatch(v!.trim());
+                return ok ? null : 'Invalid phone';
+              },
             ),
             inputPad,
             TextFormField(
               controller: _email,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: _dec('Email'),
+              keyboardType: TextInputType.emailAddress,
               validator: (v) {
                 if ((v ?? '').isEmpty) return 'Required';
-                if (!RegExp(r'.+@.+\..+').hasMatch(v!)) return 'Invalid email';
+                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v!)) {
+                  return 'Invalid email';
+                }
                 return null;
               },
-              keyboardType: TextInputType.emailAddress,
             ),
             inputPad,
             TextFormField(
               controller: _password,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: _dec(
+                'Password',
+                suffix: IconButton(
+                  icon: Icon(
+                      _showPassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
+                ),
+              ),
+              obscureText: !_showPassword,
               validator: (v) => (v ?? '').length < 6 ? 'Min 6 chars' : null,
-              obscureText: true,
             ),
             inputPad,
             DropdownButtonFormField<String>(
@@ -150,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 DropdownMenuItem(value: 'WORKER', child: Text('Worker')),
               ],
               onChanged: (v) => setState(() => _role = v ?? 'CUSTOMER'),
-              decoration: const InputDecoration(labelText: 'Role'),
+              decoration: _dec('Role'),
             ),
             inputPad,
             DropdownButtonFormField<String>(
@@ -160,7 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 DropdownMenuItem(value: 'FEMALE', child: Text('Female')),
               ],
               onChanged: (v) => setState(() => _gender = v),
-              decoration: const InputDecoration(labelText: 'Gender (optional)'),
+              decoration: _dec('Gender (optional)'),
             ),
             inputPad,
             DropdownButtonFormField<String>(
@@ -171,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 DropdownMenuItem(value: 'UZ', child: Text("O‘zbek")),
               ],
               onChanged: (v) => setState(() => _language = v ?? 'EN'),
-              decoration: const InputDecoration(labelText: 'Language'),
+              decoration: _dec('Language'),
             ),
             inputPad,
             ListTile(
@@ -181,16 +227,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _dob == null
                     ? '—'
                     : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
+                style: const TextStyle(color: _Brand.subtle),
               ),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDob,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _loading ? null : _submit,
-              child: _loading
-                  ? const CircularProgressIndicator()
-                  : const Text('Create account'),
+            SizedBox(
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _Brand.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: _loading ? null : _submit,
+                child: _loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Create account'),
+              ),
             ),
             const SizedBox(height: 8),
             TextButton(
