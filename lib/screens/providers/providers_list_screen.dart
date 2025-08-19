@@ -6,7 +6,7 @@ import '../providers/provider_screen.dart';
 
 class ProvidersListScreen extends StatefulWidget {
   /// 'favorites' => list user’s favorite providers
-  /// 'all'       => list all providers
+  /// 'all'       => list all providers (placeholder for recommendations)
   final String? filter;
   final String? categoryId; // (future)
   const ProvidersListScreen({super.key, this.filter, this.categoryId});
@@ -20,11 +20,31 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
   bool _loading = false;
   String? _error;
   List<_ProviderSummary> _items = [];
+  Set<String> _favIds = <String>{};
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  Future<Set<String>> _fetchFavoriteIds() async {
+    try {
+      final r = await _dio.get('/customers/favourites');
+      final data = r.data;
+      if (data is List) {
+        if (data.isNotEmpty && data.first is Map) {
+          return data
+              .cast<Map>()
+              .map((m) => (m['id'] ?? '').toString())
+              .where((id) => id.isNotEmpty)
+              .toSet();
+        } else {
+          return data.map((e) => e.toString()).toSet();
+        }
+      }
+    } catch (_) {}
+    return <String>{};
   }
 
   Future<void> _load() async {
@@ -34,10 +54,12 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
     });
 
     try {
+      // always know current favorites
+      _favIds = await _fetchFavoriteIds();
+
       if (widget.filter == 'favorites') {
         final r = await _dio.get('/customers/favourites');
 
-        // Case A: backend returns full ProviderResponse objects
         if (r.data is List &&
             (r.data as List).isNotEmpty &&
             (r.data as List).first is Map) {
@@ -47,7 +69,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                   _ProviderSummary.fromJson(Map<String, dynamic>.from(m)))
               .toList();
         } else {
-          // Case B: backend returns list of IDs → fetch details per ID
           final ids = (r.data as List).map((e) => e.toString()).toList();
           final futures = ids.map((id) async {
             final d = await _dio.get('/providers/public/$id/details');
@@ -59,7 +80,7 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
 
         _items.sort((a, b) => a.name.compareTo(b.name));
       } else {
-        // 'all' = use public/all page (your endpoint)
+        // 'all'
         final r = await _dio.get(
           '/providers/public/all',
           queryParameters: {'page': 0, 'size': 100, 'sortBy': 'name'},
@@ -81,6 +102,36 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggleFavorite(_ProviderSummary p) async {
+    final isFav = _favIds.contains(p.id);
+    try {
+      if (isFav) {
+        await _dio.delete('/customers/favourites/${p.id}');
+      } else {
+        await _dio.post('/customers/favourites/${p.id}');
+      }
+      setState(() {
+        if (isFav) {
+          _favIds.remove(p.id);
+          if (widget.filter == 'favorites') {
+            _items.removeWhere((e) => e.id == p.id); // instantly disappear
+          }
+        } else {
+          _favIds.add(p.id);
+        }
+      });
+    } on DioException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed (${e.response?.statusCode ?? 'net'})')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
     }
   }
 
@@ -115,89 +166,130 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         ],
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                         itemCount: _items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (_, i) {
                           final p = _items[i];
-
-                          final bits = <String>[];
-                          if ((p.category ?? '').isNotEmpty)
-                            bits.add(p.category!);
-                          if (p.rating != null)
-                            bits.add(p.rating!.toStringAsFixed(1));
-                          final top = bits.join(' • ');
-
-                          Widget leading;
-                          if ((p.logoUrl ?? '').isNotEmpty) {
-                            leading = ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                p.logoUrl!,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _fallbackAvatar(p.name),
-                              ),
-                            );
-                          } else {
-                            leading = _fallbackAvatar(p.name);
+                          final isFav = _favIds.contains(p.id);
+                          final subtitleBits = <String>[];
+                          if ((p.category ?? '').isNotEmpty) {
+                            subtitleBits.add(p.category!);
+                          }
+                          if (p.rating != null) {
+                            subtitleBits.add(p.rating!.toStringAsFixed(1));
+                          }
+                          if ((p.locationCompact ?? '').isNotEmpty) {
+                            subtitleBits.add(p.locationCompact!);
                           }
 
-                          return Card(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              leading: leading,
-                              onTap: () {
-                                Navigator.of(context, rootNavigator: true).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        ProviderScreen(providerId: p.id),
-                                  ),
-                                );
-                              },
-                              title: Text(
-                                p.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700),
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.of(context, rootNavigator: true).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ProviderScreen(providerId: p.id),
+                                ),
+                              );
+                            },
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: const Color(0xFFE6E8EB)),
                               ),
-                              subtitle: Column(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (top.isNotEmpty)
-                                    Text(top,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis),
-                                  if ((p.locationCompact ?? '').isNotEmpty)
-                                    Text(
-                                      p.locationCompact!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          color: Colors.black54),
+                                  Stack(
+                                    children: [
+                                      AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        child: (p.logoUrl == null)
+                                            ? Container(
+                                                color: const Color(0xFFF2F4F7),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.storefront_rounded,
+                                                    size: 40,
+                                                  ),
+                                                ),
+                                              )
+                                            : Image.network(
+                                                p.logoUrl!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, __, ___) =>
+                                                    Container(
+                                                  color:
+                                                      const Color(0xFFF2F4F7),
+                                                  child: const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .broken_image_outlined,
+                                                      size: 40,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: Material(
+                                          color: Colors.white.withOpacity(0.92),
+                                          shape: const CircleBorder(),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: IconButton(
+                                            tooltip: isFav
+                                                ? t.remove_from_favorites
+                                                : t.favorites_added_snack,
+                                            icon: Icon(isFav
+                                                ? Icons.favorite
+                                                : Icons.favorite_border),
+                                            color: isFav
+                                                ? Colors.redAccent
+                                                : Colors.black54,
+                                            onPressed: () => _toggleFavorite(p),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        12, 10, 12, 12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          p.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          subtitleBits.join(' • '),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
+                                      ],
                                     ),
+                                  ),
                                 ],
                               ),
-                              trailing: const Icon(Icons.chevron_right),
                             ),
                           );
                         },
                       ),
       ),
-    );
-  }
-
-  Widget _fallbackAvatar(String name) {
-    final letter = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    return CircleAvatar(
-      radius: 28,
-      child: Text(letter, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 }
@@ -206,8 +298,8 @@ class _ProviderSummary {
   final String id;
   final String name;
   final String? description;
-  final double? rating; // from avgRating
-  final String? category; // “CLINIC”, etc.
+  final double? rating; // avgRating
+  final String? category;
   final String? locationCompact;
   final String? logoUrl;
 

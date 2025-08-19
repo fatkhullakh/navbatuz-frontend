@@ -89,24 +89,20 @@ class ServiceDetails {
       return const [];
     }
 
-    // Accept images[], imageUrls[], or a single logoUrl
     final List<String> collected = [
       ...parseImages(j['images'] ?? j['imageUrls']),
     ];
     final String? single = (j['logoUrl'] as String?)?.toString();
-    if (single != null && single.isNotEmpty) {
-      collected.add(single);
-    }
+    if (single != null && single.isNotEmpty) collected.add(single);
+
     final List<String> normalized =
         collected.map((u) => ApiService.fixPublicUrl(u)).toList();
 
-    // Workers list (objects) if present
     final List<WorkerLite> workers = ((j['workers'] as List?) ?? const [])
         .whereType<Map>()
         .map((w) => WorkerLite.fromJson(Map<String, dynamic>.from(w)))
         .toList();
 
-    // Worker IDs either explicit or derived from workers list
     final List<String> workerIds = ((j['workerIds'] as List?) ?? const [])
         .map((e) => e.toString())
         .toList();
@@ -128,6 +124,22 @@ class ServiceDetails {
   }
 }
 
+/// Simple page wrapper for search results
+class PageResult<T> {
+  final List<T> items;
+  final int page;
+  final int size;
+  final int totalElements;
+  final bool last;
+  PageResult({
+    required this.items,
+    required this.page,
+    required this.size,
+    required this.totalElements,
+    required this.last,
+  });
+}
+
 class ServiceCatalogService {
   final Dio _dio = ApiService.client;
 
@@ -138,6 +150,56 @@ class ServiceCatalogService {
         .whereType<Map>()
         .map((m) => ServiceSummary.fromJson(Map<String, dynamic>.from(m)))
         .toList();
+  }
+
+  /// Get providerId for a given service (from fallback endpoint).
+  Future<String?> getProviderIdForService(String serviceId) async {
+    final r = await _dio.get('/services/public/$serviceId');
+    if (r.data is Map && (r.data as Map)['providerId'] != null) {
+      return (r.data as Map)['providerId'].toString();
+    }
+    return null;
+    // NOTE: if your backend adds providerId to search response, you can drop this extra call.
+  }
+
+  /// Search services via `/services/public/search`
+  Future<PageResult<ServiceSummary>> searchServices({
+    String? keyword, // optional; backend may ignore if not supported
+    String? category, // enum name e.g. "CLINIC"
+    num? minPrice,
+    num? maxPrice,
+    int page = 0,
+    int size = 20,
+  }) async {
+    final qp = <String, dynamic>{
+      if (category != null && category.isNotEmpty) 'category': category,
+      if (minPrice != null) 'minPrice': minPrice,
+      if (maxPrice != null) 'maxPrice': maxPrice,
+      // If your backend adds a `q` or `keyword` param, just pass it; Spring will ignore unknown params.
+      if (keyword != null && keyword.trim().isNotEmpty) 'q': keyword.trim(),
+      'page': page,
+      'size': size,
+    };
+
+    final r = await _dio.get('/services/public/search', queryParameters: qp);
+
+    final content = (r.data is Map && (r.data as Map)['content'] is List)
+        ? ((r.data as Map)['content'] as List)
+        : const <dynamic>[];
+
+    final items = content
+        .whereType<Map>()
+        .map((m) => ServiceSummary.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+
+    final m = Map<String, dynamic>.from(r.data as Map);
+    return PageResult<ServiceSummary>(
+      items: items,
+      page: (m['number'] as int?) ?? page,
+      size: (m['size'] as int?) ?? size,
+      totalElements: (m['totalElements'] as int?) ?? items.length,
+      last: (m['last'] as bool?) ?? true,
+    );
   }
 
   /// Main details fetcher used by UI

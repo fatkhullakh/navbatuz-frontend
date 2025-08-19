@@ -70,7 +70,7 @@ class ProviderResponse {
   final double avgRating;
   final String category;
   final LocationSummary? location;
-  final String? logoUrl; // <-- added
+  final String? logoUrl; // <-- add
 
   ProviderResponse({
     required this.id,
@@ -95,6 +95,21 @@ class ProviderResponse {
             : null,
         logoUrl: ApiService.normalizeMediaUrl(j['logoUrl']?.toString()),
       );
+}
+
+class ProviderPageResult<T> {
+  final List<T> items;
+  final int page;
+  final int size;
+  final int totalElements;
+  final bool last;
+  ProviderPageResult({
+    required this.items,
+    required this.page,
+    required this.size,
+    required this.totalElements,
+    required this.last,
+  });
 }
 
 class ProvidersDetails {
@@ -175,5 +190,59 @@ class ProviderPublicService {
     } else {
       await _dio.delete('/customers/favourites/$providerId');
     }
+  }
+
+  Future<ProviderPageResult<ProviderResponse>> searchProviders({
+    String? category, // ENUM like "CLINIC"
+    String? keyword, // if backend adds support later
+    int page = 0,
+    int size = 20,
+  }) async {
+    // Prefer /providers/public/search if category is provided
+    if (category != null && category.isNotEmpty) {
+      final r = await _dio.get('/providers/public/search', queryParameters: {
+        'category': category,
+        'page': page,
+        'size': size,
+        if (keyword != null && keyword.trim().isNotEmpty) 'q': keyword.trim(),
+      });
+      final content = (r.data is Map && (r.data as Map)['content'] is List)
+          ? ((r.data as Map)['content'] as List)
+          : const <dynamic>[];
+      final items = content
+          .whereType<Map>()
+          .map((m) => ProviderResponse.fromJson(Map<String, dynamic>.from(m)))
+          .toList();
+      final m = Map<String, dynamic>.from(r.data as Map);
+      return ProviderPageResult<ProviderResponse>(
+        items: items,
+        page: (m['number'] as int?) ?? page,
+        size: (m['size'] as int?) ?? size,
+        totalElements: (m['totalElements'] as int?) ?? items.length,
+        last: (m['last'] as bool?) ?? true,
+      );
+    }
+
+    // Fallback: no category → list all active providers
+    final r = await _dio.get('/providers/public/all', queryParameters: {
+      'page': page,
+      'size': size,
+      'sortBy': 'name',
+    });
+    final content = (r.data is Map && (r.data as Map)['content'] is List)
+        ? ((r.data as Map)['content'] as List)
+        : const <dynamic>[];
+    final items = content
+        .whereType<Map>()
+        .map((m) => ProviderResponse.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+    final m = Map<String, dynamic>.from(r.data as Map);
+    return ProviderPageResult<ProviderResponse>(
+      items: items,
+      page: (m['number'] as int?) ?? page,
+      size: (m['size'] as int?) ?? size,
+      totalElements: (m['totalElements'] as int?) ?? items.length,
+      last: (m['last'] as bool?) ?? true,
+    );
   }
 }

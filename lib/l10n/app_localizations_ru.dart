@@ -39,9 +39,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favorites => 'Избранное';
 
   @override
-  String get no_favorites => 'У вас пока нет избранных магазинов.';
-
-  @override
   String get recommended => 'Рекомендовано';
 
   @override
@@ -115,9 +112,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get action_reload => 'Обновить';
-
-  @override
-  String get error_generic => 'Что-то пошло не так. Повторите попытку.';
 
   @override
   String get provider_tab_services => 'Услуги';
@@ -421,7 +415,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get no_results => 'Нет результатов';
 
   @override
+  String get no_favorites => 'У вас пока нет избранных магазинов.';
+
+  @override
   String get remove_from_favorites => 'Убрать из избранного';
+
+  @override
+  String get error_generic => 'Что-то пошло не так. Повторите попытку.';
 
   @override
   String get provider_change_logo => 'Изменить логотип';
@@ -446,4 +446,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get action_view_photo => 'Просмотреть фото';
+
+  @override
+  String get search => 'Поиск';
+
+  @override
+  String get services => 'Услуги';
+
+  @override
+  String get all => 'Все';
 }
