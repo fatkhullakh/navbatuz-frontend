@@ -5,6 +5,9 @@ import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
 import 'appointment_details_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/api_service.dart';
+import '../../screens/booking/service_booking_screen.dart';
+import '../../models/appointment_detail.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   final VoidCallback? onChanged;
@@ -15,6 +18,7 @@ class AppointmentsScreen extends StatefulWidget {
 }
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
+  final Dio _dio = ApiService.client;
   final _svc = AppointmentService();
   bool _loading = false;
   List<AppointmentItem> _upcoming = [];
@@ -37,7 +41,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       final past = <AppointmentItem>[];
       for (final a in all) {
         final s = a.status.toUpperCase();
-        final isUpcomingStatus = s == 'BOOKED' || s == 'CONFIRMED';
+        final isUpcomingStatus =
+            s == 'BOOKED' || s == 'CONFIRMED' || s == 'RESCHEDULED';
         if (isUpcomingStatus && a.start.isAfter(now)) {
           upcoming.add(a);
         } else {
@@ -71,6 +76,170 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (changed == true) {
       await _load();
       widget.onChanged?.call();
+    }
+  }
+
+  Future<String?> _findProviderIdByName(String? providerName) async {
+    if (providerName == null || providerName.trim().isEmpty) return null;
+    try {
+      final r = await _dio.get('/providers/public/all',
+          queryParameters: {'page': 0, 'size': 100, 'sortBy': 'name'});
+      final list = (r.data is Map && (r.data as Map)['content'] is List)
+          ? ((r.data as Map)['content'] as List)
+          : const <dynamic>[];
+      for (final e in list) {
+        if (e is Map &&
+            (e['name']?.toString().toLowerCase().trim() ?? '') ==
+                providerName.toLowerCase().trim()) {
+          return e['id']?.toString();
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<String?> _findWorkerIdByName({
+    required String? providerId,
+    required String? workerName,
+  }) async {
+    if (providerId == null || workerName == null) return null;
+    try {
+      final d = await _dio.get('/providers/public/$providerId/details');
+      final workers = (d.data is Map && (d.data as Map)['workers'] is List)
+          ? ((d.data as Map)['workers'] as List)
+          : const <dynamic>[];
+      for (final w in workers) {
+        if (w is Map &&
+            (w['name']?.toString().toLowerCase().trim() ?? '') ==
+                workerName.toLowerCase().trim()) {
+          return w['id']?.toString();
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<String?> _findServiceIdSmart({
+    required String providerId,
+    required String serviceName,
+    required AppointmentDetail appointmentDetail,
+  }) async {
+    final resp =
+        await _dio.get('/services/public/provider/$providerId/services');
+    final list = (resp.data as List?) ?? const [];
+
+    int parseIsoMinutes(String? iso) {
+      if (iso == null || iso.isEmpty) return 0;
+      final s = iso.toUpperCase();
+      if (!s.startsWith('PT')) return 0;
+      int h = 0, m = 0, sec = 0;
+      final hIdx = s.indexOf('H');
+      final mIdx = s.indexOf('M');
+      final sIdx = s.indexOf('S');
+      if (hIdx != -1) h = int.tryParse(s.substring(2, hIdx)) ?? 0;
+      if (mIdx != -1) {
+        final start = (hIdx == -1) ? 2 : hIdx + 1;
+        m = int.tryParse(s.substring(start, mIdx)) ?? 0;
+      }
+      if (sIdx != -1) {
+        final start = (mIdx != -1) ? mIdx + 1 : (hIdx != -1 ? hIdx + 1 : 2);
+        sec = int.tryParse(s.substring(start, sIdx)) ?? 0;
+      }
+      return Duration(hours: h, minutes: m, seconds: sec).inMinutes;
+    }
+
+    String norm(String v) => v.toLowerCase().trim();
+
+    final matches = <Map<String, dynamic>>[];
+    for (final e in list) {
+      if (e is Map && norm(e['name']?.toString() ?? '') == norm(serviceName)) {
+        matches.add(Map<String, dynamic>.from(e));
+      }
+    }
+    if (matches.isEmpty) return null;
+
+    final int apptDurMin =
+        appointmentDetail.end.difference(appointmentDetail.start).inMinutes;
+    final int? apptPrice = appointmentDetail.price;
+
+    Map<String, dynamic>? best;
+    int bestScore = 1 << 30;
+
+    for (final e in matches) {
+      final durMin = parseIsoMinutes(e['duration']?.toString());
+      final priceNum = e['price'];
+      final priceInt =
+          (priceNum is num) ? priceNum.round() : int.tryParse('$priceNum');
+
+      final nonZeroPenalty = (durMin > 0) ? 0 : 100000;
+      final durDelta = (durMin - apptDurMin).abs();
+      final priceDelta = (apptPrice != null && priceInt != null)
+          ? (priceInt - apptPrice).abs()
+          : 0;
+
+      final score = nonZeroPenalty + (durDelta * 100) + priceDelta;
+      if (score < bestScore) {
+        bestScore = score;
+        best = e;
+      }
+    }
+
+    return best?['id']?.toString();
+  }
+
+  // Core: perform the rebook given full detail
+  Future<void> _bookAgain(AppointmentDetail a) async {
+    var pid = a.providerId ?? await _findProviderIdByName(a.providerName);
+    if (pid == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Booking info is incomplete.')),
+      );
+      return;
+    }
+
+    final sid = a.serviceId ??
+        await _findServiceIdSmart(
+          providerId: pid,
+          serviceName: a.serviceName ?? '',
+          appointmentDetail: a,
+        );
+
+    var wid = a.workerId ??
+        await _findWorkerIdByName(
+          providerId: pid,
+          workerName: a.workerName,
+        );
+
+    if (sid == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not resolve service for booking.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => ServiceBookingScreen(
+        serviceId: sid,
+        providerId: pid,
+        initialWorkerId: wid,
+      ),
+    ));
+  }
+
+  // Wrapper: fetch detail then rebook
+  Future<void> _bookAgainFromItem(String appointmentId) async {
+    try {
+      final a = await _svc.getById(appointmentId);
+      if (!mounted) return;
+      await _bookAgain(a);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to start rebooking: $e')),
+      );
     }
   }
 
@@ -133,19 +302,24 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     }
   }
 
-  // Status colors (BOOKED/CONFIRMED use #88BDF2 as requested)
+  // Status → color mapping (BOOKED uses brand primary #6A89A7)
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
       case 'FINISHED':
         return const Color(0xFF2E7D32); // green
+      case 'NO_SHOW':
+        return const Color(0xFFEF6C00); // orange
       case 'CANCELED':
       case 'CANCELLED':
         return const Color(0xFFB00020); // red
       case 'BOOKED':
+        return const Color(0xFF6A89A7); // PRIMARY
       case 'CONFIRMED':
+      case 'RESCHEDULED':
+        return const Color(0xFF88BDF2); // light blue
       default:
-        return const Color(0xFF88BDF2); // light blue for upcoming
+        return const Color(0xFF88BDF2);
     }
   }
 
@@ -168,8 +342,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          foregroundColor: cs.primary,
-          backgroundColor: cs.surfaceVariant.withOpacity(.55),
+          foregroundColor: const Color(0xFF6A89A7),
+          backgroundColor: const Color(0xFFBDDDFC).withOpacity(.55),
         ),
       ),
       chipTheme: theme.chipTheme.copyWith(
@@ -178,7 +352,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
-      dividerColor: cs.outlineVariant.withOpacity(.6),
+      dividerColor: const Color(0xFFE6ECF2),
       listTileTheme: ListTileThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
@@ -194,6 +368,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           title: Text(t.appointments_title),
         ),
         body: RefreshIndicator(
+          color: const Color(0xFF6A89A7),
           onRefresh: _load,
           child: _loading && _upcoming.isEmpty && _past.isEmpty
               ? const Center(child: CircularProgressIndicator.adaptive())
@@ -211,6 +386,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                   statusColor: _statusColor(a.status),
                                   primaryActionText:
                                       t.appointment_action_cancel,
+                                  destructive: true,
                                   onPrimaryAction: () => _cancel(a.id),
                                   onOpen: () => _openDetails(a.id),
                                 ))
@@ -228,7 +404,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                   statusColor: _statusColor(a.status),
                                   primaryActionText:
                                       t.appointment_action_book_again,
-                                  onPrimaryAction: () {/* TODO */},
+                                  destructive: false,
+                                  onPrimaryAction: () =>
+                                      _bookAgainFromItem(a.id), // <<< here
                                   onOpen: () => _openDetails(a.id),
                                 ))
                             .toList(),
@@ -283,6 +461,7 @@ class _AppointmentCard extends StatelessWidget {
   final DateFormat timeFmt;
   final Color statusColor;
   final String primaryActionText;
+  final bool destructive;
   final VoidCallback onPrimaryAction;
   final VoidCallback onOpen;
 
@@ -292,6 +471,7 @@ class _AppointmentCard extends StatelessWidget {
     required this.timeFmt,
     required this.statusColor,
     required this.primaryActionText,
+    required this.destructive,
     required this.onPrimaryAction,
     required this.onOpen,
   });
@@ -319,15 +499,12 @@ class _AppointmentCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: cs.outlineVariant.withOpacity(0.6), width: 1),
+          side: const BorderSide(color: Color(0xFFE6ECF2), width: 1.25),
         ),
-        color: Color.alphaBlend(
-          cs.surfaceTint
-              .withOpacity(theme.brightness == Brightness.dark ? 0.06 : 0.03),
-          cs.surface,
-        ),
+        color: const Color(0xFFBDDDFC).withOpacity(.18),
         child: Stack(
           children: [
+            // left status accent
             Positioned.fill(
               left: 0,
               child: Align(
@@ -429,15 +606,17 @@ class _AppointmentCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
+
+                        // compact date–time pill with slight corners
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
+                              horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
-                            color: cs.surfaceVariant.withOpacity(.45),
-                            borderRadius: BorderRadius.circular(10),
+                            color: const Color(0xFFBDDDFC).withOpacity(.30),
+                            borderRadius:
+                                BorderRadius.circular(8), // slight corners
                             border: Border.all(
-                                color: cs.outlineVariant.withOpacity(.6),
-                                width: 1),
+                                color: const Color(0xFFE6ECF2), width: 1),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -445,31 +624,48 @@ class _AppointmentCard extends StatelessWidget {
                               Icon(Icons.schedule_rounded,
                                   size: 16,
                                   color: cs.onSurface.withOpacity(.7)),
-                              const SizedBox(width: 8),
-                              Text(dateText, style: theme.textTheme.bodyMedium),
-                              const SizedBox(width: 8),
-                              Text("•", style: theme.textTheme.bodyMedium),
-                              const SizedBox(width: 8),
-                              Text(timeText, style: theme.textTheme.bodyMedium),
+                              const SizedBox(width: 6),
+                              Text(dateText, style: theme.textTheme.bodySmall),
+                              const SizedBox(width: 6),
+                              Text("•", style: theme.textTheme.bodySmall),
+                              const SizedBox(width: 6),
+                              Text(timeText, style: theme.textTheme.bodySmall),
                             ],
                           ),
                         ),
+
                         const SizedBox(height: 12),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: FilledButton.tonal(
-                            onPressed: onPrimaryAction,
-                            style: FilledButton.styleFrom(
-                              backgroundColor:
-                                  cs.secondaryContainer.withOpacity(.75),
-                              foregroundColor: cs.onSecondaryContainer,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
-                            child: Text(primaryActionText),
-                          ),
+                          child: destructive
+                              ? FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFFB00020)
+                                        .withOpacity(.90),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                  ),
+                                  onPressed: onPrimaryAction,
+                                  child: Text(primaryActionText),
+                                )
+                              : FilledButton.tonal(
+                                  onPressed: onPrimaryAction,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFFBDDDFC)
+                                        .withOpacity(.75),
+                                    foregroundColor: const Color(0xFF384959),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                  ),
+                                  child: Text(primaryActionText),
+                                ),
                         ),
                       ],
                     ),

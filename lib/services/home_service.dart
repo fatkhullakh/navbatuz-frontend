@@ -81,8 +81,8 @@ class HomeAppointment {
     required this.start,
   });
 
-  get date => null;
-  get startTime => null;
+  Null get date => null;
+  Null get startTime => null;
 }
 
 class HomeData {
@@ -114,7 +114,7 @@ class HomeService {
     final catsRaw = results[0].data;
     final categories = (catsRaw is List)
         ? catsRaw
-            .where((e) => e is Map)
+            .whereType<Map>()
             .map((e) =>
                 CategoryItem.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList()
@@ -144,7 +144,7 @@ class HomeService {
             providerName: (m['providerName'] ?? '').toString(),
             start: start,
           );
-          if (upcoming == null || cand.start.isBefore(upcoming!.start)) {
+          if (upcoming == null || cand.start.isBefore(upcoming.start)) {
             upcoming = cand;
           }
         }
@@ -157,7 +157,7 @@ class HomeService {
         ? (provRaw['content'] as List)
         : const <dynamic>[];
     final providers = content
-        .where((e) => e is Map)
+        .whereType<Map>()
         .map<ProviderItem>(
             (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();

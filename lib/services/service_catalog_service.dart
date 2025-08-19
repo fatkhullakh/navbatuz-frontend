@@ -34,7 +34,8 @@ Duration? _parseIsoDuration(String? s) {
 class ServiceSummary {
   final String id;
   final String name;
-  final String category;
+  final String category; // keep for later use if needed
+  final String? description; // NEW
   final int price; // integer money
   final Duration? duration;
 
@@ -44,12 +45,14 @@ class ServiceSummary {
     required this.category,
     required this.price,
     required this.duration,
+    this.description, // NEW
   });
 
   factory ServiceSummary.fromJson(Map<String, dynamic> j) => ServiceSummary(
         id: (j['id'] ?? '').toString(),
         name: (j['name'] ?? '').toString(),
         category: (j['category'] ?? '').toString(),
+        description: j['description']?.toString(), // NEW
         price: ((j['price'] is num) ? (j['price'] as num).round() : 0),
         duration: _parseIsoDuration(j['duration']?.toString()),
       );
@@ -242,7 +245,7 @@ class ServiceCatalogService {
       json = {
         'id': s.id,
         'name': s.name,
-        'description': null,
+        'description': s.description, // was null
         'category': s.category,
         'price': s.price,
         'duration': s.duration == null
@@ -251,11 +254,11 @@ class ServiceCatalogService {
         'imageUrls': const [],
         'workers': pd.workers.map((w) => {'id': w.id, 'name': w.name}).toList(),
         'workerIds': pd.workers.map((w) => w.id).toList(),
-        'providerId': providerId, // ensure we keep it for downstream flows
+        'providerId': providerId,
       };
     }
 
-    return ServiceDetails.fromJson(json!);
+    return ServiceDetails.fromJson(json);
   }
 
   /// Backwards-compat alias

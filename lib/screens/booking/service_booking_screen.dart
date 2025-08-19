@@ -250,25 +250,31 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                     if (snap.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
+
+                    // If the API errored, show the same friendly text as "no slots".
                     if (snap.hasError) {
-                      return Column(
-                        children: [
-                          Text('Failed to load slots: ${snap.error}'),
-                          const SizedBox(height: 8),
-                          OutlinedButton(
-                            onPressed: _loadSlots,
-                            child: Text(t.booking_slots_retry),
-                          ),
-                        ],
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          // Use your existing translation:
+                          // "booking_no_slots": "Bu kunda bo‘sh vaqt yo‘q."
+                          t.booking_no_slots,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                       );
                     }
+
                     final slots = snap.data ?? const <String>[];
                     if (slots.isEmpty) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(t.booking_no_slots),
+                        child: Text(
+                          t.booking_no_slots, // “worker is not available on that day”
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                       );
                     }
+
                     return Wrap(
                       spacing: 8,
                       runSpacing: 8,

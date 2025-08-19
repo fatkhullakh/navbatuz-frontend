@@ -71,7 +71,7 @@ class AppointmentService {
       if (code == 409) throw SlotUnavailableException(); // slot taken
       if (code == 403) throw NotAuthorizedException(); // not allowed
       if (msg.contains('customer not found')) throw CustomerMissingException();
-      throw e;
+      rethrow;
     }
   }
 

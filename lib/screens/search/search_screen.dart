@@ -266,7 +266,6 @@ class _Brand {
 ThemeData _brandTheme(BuildContext context) {
   final base = Theme.of(context);
   return base.copyWith(
-    useMaterial3: true,
     scaffoldBackgroundColor: _Brand.bg,
     colorScheme: ColorScheme.light(
       primary: _Brand.primary,

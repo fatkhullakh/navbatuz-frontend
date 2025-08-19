@@ -50,7 +50,6 @@ class WorkerService {
     return WorkerDetails(id: workerId, name: 'Worker');
   }
 
-  /// already had: freeSlots(...)
   Future<List<String>> freeSlots({
     required String workerId,
     required DateTime date,
@@ -67,4 +66,37 @@ class WorkerService {
     // API returns ["HH:mm:ss", ...]
     return (r.data as List).map((e) => e.toString()).toList();
   }
+
+  /// already had: freeSlots(...)
+  // Future<List<String>> freeSlots({
+  //   required String workerId,
+  //   required DateTime date,
+  //   required int serviceDurationMinutes,
+  // }) async {
+  //   try {
+  //     final r = await _dio.get(
+  //       '/workers/public/$workerId/slots',
+  //       queryParameters: {
+  //         'date': date.toIso8601String().split('T').first,
+  //         'durationMin': serviceDurationMinutes,
+  //       },
+  //     );
+  //     final list = (r.data as List?) ?? const [];
+  //     return list.map((e) => e.toString()).toList();
+  //   } on DioException catch (e) {
+  //     // Treat common “no availability / not configured” responses as NO SLOTS
+  //     final code = e.response?.statusCode ?? 0;
+  //     final body = (e.response?.data ?? '').toString().toLowerCase();
+  //     if (code == 400 ||
+  //         code == 404 ||
+  //         code == 422 ||
+  //         body.contains('no availability') ||
+  //         body.contains('not available') ||
+  //         body.contains('no schedule') ||
+  //         body.contains('no working hours')) {
+  //       return const <String>[]; // <- fall back to "no slots" UI
+  //     }
+  //     rethrow;
+  //   }
+  // }
 }

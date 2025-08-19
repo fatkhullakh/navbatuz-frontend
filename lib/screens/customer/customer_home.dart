@@ -44,6 +44,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       body: RefreshIndicator(
+        color: _Brand.primary,
         onRefresh: _refresh,
         child: FutureBuilder<hs.HomeData>(
           future: _future,
@@ -138,7 +139,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: cs.primary,
+                              foregroundColor: const Color(0xFF88BDF2),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 8),
                               shape: RoundedRectangleBorder(
@@ -158,8 +159,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     child: data.favoriteShops.isNotEmpty
                         ? _ProviderRow(
                             shops: data.favoriteShops,
-                            borderColor:
-                                cs.outlineVariant, // subtle, theme-aware
+                            borderColor: cs.outlineVariant,
                           )
                         : _MutedNote(t.no_favorites),
                   ),
@@ -172,7 +172,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: cs.primary,
+                              foregroundColor: const Color(0xFF88BDF2),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 8),
                               shape: RoundedRectangleBorder(
@@ -208,6 +208,81 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
+/* ---------------------------- Brand helpers ---------------------------- */
+
+class _Brand {
+  static const primary = Color(0xFF6A89A7); // #6A89A7
+  static const accent = Color(0xFF88BDF2); // #88BDF2
+  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
+  static const ink = Color(0xFF384959); // #384959
+
+  static const border = Color(0xFFE6ECF2);
+  static const subtle = Color(0xFF7C8B9B);
+}
+
+String _normCat(String? s) =>
+    (s ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+
+String _localizedCategory(BuildContext context, String? idOrName) {
+  final t = AppLocalizations.of(context)!;
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return t.cat_barbershop;
+    case 'dental':
+    case 'dentist':
+      return t.cat_dental;
+    case 'clinic':
+      return t.cat_clinic;
+    case 'spa':
+      return t.cat_spa;
+    case 'gym':
+      return t.cat_gym;
+    case 'nail_salon':
+      return t.cat_nail_salon;
+    case 'beauty_clinic':
+      return t.cat_beauty_clinic;
+    case 'tattoo_studio':
+      return t.cat_tattoo_studio;
+    case 'massage_center':
+      return t.cat_massage_center;
+    case 'physiotherapy_clinic':
+      return t.cat_physiotherapy_clinic;
+    case 'makeup_studio':
+      return t.cat_makeup_studio;
+    default:
+      return idOrName ?? '';
+  }
+}
+
+Color _borderForCategory(String? idOrName) {
+  switch (_normCat(idOrName)) {
+    case 'barbershop':
+      return _Brand.primary;
+    case 'dental':
+    case 'dentist':
+      return _Brand.accent;
+    case 'clinic':
+    case 'beauty_clinic':
+      return _Brand.primary.withOpacity(.75);
+    case 'spa':
+    case 'massage_center':
+      return _Brand.accent.withOpacity(.75);
+    case 'gym':
+      return _Brand.ink.withOpacity(.55);
+    case 'nail_salon':
+    case 'makeup_studio':
+      return _Brand.accent;
+    case 'tattoo_studio':
+      return _Brand.ink;
+    case 'physiotherapy_clinic':
+      return _Brand.primary;
+    default:
+      return _Brand.border;
+  }
+}
+
+/* ------------------------------ Widgets ------------------------------- */
+
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
   final String hint;
@@ -230,24 +305,21 @@ class _SearchBar extends StatelessWidget {
             child: Ink(
               height: 50,
               decoration: BoxDecoration(
-                color: Color.alphaBlend(
-                    cs.surfaceTint.withOpacity(
-                        theme.brightness == Brightness.dark ? .10 : .05),
-                    cs.surface),
+                color: _Brand.accentSoft.withOpacity(.30),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant, width: 1),
+                border: Border.all(color: _Brand.border, width: 1),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                  Icon(Icons.search_rounded, color: _Brand.ink),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       hint,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: cs.onSurfaceVariant),
+                          ?.copyWith(color: _Brand.ink.withOpacity(.7)),
                     ),
                   ),
                 ],
@@ -285,15 +357,16 @@ class _Section extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: .2,
+                      color: _Brand.ink,
                     ),
                   ),
                 ),
                 if (trailing != null)
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: cs.surfaceVariant.withOpacity(.5),
+                      color: cs.surfaceContainerHighest.withOpacity(.4),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: cs.outlineVariant, width: 1),
+                      border: Border.all(color: _Brand.border, width: 1),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -349,40 +422,10 @@ class _CategoryChips extends StatelessWidget {
     }
   }
 
-  String _labelFor(AppLocalizations t, String id, String fallback) {
-    switch (id.toUpperCase()) {
-      case 'BARBERSHOP':
-        return t.cat_barbershop;
-      case 'DENTAL':
-        return t.cat_dental;
-      case 'CLINIC':
-        return t.cat_clinic;
-      case 'SPA':
-        return t.cat_spa;
-      case 'GYM':
-        return t.cat_gym;
-      case 'NAIL_SALON':
-        return t.cat_nail_salon;
-      case 'BEAUTY_CLINIC':
-        return t.cat_beauty_clinic;
-      case 'TATTOO_STUDIO':
-        return t.cat_tattoo_studio;
-      case 'MASSAGE_CENTER':
-        return t.cat_massage_center;
-      case 'PHYSIOTHERAPY_CLINIC':
-        return t.cat_physiotherapy_clinic;
-      case 'MAKEUP_STUDIO':
-        return t.cat_makeup_studio;
-      default:
-        return fallback;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox();
     final t = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
       height: 110,
@@ -393,7 +436,8 @@ class _CategoryChips extends StatelessWidget {
         itemBuilder: (_, i) {
           final c = categories[i];
           final icon = _iconFor(c.id);
-          final label = _labelFor(t, c.id, (c.name.isNotEmpty) ? c.name : c.id);
+          final label =
+              _localizedCategory(context, c.id.isNotEmpty ? c.id : c.name);
 
           return InkWell(
             onTap: () => onTap(c),
@@ -403,15 +447,15 @@ class _CategoryChips extends StatelessWidget {
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: Color.alphaBlend(
-                    cs.surfaceTint.withOpacity(.06), cs.surface),
+                color: _Brand.accentSoft.withOpacity(.25),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: cs.outlineVariant, width: 1),
+                border: Border.all(color: _Brand.border, width: 1),
                 boxShadow: const [
                   BoxShadow(
-                      color: Color(0x0F000000),
-                      blurRadius: 6,
-                      offset: Offset(0, 2)),
+                    color: Color(0x0F000000),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
                 ],
               ),
               child: Column(
@@ -426,12 +470,12 @@ class _CategoryChips extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          cs.primary.withOpacity(.18),
-                          cs.primary.withOpacity(.08),
+                          _Brand.primary.withOpacity(.18),
+                          _Brand.primary.withOpacity(.08),
                         ],
                       ),
                     ),
-                    child: Icon(icon, size: 22, color: cs.primary),
+                    child: Icon(icon, size: 22, color: _Brand.primary),
                   ),
                   const SizedBox(height: 6),
                   Flexible(
@@ -441,9 +485,11 @@ class _CategoryChips extends StatelessWidget {
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          height: 1.2),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                        color: _Brand.ink,
+                      ),
                     ),
                   ),
                 ],
@@ -464,8 +510,6 @@ class _ProviderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return SizedBox(
       height: 250,
       child: ListView.separated(
@@ -477,6 +521,7 @@ class _ProviderRow extends StatelessWidget {
         itemBuilder: (_, i) {
           final s = shops[i];
           final img = ApiService.normalizeMediaUrl(s.logoUrl);
+          final catLabel = _localizedCategory(context, s.category);
 
           return SizedBox(
             width: 270,
@@ -487,12 +532,11 @@ class _ProviderRow extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(
-                  color: (borderColor ?? cs.outlineVariant),
-                  width: (borderColor == null) ? 1 : 1,
+                  color: _borderForCategory(s.category),
+                  width: 1.25,
                 ),
               ),
-              color:
-                  Color.alphaBlend(cs.surfaceTint.withOpacity(.05), cs.surface),
+              color: _Brand.accentSoft.withOpacity(.18),
               child: InkWell(
                 onTap: () {
                   Navigator.of(context, rootNavigator: true).push(
@@ -503,30 +547,34 @@ class _ProviderRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (img == null)
-                      Container(
-                        height: 140,
-                        width: double.infinity,
-                        color: cs.surfaceVariant.withOpacity(.5),
-                        child: Icon(Icons.store_mall_directory_outlined,
-                            color: cs.onSurfaceVariant),
-                      )
-                    else
-                      Stack(
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Stack(
                         children: [
-                          Image.network(
-                            img,
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                          if (img == null)
+                            Container(
                               height: 140,
-                              color: cs.surfaceVariant.withOpacity(.5),
-                              child: Icon(Icons.broken_image_outlined,
-                                  color: cs.onSurfaceVariant),
+                              width: double.infinity,
+                              color: _Brand.accentSoft.withOpacity(.5),
+                              child: const Icon(
+                                  Icons.store_mall_directory_outlined,
+                                  color: _Brand.subtle),
+                            )
+                          else
+                            Image.network(
+                              img,
+                              height: 140,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 140,
+                                color: _Brand.accentSoft.withOpacity(.5),
+                                child: const Icon(Icons.broken_image_outlined,
+                                    color: _Brand.subtle),
+                              ),
                             ),
-                          ),
-                          // subtle top gradient for text readability
+                          // subtle top gradient
                           Positioned.fill(
                             child: IgnorePointer(
                               ignoring: true,
@@ -544,8 +592,19 @@ class _ProviderRow extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // rating pill
+                          if (s.rating > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: _ChipPill(
+                                icon: Icons.star_rounded,
+                                text: s.rating.toStringAsFixed(1),
+                              ),
+                            ),
                         ],
                       ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                       child: Column(
@@ -556,31 +615,19 @@ class _ProviderRow extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 15),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: _Brand.ink),
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Icon(Icons.star_rate_rounded,
-                                  size: 16, color: cs.primary),
-                              const SizedBox(width: 2),
-                              Text(
-                                s.rating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  s.category,
+                                  catLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.color
-                                          ?.withOpacity(.7)),
+                                  style: const TextStyle(color: _Brand.subtle),
                                 ),
                               ),
                             ],
@@ -591,12 +638,7 @@ class _ProviderRow extends StatelessWidget {
                               s.location!.compact,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.color
-                                      ?.withOpacity(.7)),
+                              style: const TextStyle(color: _Brand.subtle),
                             ),
                           ],
                           const SizedBox(height: 2),
@@ -620,16 +662,16 @@ class _NoUpcoming extends StatelessWidget {
   const _NoUpcoming({required this.onTap, required this.label});
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return OutlinedButton.icon(
       onPressed: onTap,
-      icon: Icon(Icons.event_note_rounded, color: cs.primary),
+      icon: const Icon(Icons.event_note_rounded, color: _Brand.ink),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: cs.outlineVariant),
+        side: const BorderSide(color: _Brand.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: cs.surfaceVariant.withOpacity(.4),
+        backgroundColor: _Brand.accentSoft.withOpacity(.35),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        foregroundColor: _Brand.ink,
       ),
     );
   }
@@ -642,7 +684,6 @@ class _UpcomingCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _UpcomingCard({
-    super.key,
     required this.start,
     required this.serviceName,
     required this.providerName,
@@ -651,7 +692,6 @@ class _UpcomingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final timeText =
         start != null ? DateFormat('EEE, d MMM • HH:mm').format(start!) : null;
     final subtitleParts = <String>[];
@@ -664,9 +704,9 @@ class _UpcomingCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: cs.outlineVariant, width: 1),
+        side: const BorderSide(color: _Brand.border, width: 1.25),
       ),
-      color: Color.alphaBlend(cs.surfaceTint.withOpacity(.05), cs.surface),
+      color: _Brand.accentSoft.withOpacity(.2),
       child: InkWell(
         onTap: onTap,
         child: Stack(
@@ -680,7 +720,7 @@ class _UpcomingCard extends StatelessWidget {
                   width: 5,
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: cs.primary,
+                    color: _Brand.primary,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -697,19 +737,24 @@ class _UpcomingCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      cs.primary.withOpacity(.20),
-                      cs.primary.withOpacity(.08)
+                      _Brand.primary.withOpacity(.20),
+                      _Brand.primary.withOpacity(.08)
                     ],
                   ),
                 ),
-                child: Icon(Icons.event_available, color: cs.primary),
+                child: const Icon(Icons.event_available, color: _Brand.primary),
               ),
               title: Text((serviceName ?? 'Service'),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: _Brand.ink)),
               subtitle: subtitle.isNotEmpty
-                  ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
+                  ? Text(subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: _Brand.subtle))
                   : null,
-              trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+              trailing: const Icon(Icons.chevron_right, color: _Brand.subtle),
             ),
           ],
         ),
@@ -723,10 +768,12 @@ class _MutedNote extends StatelessWidget {
   const _MutedNote(this.text);
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).textTheme.bodySmall?.color?.withOpacity(.7);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(text, style: TextStyle(color: color)),
+      child: Text(
+        text,
+        style: const TextStyle(color: _Brand.subtle),
+      ),
     );
   }
 }
@@ -739,9 +786,13 @@ class _ErrorBox extends StatelessWidget {
   Widget build(BuildContext context) => Center(
         child: Column(
           children: [
-            Text(text),
+            Text(text, style: const TextStyle(color: _Brand.ink)),
             const SizedBox(height: 8),
             OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _Brand.border),
+                foregroundColor: _Brand.ink,
+              ),
               onPressed: () => onRetry(),
               child: Text(AppLocalizations.of(context)!.action_reload),
             ),
@@ -754,15 +805,50 @@ class _Skeleton extends StatelessWidget {
   const _Skeleton();
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     Widget box(double h) => Container(
           height: h,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: cs.surfaceVariant.withOpacity(.6),
+            color: _Brand.accentSoft.withOpacity(.5),
             borderRadius: BorderRadius.circular(12),
           ),
         );
     return ListView(children: [box(50), box(110), box(96), box(210), box(210)]);
+  }
+}
+
+/* ---------------------------- Tiny primitives --------------------------- */
+
+class _ChipPill extends StatelessWidget {
+  final IconData? icon;
+  final String text;
+  const _ChipPill({this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: _Brand.primary.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
