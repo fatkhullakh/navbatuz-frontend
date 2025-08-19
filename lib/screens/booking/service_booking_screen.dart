@@ -11,12 +11,10 @@ import 'review_confirm_screen.dart';
 class ServiceBookingScreen extends StatefulWidget {
   final String serviceId;
   final String providerId;
-  final String? preferredWorkerId;
   const ServiceBookingScreen({
     super.key,
     required this.serviceId,
     required this.providerId,
-    this.preferredWorkerId,
   });
 
   @override
@@ -54,28 +52,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   Future<void> _bootstrap() async {
     setState(() => _error = null);
     try {
+      // use the new .details(...) (kept alias below if you prefer .getDetail)
       final svc = await _services.details(
         serviceId: widget.serviceId,
         providerId: widget.providerId,
       );
       final prov = await _providers.getDetails(widget.providerId);
-
       setState(() {
         _service = svc;
         _provider = prov;
+        _selectedWorkerId =
+            svc.workerIds.isNotEmpty ? svc.workerIds.first : null;
       });
-
-      // choose selected worker
-      final allowedIds = _allowedWorkers.map((w) => w.id).toSet();
-      if (widget.preferredWorkerId != null &&
-          allowedIds.contains(widget.preferredWorkerId)) {
-        _selectedWorkerId = widget.preferredWorkerId;
-      } else if (svc.workerIds.isNotEmpty) {
-        _selectedWorkerId = svc.workerIds.first;
-      } else {
-        _selectedWorkerId = null; // "Anyone"
-      }
-
       _loadSlots();
     } catch (e) {
       setState(() => _error = e.toString());

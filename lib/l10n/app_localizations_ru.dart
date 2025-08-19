@@ -455,43 +455,4 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get all => 'Все';
-
-  @override
-  String get service_details_title => 'Услуга';
-
-  @override
-  String get service_from => 'от';
-
-  @override
-  String get cat_barbershop => 'Барбершоп';
-
-  @override
-  String get cat_dental => 'Стоматология';
-
-  @override
-  String get cat_clinic => 'Клиника';
-
-  @override
-  String get cat_spa => 'Спа';
-
-  @override
-  String get cat_gym => 'Фитнес-зал';
-
-  @override
-  String get cat_nail_salon => 'Ногтевой салон';
-
-  @override
-  String get cat_beauty_clinic => 'Клиника красоты';
-
-  @override
-  String get cat_tattoo_studio => 'Тату-студия';
-
-  @override
-  String get cat_massage_center => 'Массажный центр';
-
-  @override
-  String get cat_physiotherapy_clinic => 'Физиотерапия';
-
-  @override
-  String get cat_makeup_studio => 'Студия макияжа';
 }
