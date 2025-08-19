@@ -455,4 +455,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get all => 'All';
+
+  @override
+  String get service_details_title => 'Service';
+
+  @override
+  String get service_from => 'from';
+
+  @override
+  String get cat_barbershop => 'Barbershop';
+
+  @override
+  String get cat_dental => 'Dental';
+
+  @override
+  String get cat_clinic => 'Clinic';
+
+  @override
+  String get cat_spa => 'Spa';
+
+  @override
+  String get cat_gym => 'Gym';
+
+  @override
+  String get cat_nail_salon => 'Nail salon';
+
+  @override
+  String get cat_beauty_clinic => 'Beauty clinic';
+
+  @override
+  String get cat_tattoo_studio => 'Tattoo studio';
+
+  @override
+  String get cat_massage_center => 'Massage center';
+
+  @override
+  String get cat_physiotherapy_clinic => 'Physiotherapy';
+
+  @override
+  String get cat_makeup_studio => 'Makeup studio';
 }

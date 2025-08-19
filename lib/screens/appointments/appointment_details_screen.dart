@@ -1,9 +1,16 @@
+// lib/screens/appointments/appointment_details_screen.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/appointment_service.dart';
-import '../../models/appointment.dart';
+
 import '../../l10n/app_localizations.dart';
+import '../../models/appointment.dart';
+import '../../services/appointment_service.dart';
+
+// screens we navigate to
+import '../providers/provider_screen.dart';
+import '../worker/worker_screen.dart';
+import '../booking/service_booking_screen.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId;
@@ -68,7 +75,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           ? t.error_session_expired
           : t.appointment_cancel_failed_generic(code?.toString() ?? '');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.appointment_cancel_failed_unknown)),
@@ -76,6 +83,40 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     } finally {
       if (mounted) setState(() => _busyCancel = false);
     }
+  }
+
+  void _openProvider(AppointmentItem a) {
+    if (a.providerId == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProviderScreen(providerId: a.providerId!),
+      ),
+    );
+  }
+
+  void _openWorker(AppointmentItem a) {
+    if (a.workerId == null || a.providerId == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WorkerScreen(
+          workerId: a.workerId!,
+          providerId: a.providerId!,
+        ),
+      ),
+    );
+  }
+
+  void _bookAgain(AppointmentItem a) {
+    if (a.serviceId == null || a.providerId == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ServiceBookingScreen(
+          serviceId: a.serviceId!,
+          providerId: a.providerId!,
+          preferredWorkerId: a.workerId, // may be null → “Anyone”
+        ),
+      ),
+    );
   }
 
   @override
@@ -88,6 +129,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       symbol: '',
       decimalDigits: 0,
     );
+
     return Scaffold(
       appBar: AppBar(title: Text(t.appointment_details_title)),
       body: FutureBuilder<AppointmentItem>(
@@ -99,19 +141,32 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           if (snap.hasError || !snap.hasData) {
             return Center(child: Text('Failed to load: ${snap.error}'));
           }
+
           final a = snap.data!;
-          final status = a.status.toUpperCase();
+          final status = (a.status).toUpperCase();
           final canCancel = status == 'BOOKED' || status == 'CONFIRMED';
+          final canBookAgain = a.serviceId != null && a.providerId != null;
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Service
               Card(
                 elevation: 0,
                 child: ListTile(
                   leading: const Icon(Icons.medical_services_outlined),
                   title: Text(a.serviceName ?? 'Service'),
-                  subtitle: Text(a.providerName ?? 'Provider'),
+                  subtitle: (a.providerName == null)
+                      ? null
+                      : InkWell(
+                          onTap: () => _openProvider(a),
+                          child: Text(
+                            a.providerName!,
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
                   trailing: (a.price != null)
                       ? Text(
                           priceFmt.format(a.price),
@@ -120,7 +175,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       : null,
                 ),
               ),
+
               const SizedBox(height: 12),
+
+              // Date & time
               Card(
                 elevation: 0,
                 child: ListTile(
@@ -130,7 +188,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   trailing: Chip(label: Text(status)),
                 ),
               ),
+
               const SizedBox(height: 12),
+
+              // Location
               if ((a.addressLine1 ?? a.city ?? a.countryIso2) != null)
                 Card(
                   elevation: 0,
@@ -139,21 +200,31 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     title: Text([
                       if ((a.addressLine1 ?? '').isNotEmpty) a.addressLine1,
                       if ((a.city ?? '').isNotEmpty) a.city,
-                      if ((a.countryIso2 ?? '').isNotEmpty) a.countryIso2
+                      if ((a.countryIso2 ?? '').isNotEmpty) a.countryIso2,
                     ].whereType<String>().join(', ')),
                   ),
                 ),
+
               const SizedBox(height: 12),
-              if (a.workerName != null)
+
+              // Worker (tappable)
+              if ((a.workerName ?? '').isNotEmpty)
                 Card(
                   elevation: 0,
                   child: ListTile(
+                    onTap: () => _openWorker(a),
                     leading: const Icon(Icons.person_outline),
                     title: Text(a.workerName!),
                     subtitle: const Text('Staff'),
+                    trailing: (a.workerId != null && a.providerId != null)
+                        ? const Icon(Icons.chevron_right)
+                        : null,
                   ),
                 ),
+
               const SizedBox(height: 24),
+
+              // Actions
               if (canCancel)
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
@@ -164,8 +235,18 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   icon: const Icon(Icons.cancel_outlined),
                   label:
                       Text(_busyCancel ? 'Cancelling…' : 'Cancel appointment'),
-                )
-              else
+                ),
+
+              if (canBookAgain) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => _bookAgain(a),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Book again'),
+                ),
+              ],
+
+              if (!canCancel && !canBookAgain)
                 OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Back'),

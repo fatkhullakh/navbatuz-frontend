@@ -165,5 +165,20 @@
   "action_view_photo": "Просмотреть фото",
   "search": "Поиск",
   "services": "Услуги",
-  "all": "Все"
+  "all": "Все",
+
+  "service_details_title": "Услуга",
+  "service_from": "от",
+
+  "cat_barbershop": "Барбершоп",
+  "cat_dental": "Стоматология",
+  "cat_clinic": "Клиника",
+  "cat_spa": "Спа",
+  "cat_gym": "Фитнес-зал",
+  "cat_nail_salon": "Ногтевой салон",
+  "cat_beauty_clinic": "Клиника красоты",
+  "cat_tattoo_studio": "Тату-студия",
+  "cat_massage_center": "Массажный центр",
+  "cat_physiotherapy_clinic": "Физиотерапия",
+  "cat_makeup_studio": "Студия макияжа"
 }

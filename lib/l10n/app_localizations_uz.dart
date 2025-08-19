@@ -455,4 +455,43 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get all => 'Barchasi';
+
+  @override
+  String get service_details_title => 'Xizmat';
+
+  @override
+  String get service_from => 'dan';
+
+  @override
+  String get cat_barbershop => 'Barbershop';
+
+  @override
+  String get cat_dental => 'Stomatologiya';
+
+  @override
+  String get cat_clinic => 'Klinika';
+
+  @override
+  String get cat_spa => 'Spa';
+
+  @override
+  String get cat_gym => 'Fitnes zali';
+
+  @override
+  String get cat_nail_salon => 'Manikyur saloni';
+
+  @override
+  String get cat_beauty_clinic => 'Go‘zallik klinikasi';
+
+  @override
+  String get cat_tattoo_studio => 'Tatu studiyasi';
+
+  @override
+  String get cat_massage_center => 'Massaj markazi';
+
+  @override
+  String get cat_physiotherapy_clinic => 'Fizioterapiya';
+
+  @override
+  String get cat_makeup_studio => 'Makyaj studiyasi';
 }

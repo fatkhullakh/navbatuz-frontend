@@ -165,6 +165,21 @@
   "action_view_photo": "Rasmni ko'rish",
   "search": "Qidiruv",
   "services": "Xizmatlar",
-  "all": "Barchasi"
+  "all": "Barchasi",
+
+  "service_details_title": "Xizmat",
+  "service_from": "dan",
+
+  "cat_barbershop": "Barbershop",
+  "cat_dental": "Stomatologiya",
+  "cat_clinic": "Klinika",
+  "cat_spa": "Spa",
+  "cat_gym": "Fitnes zali",
+  "cat_nail_salon": "Manikyur saloni",
+  "cat_beauty_clinic": "Go‘zallik klinikasi",
+  "cat_tattoo_studio": "Tatu studiyasi",
+  "cat_massage_center": "Massaj markazi",
+  "cat_physiotherapy_clinic": "Fizioterapiya",
+  "cat_makeup_studio": "Makyaj studiyasi"
 
 }
