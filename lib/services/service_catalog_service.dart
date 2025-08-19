@@ -1,4 +1,3 @@
-// lib/services/service_catalog_service.dart
 import 'package:dio/dio.dart';
 import 'api_service.dart';
 import 'provider_public_service.dart'; // WorkerLite
@@ -8,19 +7,25 @@ Duration? _parseIsoDuration(String? s) {
   try {
     final str = s.toUpperCase();
     if (!str.startsWith('PT')) return null;
-    var h = 0, m = 0;
+    var h = 0, m = 0, sec = 0;
+
     final hIdx = str.indexOf('H');
     final mIdx = str.indexOf('M');
+    final sIdx = str.indexOf('S');
+
     if (hIdx != -1) {
-      final n = str.substring(2, hIdx);
-      h = int.tryParse(n) ?? 0;
+      h = int.tryParse(str.substring(2, hIdx)) ?? 0;
     }
     if (mIdx != -1) {
       final start = (hIdx == -1) ? 2 : hIdx + 1;
-      final n = str.substring(start, mIdx);
-      m = int.tryParse(n) ?? 0;
+      m = int.tryParse(str.substring(start, mIdx)) ?? 0;
     }
-    return Duration(hours: h, minutes: m);
+    if (sIdx != -1) {
+      final start = (mIdx != -1) ? mIdx + 1 : (hIdx != -1 ? hIdx + 1 : 2);
+      sec = int.tryParse(str.substring(start, sIdx)) ?? 0;
+    }
+
+    return Duration(hours: h, minutes: m, seconds: sec);
   } catch (_) {
     return null;
   }
@@ -60,6 +65,7 @@ class ServiceDetails {
   final List<String> imageUrls;
   final List<WorkerLite> workers;
   final List<String> workerIds;
+  final String? providerId; // NEW
 
   ServiceDetails({
     required this.id,
@@ -71,6 +77,7 @@ class ServiceDetails {
     required this.imageUrls,
     required this.workers,
     required this.workerIds,
+    this.providerId, // NEW
   });
 
   factory ServiceDetails.fromJson(Map<String, dynamic> j) {
@@ -120,6 +127,7 @@ class ServiceDetails {
       imageUrls: normalized,
       workers: workers,
       workerIds: finalIds,
+      providerId: j['providerId']?.toString(), // NEW
     );
   }
 }
@@ -243,6 +251,7 @@ class ServiceCatalogService {
         'imageUrls': const [],
         'workers': pd.workers.map((w) => {'id': w.id, 'name': w.name}).toList(),
         'workerIds': pd.workers.map((w) => w.id).toList(),
+        'providerId': providerId, // ensure we keep it for downstream flows
       };
     }
 

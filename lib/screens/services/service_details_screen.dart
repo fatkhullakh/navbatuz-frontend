@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../../services/service_catalog_service.dart';
 import '../../services/api_service.dart';
@@ -41,6 +42,11 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
     return '${m}m';
   }
 
+  int _displayMinutes(Duration? d) {
+    final mins = d?.inMinutes ?? 0;
+    return mins <= 0 ? 30 : mins; // fallback for PT0S/missing duration
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -80,7 +86,10 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
           final d = snap.data!;
           final priceText =
               d.price == 0 ? t.provider_free : priceFmt.format(d.price);
-          final durText = _formatDuration(d.duration);
+          final durTextRaw = _formatDuration(d.duration);
+          final durText = durTextRaw.isEmpty
+              ? '${_displayMinutes(d.duration)}m'
+              : durTextRaw;
 
           return Stack(
             children: [
@@ -104,19 +113,20 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                         itemCount: d.imageUrls.length,
                         separatorBuilder: (_, __) => const SizedBox(width: 10),
                         itemBuilder: (_, i) => ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              d.imageUrls[i],
-                              fit: BoxFit.cover,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            d.imageUrls[i],
+                            fit: BoxFit.cover,
+                            width: 160,
+                            height: 120,
+                            errorBuilder: (_, __, ___) => Container(
                               width: 160,
                               height: 120,
-                              errorBuilder: (_, __, ___) => Container(
-                                width: 160,
-                                height: 120,
-                                color: const Color(0xFFF2F4F7),
-                                child: const Icon(Icons.broken_image_outlined),
-                              ),
-                            )),
+                              color: const Color(0xFFF2F4F7),
+                              child: const Icon(Icons.broken_image_outlined),
+                            ),
+                          ),
+                        ),
                       ),
                     )
                   else
@@ -224,12 +234,16 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                         height: 44,
                         child: ElevatedButton(
                           onPressed: () {
+                            // be robust: prefer service.providerId if present
+                            final pid = d.providerId?.isNotEmpty == true
+                                ? d.providerId!
+                                : widget.providerId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ServiceBookingScreen(
                                   serviceId: d.id,
-                                  providerId: widget.providerId,
+                                  providerId: pid,
                                 ),
                               ),
                             );

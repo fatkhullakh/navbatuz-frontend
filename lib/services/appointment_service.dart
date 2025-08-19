@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../services/api_service.dart';
 import '../models/appointment.dart';
 import 'package:intl/intl.dart';
+import '../models/appointment_detail.dart';
 
 class SlotUnavailableException implements Exception {}
 
@@ -23,31 +24,22 @@ class AppointmentService {
     return list.map(AppointmentItem.fromJson).toList();
   }
 
-  Future<AppointmentItem> getById(String id) async {
-    final r = await _dio.get('/appointments/$id');
-    return AppointmentItem.fromJson(r.data as Map<String, dynamic>);
+  Future<AppointmentDetail> getById(String id) async {
+    final resp = await _dio.get('/appointments/$id');
+    return AppointmentDetail.fromJson(
+        Map<String, dynamic>.from(resp.data as Map));
   }
 
   Future<void> cancel(String id) async {
     try {
-      final r = await _dio.put('/appointments/$id/cancel');
-      final ok = {200, 202, 204}.contains(r.statusCode);
-      if (!ok) {
-        throw DioException(
-          requestOptions: r.requestOptions,
-          response: r,
-          error: 'Unexpected status ${r.statusCode}',
-          type: DioExceptionType.badResponse,
-        );
-      }
+      await _dio.put('/appointments/$id/cancel');
     } on DioException catch (e) {
-      // If backend blocks last-minute cancel it returns 403 with a message like:
-      // "Too late to cancel (120 min window)"
-      if (e.response?.statusCode == 403) {
-        final text = (e.response?.data ?? '').toString();
-        final match = RegExp(r'(\d+)\s*min').firstMatch(text);
-        final minutes = match != null ? int.tryParse(match.group(1)!) : null;
-        throw LateCancellationException(minutes);
+      if (e.response?.statusCode == 409) {
+        final m = e.response?.data;
+        final mins = (m is Map && m['minutes'] is num)
+            ? (m['minutes'] as num).toInt()
+            : null;
+        throw LateCancellationException(mins);
       }
       rethrow;
     }

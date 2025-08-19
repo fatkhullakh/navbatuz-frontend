@@ -1,3 +1,4 @@
+// lib/screens/providers/provider_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -7,6 +8,7 @@ import '../../services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
 import '../../screens/services/service_details_screen.dart';
+import '../../screens/worker/worker_screen.dart'; // ⬅️ NEW
 
 class ProviderScreen extends StatefulWidget {
   final String providerId;
@@ -80,7 +82,6 @@ class _ProviderScreenState extends State<ProviderScreen>
                             color: Color(0xFFF2F4F7),
                           ),
                         ),
-                        // Optional subtle overlay for contrast
                         Container(color: Colors.black.withOpacity(0.12)),
                       ],
                     ),
@@ -125,7 +126,10 @@ class _ProviderScreenState extends State<ProviderScreen>
               },
             ),
             const _ReviewsTab(),
-            _DetailsTab(details: _details),
+            _DetailsTab(
+              details: _details,
+              providerId: widget.providerId, // ⬅️ pass providerId
+            ),
           ],
         ),
       ),
@@ -142,7 +146,9 @@ class _ProviderScreenState extends State<ProviderScreen>
             Text('Failed to load: $_error'),
             const SizedBox(height: 8),
             OutlinedButton(
-                onPressed: _loadHeader, child: Text(t.provider_retry)),
+              onPressed: _loadHeader,
+              child: Text(t.provider_retry),
+            ),
           ],
         ),
       );
@@ -176,7 +182,9 @@ class _ProviderScreenState extends State<ProviderScreen>
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w800),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -190,9 +198,7 @@ class _ProviderScreenState extends State<ProviderScreen>
               FavoriteToggleButton(
                 providerId: d.id,
                 initialIsFavorite: _initialFav,
-                onChanged: () {
-                  // If you need to react to fav change, do it here.
-                },
+                onChanged: () {},
               ),
               IconButton(
                 onPressed: () {},
@@ -292,7 +298,6 @@ class _ServicesTab extends StatelessWidget {
               elevation: 0,
               child: ListTile(
                 onTap: () {
-                  // Open details screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -301,7 +306,7 @@ class _ServicesTab extends StatelessWidget {
                         providerId: (context.findAncestorStateOfType<
                                 _ProviderScreenState>()!)
                             .widget
-                            .providerId, // pass through providerId
+                            .providerId,
                       ),
                     ),
                   );
@@ -321,8 +326,10 @@ class _ServicesTab extends StatelessWidget {
                       height: 28,
                       child: ElevatedButton(
                         onPressed: () => onBook(s),
-                        child: Text(t.provider_book,
-                            style: const TextStyle(fontSize: 12)),
+                        child: Text(
+                          t.provider_book,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
                     ),
                   ],
@@ -347,7 +354,8 @@ class _ReviewsTab extends StatelessWidget {
 
 class _DetailsTab extends StatelessWidget {
   final ProvidersDetails? details;
-  const _DetailsTab({required this.details});
+  final String providerId; // ⬅️ NEW
+  const _DetailsTab({required this.details, required this.providerId});
 
   String _localizedDay(BuildContext context, String serverDay) {
     final map = {
@@ -440,13 +448,26 @@ class _DetailsTab extends StatelessWidget {
           Text(t.provider_team,
               style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
+
+          // ⬇️ Workers are now clickable
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: d.workers.map((w) {
-              return Chip(
-                label: Text(w.name, overflow: TextOverflow.ellipsis),
+              return InputChip(
                 avatar: const Icon(Icons.person, size: 16),
+                label: Text(w.name, overflow: TextOverflow.ellipsis),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => WorkerScreen(
+                        workerId: w.id,
+                        providerId: providerId,
+                        workerNameFallback: w.name,
+                      ),
+                    ),
+                  );
+                },
               );
             }).toList(),
           ),

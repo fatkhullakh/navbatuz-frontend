@@ -39,9 +39,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F9),
+      backgroundColor: cs.surface,
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureBuilder<hs.HomeData>(
@@ -83,10 +84,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     child: _CategoryChips(
                       categories: data.categories,
                       onTap: (c) {
-                        // Try to open Search with preselected category
                         final args = {
                           'initialCategory': c.id,
-                          'initialQuery': '',
+                          'initialQuery': ''
                         };
                         bool pushed = false;
                         try {
@@ -94,9 +94,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                               .pushNamed('/search', arguments: args);
                           pushed = true;
                         } catch (_) {}
-                        if (!pushed) {
-                          widget.onOpenSearch(); // fallback
-                        }
+                        if (!pushed) widget.onOpenSearch();
                       },
                     ),
                   ),
@@ -139,6 +137,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.favorites,
                     trailing: data.favoriteShops.isNotEmpty
                         ? TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: cs.primary,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).push(
                                 MaterialPageRoute(
@@ -151,7 +156,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           )
                         : null,
                     child: data.favoriteShops.isNotEmpty
-                        ? _ProviderRow(shops: data.favoriteShops)
+                        ? _ProviderRow(
+                            shops: data.favoriteShops,
+                            borderColor:
+                                cs.outlineVariant, // subtle, theme-aware
+                          )
                         : _MutedNote(t.no_favorites),
                   ),
                 ),
@@ -162,6 +171,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     title: t.recommended,
                     trailing: data.recommendedShops.isNotEmpty
                         ? TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: cs.primary,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).push(
                                 MaterialPageRoute(
@@ -174,10 +190,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           )
                         : null,
                     child: data.recommendedShops.isNotEmpty
-                        ? _ProviderRow(shops: data.recommendedShops)
+                        ? _ProviderRow(
+                            shops: data.recommendedShops,
+                            borderColor: cs.outlineVariant,
+                          )
                         : _MutedNote(t.no_recommended),
                   ),
                 ),
+
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
               ],
             );
@@ -195,6 +215,9 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -203,24 +226,28 @@ class _SearchBar extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             child: Ink(
-              height: 48,
+              height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                color: Color.alphaBlend(
+                    cs.surfaceTint.withOpacity(
+                        theme.brightness == Brightness.dark ? .10 : .05),
+                    cs.surface),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: cs.outlineVariant, width: 1),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded),
-                  const SizedBox(width: 8),
+                  Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       hint,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.black54),
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: cs.onSurfaceVariant),
                     ),
                   ),
                 ],
@@ -241,6 +268,8 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 12),
       child: Column(
@@ -253,13 +282,25 @@ class _Section extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .2,
                     ),
                   ),
                 ),
-                if (trailing != null) trailing!,
+                if (trailing != null)
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: cs.surfaceVariant.withOpacity(.5),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: cs.outlineVariant, width: 1),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      child: trailing!,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -308,12 +349,43 @@ class _CategoryChips extends StatelessWidget {
     }
   }
 
+  String _labelFor(AppLocalizations t, String id, String fallback) {
+    switch (id.toUpperCase()) {
+      case 'BARBERSHOP':
+        return t.cat_barbershop;
+      case 'DENTAL':
+        return t.cat_dental;
+      case 'CLINIC':
+        return t.cat_clinic;
+      case 'SPA':
+        return t.cat_spa;
+      case 'GYM':
+        return t.cat_gym;
+      case 'NAIL_SALON':
+        return t.cat_nail_salon;
+      case 'BEAUTY_CLINIC':
+        return t.cat_beauty_clinic;
+      case 'TATTOO_STUDIO':
+        return t.cat_tattoo_studio;
+      case 'MASSAGE_CENTER':
+        return t.cat_massage_center;
+      case 'PHYSIOTHERAPY_CLINIC':
+        return t.cat_physiotherapy_clinic;
+      case 'MAKEUP_STUDIO':
+        return t.cat_makeup_studio;
+      default:
+        return fallback;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox();
+    final t = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
-      height: 110, // extra headroom => no overflow
+      height: 110,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
@@ -321,6 +393,8 @@ class _CategoryChips extends StatelessWidget {
         itemBuilder: (_, i) {
           final c = categories[i];
           final icon = _iconFor(c.id);
+          final label = _labelFor(t, c.id, (c.name.isNotEmpty) ? c.name : c.id);
+
           return InkWell(
             onTap: () => onTap(c),
             borderRadius: BorderRadius.circular(16),
@@ -329,37 +403,47 @@ class _CategoryChips extends StatelessWidget {
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color.alphaBlend(
+                    cs.surfaceTint.withOpacity(.06), cs.surface),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: cs.outlineVariant, width: 1),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x0F000000),
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
-                  ),
+                      color: Color(0x0F000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2)),
                 ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: const Color(0xFFEBF2FB),
-                    child: Icon(icon, size: 22, color: const Color(0xFF246BCE)),
+                  Container(
+                    height: 44,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          cs.primary.withOpacity(.18),
+                          cs.primary.withOpacity(.08),
+                        ],
+                      ),
+                    ),
+                    child: Icon(icon, size: 22, color: cs.primary),
                   ),
                   const SizedBox(height: 6),
                   Flexible(
                     child: Text(
-                      (c.name.isNotEmpty) ? c.name : c.id,
+                      label,
                       maxLines: 2,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          height: 1.2),
                     ),
                   ),
                 ],
@@ -375,12 +459,15 @@ class _CategoryChips extends StatelessWidget {
 /// Providers row
 class _ProviderRow extends StatelessWidget {
   final List<hs.ProviderItem> shops;
-  const _ProviderRow({required this.shops});
+  final Color? borderColor;
+  const _ProviderRow({required this.shops, this.borderColor});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SizedBox(
-      height: 250, // fixed track height for the horizontal list
+      height: 250,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(right: 12),
@@ -391,54 +478,74 @@ class _ProviderRow extends StatelessWidget {
           final s = shops[i];
           final img = ApiService.normalizeMediaUrl(s.logoUrl);
 
-          // ✅ fixed width + height so Column is bounded
           return SizedBox(
             width: 270,
             height: 210,
             child: Card(
               elevation: 0,
-              clipBehavior: Clip.antiAlias, // keep rounded corners on image
+              clipBehavior: Clip.antiAlias,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: (borderColor ?? cs.outlineVariant),
+                  width: (borderColor == null) ? 1 : 1,
+                ),
               ),
+              color:
+                  Color.alphaBlend(cs.surfaceTint.withOpacity(.05), cs.surface),
               child: InkWell(
                 onTap: () {
                   Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
-                      builder: (_) => ProviderScreen(providerId: s.id),
-                    ),
+                        builder: (_) => ProviderScreen(providerId: s.id)),
                   );
                 },
                 child: Column(
-                  mainAxisSize: MainAxisSize.max, // make Column fill 210
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // top image (fixed height)
                     if (img == null)
                       Container(
                         height: 140,
                         width: double.infinity,
-                        color: const Color(0xFFF2F4F7),
-                        child: const Center(
-                          child: Icon(Icons.store_mall_directory_outlined),
-                        ),
+                        color: cs.surfaceVariant.withOpacity(.5),
+                        child: Icon(Icons.store_mall_directory_outlined,
+                            color: cs.onSurfaceVariant),
                       )
                     else
-                      Image.network(
-                        img,
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 140,
-                          color: const Color(0xFFF2F4F7),
-                          child: const Center(
-                            child: Icon(Icons.broken_image_outlined),
+                      Stack(
+                        children: [
+                          Image.network(
+                            img,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 140,
+                              color: cs.surfaceVariant.withOpacity(.5),
+                              child: Icon(Icons.broken_image_outlined,
+                                  color: cs.onSurfaceVariant),
+                            ),
                           ),
-                        ),
+                          // subtle top gradient for text readability
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              ignoring: true,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withOpacity(.10),
+                                      Colors.transparent
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-
-                    // content
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                       child: Column(
@@ -449,20 +556,18 @@ class _ProviderRow extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
+                                fontWeight: FontWeight.w700, fontSize: 15),
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(Icons.star_rate_rounded, size: 16),
+                              Icon(Icons.star_rate_rounded,
+                                  size: 16, color: cs.primary),
                               const SizedBox(width: 2),
                               Text(
                                 s.rating.toStringAsFixed(1),
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                    fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(width: 8),
                               Flexible(
@@ -470,7 +575,12 @@ class _ProviderRow extends StatelessWidget {
                                   s.category,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.black54),
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color
+                                          ?.withOpacity(.7)),
                                 ),
                               ),
                             ],
@@ -481,10 +591,15 @@ class _ProviderRow extends StatelessWidget {
                               s.location!.compact,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.black54),
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color
+                                      ?.withOpacity(.7)),
                             ),
                           ],
-                          const SizedBox(height: 2), // ← replaces Spacer()
+                          const SizedBox(height: 2),
                         ],
                       ),
                     ),
@@ -504,11 +619,20 @@ class _NoUpcoming extends StatelessWidget {
   final String label;
   const _NoUpcoming({required this.onTap, required this.label});
   @override
-  Widget build(BuildContext context) => OutlinedButton.icon(
-        onPressed: onTap,
-        icon: const Icon(Icons.event_note_rounded),
-        label: Text(label),
-      );
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(Icons.event_note_rounded, color: cs.primary),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: cs.outlineVariant),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: cs.surfaceVariant.withOpacity(.4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      ),
+    );
+  }
 }
 
 class _UpcomingCard extends StatelessWidget {
@@ -527,6 +651,7 @@ class _UpcomingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final timeText =
         start != null ? DateFormat('EEE, d MMM • HH:mm').format(start!) : null;
     final subtitleParts = <String>[];
@@ -536,15 +661,58 @@ class _UpcomingCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      child: ListTile(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: cs.outlineVariant, width: 1),
+      ),
+      color: Color.alphaBlend(cs.surfaceTint.withOpacity(.05), cs.surface),
+      child: InkWell(
         onTap: onTap,
-        leading: const Icon(Icons.event_available),
-        title: Text((serviceName ?? 'Service'),
-            maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: subtitle.isNotEmpty
-            ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
-            : null,
-        trailing: const Icon(Icons.chevron_right),
+        child: Stack(
+          children: [
+            // left status accent
+            Positioned.fill(
+              left: 0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 5,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+              leading: Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      cs.primary.withOpacity(.20),
+                      cs.primary.withOpacity(.08)
+                    ],
+                  ),
+                ),
+                child: Icon(Icons.event_available, color: cs.primary),
+              ),
+              title: Text((serviceName ?? 'Service'),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: subtitle.isNotEmpty
+                  ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
+                  : null,
+              trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -554,10 +722,13 @@ class _MutedNote extends StatelessWidget {
   final String text;
   const _MutedNote(this.text);
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Text(text, style: const TextStyle(color: Colors.black54)),
-      );
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).textTheme.bodySmall?.color?.withOpacity(.7);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(text, style: TextStyle(color: color)),
+    );
+  }
 }
 
 class _ErrorBox extends StatelessWidget {
@@ -583,14 +754,15 @@ class _Skeleton extends StatelessWidget {
   const _Skeleton();
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     Widget box(double h) => Container(
           height: h,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F2F5),
+            color: cs.surfaceVariant.withOpacity(.6),
             borderRadius: BorderRadius.circular(12),
           ),
         );
-    return ListView(children: [box(48), box(110), box(96), box(210), box(210)]);
+    return ListView(children: [box(50), box(110), box(96), box(210), box(210)]);
   }
 }
