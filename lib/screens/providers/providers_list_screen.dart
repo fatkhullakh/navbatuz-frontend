@@ -20,11 +20,31 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
   bool _loading = false;
   String? _error;
   List<_ProviderSummary> _items = [];
+  Set<String> _favIds = <String>{};
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  Future<Set<String>> _fetchFavoriteIds() async {
+    try {
+      final r = await _dio.get('/customers/favourites');
+      final data = r.data;
+      if (data is List) {
+        if (data.isNotEmpty && data.first is Map) {
+          return data
+              .cast<Map>()
+              .map((m) => (m['id'] ?? '').toString())
+              .where((id) => id.isNotEmpty)
+              .toSet();
+        } else {
+          return data.map((e) => e.toString()).toSet();
+        }
+      }
+    } catch (_) {}
+    return <String>{};
   }
 
   Future<void> _load() async {
@@ -34,6 +54,9 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
     });
 
     try {
+      // always know current favorites
+      _favIds = await _fetchFavoriteIds();
+
       if (widget.filter == 'favorites') {
         final r = await _dio.get('/customers/favourites');
 
@@ -46,7 +69,6 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                   _ProviderSummary.fromJson(Map<String, dynamic>.from(m)))
               .toList();
         } else {
-          // IDs fallback (rare now)
           final ids = (r.data as List).map((e) => e.toString()).toList();
           final futures = ids.map((id) async {
             final d = await _dio.get('/providers/public/$id/details');
@@ -80,6 +102,36 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggleFavorite(_ProviderSummary p) async {
+    final isFav = _favIds.contains(p.id);
+    try {
+      if (isFav) {
+        await _dio.delete('/customers/favourites/${p.id}');
+      } else {
+        await _dio.post('/customers/favourites/${p.id}');
+      }
+      setState(() {
+        if (isFav) {
+          _favIds.remove(p.id);
+          if (widget.filter == 'favorites') {
+            _items.removeWhere((e) => e.id == p.id); // instantly disappear
+          }
+        } else {
+          _favIds.add(p.id);
+        }
+      });
+    } on DioException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed (${e.response?.statusCode ?? 'net'})')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
     }
   }
 
@@ -119,6 +171,7 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (_, i) {
                           final p = _items[i];
+                          final isFav = _favIds.contains(p.id);
                           final subtitleBits = <String>[];
                           if ((p.category ?? '').isNotEmpty) {
                             subtitleBits.add(p.category!);
@@ -150,31 +203,59 @@ class _ProvidersListScreenState extends State<ProvidersListScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AspectRatio(
-                                    aspectRatio: 16 / 9,
-                                    child: (p.logoUrl == null)
-                                        ? Container(
-                                            color: const Color(0xFFF2F4F7),
-                                            child: const Center(
-                                              child: Icon(
-                                                  Icons.storefront_rounded,
-                                                  size: 40),
-                                            ),
-                                          )
-                                        : Image.network(
-                                            p.logoUrl!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                Container(
-                                              color: const Color(0xFFF2F4F7),
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.broken_image_outlined,
-                                                  size: 40,
+                                  Stack(
+                                    children: [
+                                      AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        child: (p.logoUrl == null)
+                                            ? Container(
+                                                color: const Color(0xFFF2F4F7),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.storefront_rounded,
+                                                    size: 40,
+                                                  ),
+                                                ),
+                                              )
+                                            : Image.network(
+                                                p.logoUrl!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, __, ___) =>
+                                                    Container(
+                                                  color:
+                                                      const Color(0xFFF2F4F7),
+                                                  child: const Center(
+                                                    child: Icon(
+                                                      Icons
+                                                          .broken_image_outlined,
+                                                      size: 40,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: Material(
+                                          color: Colors.white.withOpacity(0.92),
+                                          shape: const CircleBorder(),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: IconButton(
+                                            tooltip: isFav
+                                                ? t.remove_from_favorites
+                                                : t.favorites_added_snack,
+                                            icon: Icon(isFav
+                                                ? Icons.favorite
+                                                : Icons.favorite_border),
+                                            color: isFav
+                                                ? Colors.redAccent
+                                                : Colors.black54,
+                                            onPressed: () => _toggleFavorite(p),
                                           ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(
