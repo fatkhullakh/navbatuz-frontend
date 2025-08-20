@@ -1,5 +1,5 @@
-import 'api_service.dart';
-import 'favorites_service.dart';
+import '../api_service.dart';
+import '../customers/favorites_service.dart';
 
 class LocationSummary {
   final String id;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/home_service.dart' as hs;
+import '../../services/customers/home_service.dart' as hs;
 import '../providers/provider_screen.dart';
 import '../../services/api_service.dart';
 import '../providers/providers_list_screen.dart';

@@ -1,6 +1,6 @@
 // lib/screens/account/change_password_screen.dart
 import 'package:flutter/material.dart';
-import '../../services/profile_service.dart';
+import '../../services/profile/profile_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final String? userId; // optional; not needed for /users/change-password

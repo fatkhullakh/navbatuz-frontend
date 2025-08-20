@@ -1,11 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../models/provider_service.dart';
-import '../../../../services/provider_services_service.dart';
 import '../../../../services/api_service.dart';
-import '../../../providers/provider_screen.dart'; // optional if you want to jump to public view
+import '../../../../services/providers/provider_owner_services_service.dart';
 import 'service_edit_screen.dart';
 
 class ProviderServicesScreen extends StatefulWidget {
@@ -17,49 +16,136 @@ class ProviderServicesScreen extends StatefulWidget {
 }
 
 class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
-  final _svc = ProviderServicesService();
-  late Future<List<ProviderService>> _future;
-
+  final _svc = ProviderOwnerServicesService();
+  late Future<List<OwnerServiceItem>> _future;
   String _query = '';
-  bool _showInactive = true;
+  bool _showOnlyActive = false;
 
   @override
   void initState() {
     super.initState();
-    _future = _svc.listByProvider(widget.providerId);
+    _future = _load();
   }
 
-  Future<void> _reload() async {
-    setState(() => _future = _svc.listByProvider(widget.providerId));
-    await _future;
+  Future<List<OwnerServiceItem>> _load() async {
+    // returns ALL non-deleted + deleted; we'll filter deleted on UI
+    return _svc.getAllByProvider(widget.providerId);
   }
 
-  String _durText(Duration? d) {
+  Future<void> _refresh() async {
+    final fut = _load(); // start async work OUTSIDE setState
+    if (!mounted) return;
+    setState(() {
+      _future = fut; // setState is sync
+    });
+    await fut;
+    if (!mounted) return;
+  }
+
+  Future<void> _deleteFromList(BuildContext pageCtx, String id) async {
+    final ok = await showDialog<bool>(
+      context: pageCtx,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(AppLocalizations.of(dialogCtx)!.confirm_delete_title ??
+            'Delete service?'),
+        content: Text(AppLocalizations.of(dialogCtx)!.confirm_delete_msg ??
+            'This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child:
+                Text(AppLocalizations.of(dialogCtx)!.action_cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child:
+                Text(AppLocalizations.of(dialogCtx)!.action_delete ?? 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await _svc.delete(id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.deleted ?? 'Deleted')),
+      );
+      await _refresh();
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final code = e.response?.statusCode;
+      final body = e.response?.data;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Delete failed $code: $body')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Delete failed: $e')),
+      );
+    }
+  }
+
+  Future<void> _setActive(String id, bool active) async {
+    try {
+      if (active) {
+        await _svc.activate(id);
+      } else {
+        await _svc.deactivate(id);
+      }
+      await _refresh();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Failed to ${active ? 'activate' : 'deactivate'}: $e')),
+      );
+    }
+  }
+
+  String _formatDuration(Duration? d) {
     if (d == null) return '';
-    final h = d.inHours;
-    final m = d.inMinutes % 60;
+    final h = d.inHours, m = d.inMinutes % 60;
     if (h > 0 && m > 0) return '${h}h ${m}m';
     if (h > 0) return '${h}h';
     return '${m}m';
   }
 
+  Widget _statusChip(bool isActive) {
+    final bg = isActive ? const Color(0xFFE8F5E9) : const Color(0xFFF3F4F6);
+    final fg = isActive ? const Color(0xFF2E7D32) : const Color(0xFF6B7280);
+    final label = isActive ? 'Active' : 'Inactive';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(label,
+          style:
+              TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    final priceFmt = NumberFormat.currency(
-      locale: Localizations.localeOf(context).toLanguageTag(),
-      symbol: '',
-      decimalDigits: 0,
-    );
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final money =
+        NumberFormat.currency(locale: locale, symbol: '', decimalDigits: 0);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_tx(t, 'manage_services_title', 'Services')),
+        title: Text(t.services_title ?? 'Services'),
         actions: [
           IconButton(
-            tooltip: _tx(t, 'action_refresh', 'Refresh'),
-            onPressed: _reload,
-            icon: const Icon(Icons.refresh),
+            tooltip: t.action_refresh ?? 'Refresh',
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _refresh,
           ),
         ],
       ),
@@ -68,338 +154,334 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
           final created = await Navigator.push<bool>(
             context,
             MaterialPageRoute(
-              builder: (_) => ServiceEditScreen(
+              builder: (_) => ProviderServiceEditScreen(
                 providerId: widget.providerId,
               ),
             ),
           );
-          if (created == true) _reload();
+          if (created == true) _refresh();
         },
         icon: const Icon(Icons.add),
-        label: Text(_tx(t, 'action_add_service', 'Add service')),
+        label: Text(t.action_add ?? 'Add'),
       ),
       body: RefreshIndicator(
-        onRefresh: _reload,
-        child: FutureBuilder<List<ProviderService>>(
+        onRefresh: _refresh,
+        child: FutureBuilder<List<OwnerServiceItem>>(
           future: _future,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const _Skeleton();
             }
             if (snap.hasError) {
               return ListView(
                 children: [
                   const SizedBox(height: 120),
-                  Center(child: Text('Failed: ${snap.error}')),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: OutlinedButton(
-                      onPressed: _reload,
-                      child: Text(t.provider_retry),
-                    ),
+                  _ErrorBox(
+                    text: 'Failed: ${snap.error}',
+                    onRetry: _refresh,
+                    t: t,
                   ),
                 ],
               );
             }
-            var items = snap.data ?? const <ProviderService>[];
 
-            // simple filters
-            if (!_showInactive) {
-              items = items.where((s) => s.isActive).toList();
-            }
-            if (_query.trim().isNotEmpty) {
-              final q = _query.trim().toLowerCase();
-              items = items
-                  .where((s) =>
-                      s.name.toLowerCase().contains(q) ||
-                      (s.description ?? '').toLowerCase().contains(q))
-                  .toList();
-            }
+            final all = snap.data ?? const <OwnerServiceItem>[];
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              children: [
-                // search + filters
-                Card(
-                  elevation: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                    child: Column(
+            // show both active & inactive, but hide deleted (soft-deleted)
+            final visible = all.where((s) => s.deleted != true).toList();
+            final base = _showOnlyActive
+                ? visible.where((s) => s.isActive == true).toList()
+                : visible;
+
+            final items = (_query.trim().isEmpty)
+                ? base
+                : base
+                    .where((s) =>
+                        s.name.toLowerCase().contains(_query.toLowerCase()))
+                    .toList();
+
+            if (visible.isEmpty) {
+              return ListView(
+                children: [
+                  const SizedBox(height: 20),
+                  _SearchField(
+                    hint: t.search_services_hint ?? 'Search services…',
+                    onChanged: (v) => setState(() => _query = v),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
                       children: [
-                        TextField(
-                          decoration: InputDecoration(
-                            hintText: _tx(t, 'search_hint', 'Search services'),
-                            prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onChanged: (v) => setState(() => _query = v),
-                        ),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _showInactive,
-                              onChanged: (v) => setState(
-                                  () => _showInactive = v ?? _showInactive),
-                            ),
-                            Text(_tx(
-                                t, 'filter_show_inactive', 'Show inactive')),
-                          ],
+                        FilterChip(
+                          label: const Text('Active only'),
+                          selected: _showOnlyActive,
+                          onSelected: (v) =>
+                              setState(() => _showOnlyActive = v),
                         ),
                       ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  Center(child: Text(t.no_data ?? 'No services yet')),
+                ],
+              );
+            }
 
-                const SizedBox(height: 8),
-                if (items.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Center(
-                      child: Text(_tx(
-                          t, 'empty_services', 'No services yet. Add one!')),
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 90),
+              itemCount: items.length + 2, // + search/header controls
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, i) {
+                if (i == 0) {
+                  return _SearchField(
+                    hint: t.search_services_hint ?? 'Search services…',
+                    onChanged: (v) => setState(() => _query = v),
+                  );
+                }
+                if (i == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        FilterChip(
+                          label: const Text('Active only'),
+                          selected: _showOnlyActive,
+                          onSelected: (v) =>
+                              setState(() => _showOnlyActive = v),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${items.length} ${items.length == 1 ? 'service' : 'services'}',
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ],
                     ),
-                  ),
+                  );
+                }
 
-                for (final s in items) ...[
-                  Card(
-                    elevation: 0,
-                    child: ListTile(
-                      leading: _ServiceThumb(url: s.logoUrl),
-                      title: Text(
-                        s.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            spacing: 8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              if ((s.category).isNotEmpty)
-                                Chip(
-                                  label: Text(s.category),
-                                  avatar: const Icon(Icons.category, size: 14),
-                                ),
-                              if (s.duration != null)
-                                Chip(
-                                  label: Text(_durText(s.duration)),
-                                  avatar: const Icon(Icons.schedule_outlined,
-                                      size: 14),
-                                ),
-                              Chip(
-                                label: Text(s.isActive
-                                    ? _tx(t, 'active', 'Active')
-                                    : _tx(t, 'inactive', 'Inactive')),
-                                avatar: Icon(
-                                  s.isActive ? Icons.check : Icons.pause,
-                                  size: 14,
-                                ),
-                              ),
-                            ],
+                final s = items[i - 2];
+
+                String? cover() {
+                  final raw = (s.imageUrl ?? s.logoUrl ?? '').trim();
+                  if (raw.isEmpty) return null;
+                  final n = ApiService.normalizeMediaUrl(raw);
+                  final u = (n ?? raw).trim();
+                  return u.isEmpty ? null : u;
+                }
+
+                final c = cover();
+                final isActive = s.isActive == true;
+                final priceText = (s.price == null || s.price == 0)
+                    ? ''
+                    : money.format(s.price);
+
+                return Card(
+                  elevation: 0,
+                  child: ListTile(
+                    onTap: () async {
+                      final changed = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProviderServiceEditScreen(
+                            providerId: widget.providerId,
+                            serviceId: s.id,
                           ),
-                          if (s.price != null)
-                            Text(priceFmt.format(s.price),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (v) async {
-                          if (v == 'edit') {
-                            final changed = await Navigator.push<bool>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ServiceEditScreen(
-                                  providerId: widget.providerId,
-                                  existing: s,
+                        ),
+                      );
+                      if (changed == true) _refresh();
+                    },
+                    leading: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: (c == null)
+                            ? Container(
+                                color: const Color(0xFFF2F4F7),
+                                child:
+                                    const Icon(Icons.design_services_outlined),
+                              )
+                            : Image.network(
+                                c,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: const Color(0xFFF2F4F7),
+                                  child:
+                                      const Icon(Icons.broken_image_outlined),
                                 ),
                               ),
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            s.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: isActive ? null : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _statusChip(isActive),
+                      ],
+                    ),
+                    subtitle: Wrap(
+                      spacing: 10,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (s.duration != null)
+                          Text(_formatDuration(s.duration),
+                              style: const TextStyle(color: Colors.black54)),
+                        if (priceText.isNotEmpty)
+                          Text(priceText,
+                              style: const TextStyle(color: Colors.black54)),
+                      ],
+                    ),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (v) async {
+                        if (v == 'delete') {
+                          final id = s.id;
+                          if (id == null || id.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Missing service id')),
                             );
-                            if (changed == true) _reload();
-                          } else if (v == 'toggle') {
-                            try {
-                              if (s.isActive) {
-                                await _svc.deactivate(s.id);
-                              } else {
-                                await _svc.activate(s.id);
-                              }
-                              _reload();
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed: $e')),
-                              );
-                            }
-                          } else if (v == 'delete') {
-                            final ok = await _confirmDelete(context, t);
-                            if (ok == true) {
-                              try {
-                                await _svc.delete(s.id);
-                                _reload();
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed: $e')),
-                                );
-                              }
-                            }
-                          } else if (v == 'image') {
-                            final url =
-                                await _askImageUrl(context, t, s.logoUrl);
-                            if (url != null && url.trim().isNotEmpty) {
-                              try {
-                                await _svc.setImage(s.id, url.trim());
-                                _reload();
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed: $e')),
-                                );
-                              }
-                            }
+                            return;
                           }
-                        },
-                        itemBuilder: (_) => [
-                          PopupMenuItem(
+                          await _deleteFromList(context, id);
+                        } else if (v == 'edit') {
+                          Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProviderServiceEditScreen(
+                                providerId: widget.providerId,
+                                serviceId: s.id,
+                              ),
+                            ),
+                          ).then((changed) {
+                            if (changed == true) _refresh();
+                          });
+                        } else if (v == 'activate') {
+                          if (s.id != null) _setActive(s.id!, true);
+                        } else if (v == 'deactivate') {
+                          if (s.id != null) _setActive(s.id!, false);
+                        }
+                      },
+                      itemBuilder: (_) {
+                        final items = <PopupMenuEntry<String>>[
+                          const PopupMenuItem(
                             value: 'edit',
                             child: ListTile(
-                              leading: const Icon(Icons.edit),
-                              title: Text(_tx(t, 'action_edit', 'Edit')),
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(Icons.edit_outlined),
+                              title: Text('Edit'),
                             ),
                           ),
-                          PopupMenuItem(
-                            value: 'toggle',
-                            child: ListTile(
-                              leading: Icon(
-                                  s.isActive ? Icons.pause : Icons.play_arrow),
-                              title: Text(s.isActive
-                                  ? _tx(t, 'action_deactivate', 'Deactivate')
-                                  : _tx(t, 'action_activate', 'Activate')),
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
+                          if (!isActive)
+                            const PopupMenuItem(
+                              value: 'activate',
+                              child: ListTile(
+                                leading: Icon(Icons.play_arrow_rounded),
+                                title: Text('Activate'),
+                              ),
                             ),
-                          ),
-                          const PopupMenuDivider(),
-                          PopupMenuItem(
-                            value: 'image',
-                            child: ListTile(
-                              leading: const Icon(Icons.image_outlined),
-                              title: Text(_tx(t, 'action_change_image',
-                                  'Change image URL')),
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
+                          if (isActive)
+                            const PopupMenuItem(
+                              value: 'deactivate',
+                              child: ListTile(
+                                leading: Icon(Icons.pause_rounded),
+                                title: Text('Deactivate'),
+                              ),
                             ),
-                          ),
-                          PopupMenuItem(
+                          const PopupMenuItem(
                             value: 'delete',
                             child: ListTile(
-                              leading: const Icon(Icons.delete_outline,
-                                  color: Colors.red),
-                              title: Text(
-                                _tx(t, 'action_delete', 'Delete'),
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
+                              leading:
+                                  Icon(Icons.delete_outline, color: Colors.red),
+                              title: Text('Delete'),
                             ),
                           ),
-                        ],
-                      ),
-                      onTap: () async {
-                        final changed = await Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ServiceEditScreen(
-                              providerId: widget.providerId,
-                              existing: s,
-                            ),
-                          ),
-                        );
-                        if (changed == true) _reload();
+                        ];
+                        return items;
                       },
                     ),
                   ),
-                  const SizedBox(height: 8),
-                ],
-              ],
+                );
+              },
             );
           },
         ),
       ),
     );
   }
-
-  Future<bool?> _confirmDelete(BuildContext context, AppLocalizations t) {
-    return showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(_tx(t, 'confirm', 'Are you sure?')),
-        content: Text(_tx(t, 'confirm_delete_service',
-            'This will permanently delete the service.')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(_tx(t, 'common_no', 'No')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(_tx(t, 'common_yes', 'Yes')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<String?> _askImageUrl(
-      BuildContext context, AppLocalizations t, String? initial) {
-    final ctl = TextEditingController(text: initial ?? '');
-    return showDialog<String>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(_tx(t, 'change_image', 'Change image URL')),
-        content: TextField(
-          controller: ctl,
-          decoration: const InputDecoration(
-            hintText: 'https://example.com/image.jpg',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(_tx(t, 'action_cancel', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, ctl.text),
-            child: Text(_tx(t, 'action_save', 'Save')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _tx(AppLocalizations t, String _key, String fallback) => fallback;
 }
 
-class _ServiceThumb extends StatelessWidget {
-  final String? url;
-  const _ServiceThumb({this.url});
+class _SearchField extends StatelessWidget {
+  final String hint;
+  final ValueChanged<String> onChanged;
+  const _SearchField({required this.hint, required this.onChanged});
   @override
   Widget build(BuildContext context) {
-    final image = (url != null) ? NetworkImage(url!) : null;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        color: const Color(0xFFF2F4F7),
-        width: 56,
-        height: 56,
-        child: image == null
-            ? const Icon(Icons.medical_services_outlined)
-            : Image(image: image, fit: BoxFit.cover),
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: const Icon(Icons.search_rounded),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF6A89A7), width: 1.5),
+        ),
       ),
     );
+  }
+}
+
+class _ErrorBox extends StatelessWidget {
+  final String text;
+  final Future<void> Function() onRetry;
+  final AppLocalizations t;
+  const _ErrorBox({required this.text, required this.onRetry, required this.t});
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          children: [
+            Text(text),
+            const SizedBox(height: 8),
+            OutlinedButton(
+                onPressed: () => onRetry(),
+                child: Text(t.action_retry ?? 'Retry')),
+          ],
+        ),
+      );
+}
+
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
+  @override
+  Widget build(BuildContext context) {
+    Widget box(double h) => Container(
+          height: h,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F2F5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+    return ListView(children: [box(48), box(80), box(80), box(80), box(80)]);
   }
 }

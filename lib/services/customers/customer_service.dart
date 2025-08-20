@@ -1,6 +1,6 @@
 // lib/services/customer_service.dart
 import 'package:dio/dio.dart';
-import '../core/dio_client.dart';
+import '../../core/dio_client.dart';
 
 class CustomerService {
   final Dio _dio = DioClient.build();

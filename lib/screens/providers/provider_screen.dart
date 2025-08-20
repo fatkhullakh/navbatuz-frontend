@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/provider_public_service.dart';
-import '../../services/service_catalog_service.dart';
+import '../../services/services/provider_public_service.dart';
+import '../../services/services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
 import '../../screens/services/service_details_screen.dart';

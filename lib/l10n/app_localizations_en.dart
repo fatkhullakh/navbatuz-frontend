@@ -572,4 +572,112 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get provider_hours_hint => 'Weekly grid editor and exceptions';
+
+  @override
+  String get services_title => 'Services & Combo Services';
+
+  @override
+  String get action_refresh => 'Refresh';
+
+  @override
+  String get action_add => 'Add';
+
+  @override
+  String get search_services_hint => 'Search services…';
+
+  @override
+  String get no_data => 'No services yet';
+
+  @override
+  String get service_create => 'Create service';
+
+  @override
+  String get main_details_required => 'Main details (required)';
+
+  @override
+  String get service_name => 'Service name';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get service_duration => 'Service duration';
+
+  @override
+  String get service_description => 'Service Description';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get not_set => 'Not set';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get add_photo => 'Add photo';
+
+  @override
+  String get image_updated => 'Image updated';
+
+  @override
+  String get image_removed => 'Image removed';
+
+  @override
+  String get error_upload_image => 'Failed to upload image';
+
+  @override
+  String get error_remove_image => 'Failed to remove image';
+
+  @override
+  String get manage_title => 'Manage';
+
+  @override
+  String get manage_services_title => 'Services';
+
+  @override
+  String get manage_services_subtitle => 'Create, edit, and organize services';
+
+  @override
+  String get manage_business_info_title => 'Business info';
+
+  @override
+  String get manage_business_info_subtitle => 'Name, contacts, address, about';
+
+  @override
+  String get manage_staff_title => 'Staff';
+
+  @override
+  String get manage_staff_subtitle => 'Invite and manage workers';
+
+  @override
+  String get manage_hours_title => 'Working hours';
+
+  @override
+  String get manage_hours_subtitle => 'Set business schedule and breaks';
+
+  @override
+  String get prov_nav_dashboard => 'Dashboard';
+
+  @override
+  String get prov_nav_manage => 'Manage';
+
+  @override
+  String get action_delete => 'Delete';
+
+  @override
+  String get action_cancel => 'Cancel';
+
+  @override
+  String get confirm_delete_title => 'Delete service?';
+
+  @override
+  String get confirm_delete_msg => 'This action cannot be undone.';
+
+  @override
+  String get staff_members => 'Staff members';
 }

@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../services/api_service.dart';
-import '../../services/provider_resolver_service.dart'; // ← NEW
+import '../../services/providers/provider_resolver_service.dart'; // ← NEW
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

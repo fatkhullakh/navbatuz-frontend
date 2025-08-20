@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 
 Duration? _parseIsoDuration(String? s) {
   if (s == null || s.isEmpty) return null;

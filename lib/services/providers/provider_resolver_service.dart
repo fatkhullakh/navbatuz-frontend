@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 
 /// Tries several likely endpoints to get the current user's providerId.
 /// Returns null if none work. Safe to keep as-is and refine later.

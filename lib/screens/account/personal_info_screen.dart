@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/profile_service.dart';
+import '../../services/profile/profile_service.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   final Me initial;

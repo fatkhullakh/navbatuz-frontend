@@ -572,4 +572,112 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get provider_hours_hint => 'Haftalik jadval tahrirlash va istisnolar';
+
+  @override
+  String get services_title => 'Xizmatlar va Kombo xizmatlar';
+
+  @override
+  String get action_refresh => 'Yangilash';
+
+  @override
+  String get action_add => 'Qo‘shish';
+
+  @override
+  String get search_services_hint => 'Xizmatlarni qidiring…';
+
+  @override
+  String get no_data => 'Hozircha xizmatlar yo‘q';
+
+  @override
+  String get service_create => 'Xizmat yaratish';
+
+  @override
+  String get main_details_required => 'Asosiy ma’lumotlar (majburiy)';
+
+  @override
+  String get service_name => 'Xizmat nomi';
+
+  @override
+  String get required => 'Majburiy';
+
+  @override
+  String get price => 'Narx';
+
+  @override
+  String get service_duration => 'Xizmat davomiyligi';
+
+  @override
+  String get service_description => 'Xizmat tavsifi';
+
+  @override
+  String get photos => 'Rasmlar';
+
+  @override
+  String get not_set => 'Ko‘rsatilmagan';
+
+  @override
+  String get active => 'Faol';
+
+  @override
+  String get add_photo => 'Rasm qo‘shish';
+
+  @override
+  String get image_updated => 'Rasm yangilandi';
+
+  @override
+  String get image_removed => 'Rasm o‘chirildi';
+
+  @override
+  String get error_upload_image => 'Rasmni yuklab bo‘lmadi';
+
+  @override
+  String get error_remove_image => 'Rasmni o‘chirib bo‘lmadi';
+
+  @override
+  String get manage_title => 'Boshqaruv';
+
+  @override
+  String get manage_services_title => 'Xizmatlar';
+
+  @override
+  String get manage_services_subtitle => 'Xizmatlarni yaratish, tahrirlash va tartiblash';
+
+  @override
+  String get manage_business_info_title => 'Biznes ma’lumotlari';
+
+  @override
+  String get manage_business_info_subtitle => 'Nomi, kontaktlar, manzil, haqida';
+
+  @override
+  String get manage_staff_title => 'Xodimlar';
+
+  @override
+  String get manage_staff_subtitle => 'Xodimlarni taklif qiling va boshqaring';
+
+  @override
+  String get manage_hours_title => 'Ish vaqti';
+
+  @override
+  String get manage_hours_subtitle => 'Ish jadvali va tanaffuslarni sozlang';
+
+  @override
+  String get prov_nav_dashboard => 'Boshqaruv paneli';
+
+  @override
+  String get prov_nav_manage => 'Boshqaruv';
+
+  @override
+  String get action_delete => 'O‘chirish';
+
+  @override
+  String get action_cancel => 'Bekor qilish';
+
+  @override
+  String get confirm_delete_title => 'Xizmatni o‘chirasizmi?';
+
+  @override
+  String get confirm_delete_msg => 'Bu amalni qaytarib bo‘lmaydi.';
+
+  @override
+  String get staff_members => 'Xodimlar';
 }

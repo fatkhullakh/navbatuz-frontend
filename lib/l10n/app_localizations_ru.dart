@@ -572,4 +572,112 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get provider_hours_hint => 'Редактор расписания по неделе и исключения';
+
+  @override
+  String get services_title => 'Услуги и комбинированные услуги';
+
+  @override
+  String get action_refresh => 'Обновить';
+
+  @override
+  String get action_add => 'Добавить';
+
+  @override
+  String get search_services_hint => 'Поиск услуг…';
+
+  @override
+  String get no_data => 'Пока нет услуг';
+
+  @override
+  String get service_create => 'Создать услугу';
+
+  @override
+  String get main_details_required => 'Основные данные (обязательно)';
+
+  @override
+  String get service_name => 'Название услуги';
+
+  @override
+  String get required => 'Обязательное поле';
+
+  @override
+  String get price => 'Цена';
+
+  @override
+  String get service_duration => 'Длительность услуги';
+
+  @override
+  String get service_description => 'Описание услуги';
+
+  @override
+  String get photos => 'Фотографии';
+
+  @override
+  String get not_set => 'Не указано';
+
+  @override
+  String get active => 'Активна';
+
+  @override
+  String get add_photo => 'Добавить фото';
+
+  @override
+  String get image_updated => 'Изображение обновлено';
+
+  @override
+  String get image_removed => 'Изображение удалено';
+
+  @override
+  String get error_upload_image => 'Не удалось загрузить изображение';
+
+  @override
+  String get error_remove_image => 'Не удалось удалить изображение';
+
+  @override
+  String get manage_title => 'Управление';
+
+  @override
+  String get manage_services_title => 'Услуги';
+
+  @override
+  String get manage_services_subtitle => 'Создание, редактирование и организация услуг';
+
+  @override
+  String get manage_business_info_title => 'Данные бизнеса';
+
+  @override
+  String get manage_business_info_subtitle => 'Название, контакты, адрес, описание';
+
+  @override
+  String get manage_staff_title => 'Персонал';
+
+  @override
+  String get manage_staff_subtitle => 'Приглашайте и управляйте сотрудниками';
+
+  @override
+  String get manage_hours_title => 'Часы работы';
+
+  @override
+  String get manage_hours_subtitle => 'Настройте расписание и перерывы';
+
+  @override
+  String get prov_nav_dashboard => 'Дашборд';
+
+  @override
+  String get prov_nav_manage => 'Управление';
+
+  @override
+  String get action_delete => 'Удалить';
+
+  @override
+  String get action_cancel => 'Отмена';
+
+  @override
+  String get confirm_delete_title => 'Удалить услугу?';
+
+  @override
+  String get confirm_delete_msg => 'Это действие необратимо.';
+
+  @override
+  String get staff_members => 'Сотрудники';
 }

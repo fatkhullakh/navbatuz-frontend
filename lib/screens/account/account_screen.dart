@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/profile_service.dart';
-import '../../services/uploads_service.dart';
+import '../../services/profile/profile_service.dart';
+import '../../services/media/uploads_service.dart';
 import '../../services/api_service.dart';
 import 'personal_info_screen.dart';
 import 'account_settings_screen.dart';

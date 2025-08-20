@@ -63,7 +63,8 @@ import 'app_localizations_uz.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,7 +72,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,7 +85,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -1218,9 +1221,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weekly grid editor and exceptions'**
   String get provider_hours_hint;
+
+  /// No description provided for @services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services & Combo Services'**
+  String get services_title;
+
+  /// No description provided for @action_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get action_refresh;
+
+  /// No description provided for @action_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get action_add;
+
+  /// No description provided for @search_services_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search services…'**
+  String get search_services_hint;
+
+  /// No description provided for @no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get no_data;
+
+  /// No description provided for @service_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create service'**
+  String get service_create;
+
+  /// No description provided for @main_details_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Main details (required)'**
+  String get main_details_required;
+
+  /// No description provided for @service_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Service name'**
+  String get service_name;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @service_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Service duration'**
+  String get service_duration;
+
+  /// No description provided for @service_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Description'**
+  String get service_description;
+
+  /// No description provided for @photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// No description provided for @not_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get not_set;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @add_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get add_photo;
+
+  /// No description provided for @image_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Image updated'**
+  String get image_updated;
+
+  /// No description provided for @image_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Image removed'**
+  String get image_removed;
+
+  /// No description provided for @error_upload_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload image'**
+  String get error_upload_image;
+
+  /// No description provided for @error_remove_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove image'**
+  String get error_remove_image;
+
+  /// No description provided for @manage_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage_title;
+
+  /// No description provided for @manage_services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get manage_services_title;
+
+  /// No description provided for @manage_services_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, edit, and organize services'**
+  String get manage_services_subtitle;
+
+  /// No description provided for @manage_business_info_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business info'**
+  String get manage_business_info_title;
+
+  /// No description provided for @manage_business_info_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, contacts, address, about'**
+  String get manage_business_info_subtitle;
+
+  /// No description provided for @manage_staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get manage_staff_title;
+
+  /// No description provided for @manage_staff_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite and manage workers'**
+  String get manage_staff_subtitle;
+
+  /// No description provided for @manage_hours_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get manage_hours_title;
+
+  /// No description provided for @manage_hours_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set business schedule and breaks'**
+  String get manage_hours_subtitle;
+
+  /// No description provided for @prov_nav_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get prov_nav_dashboard;
+
+  /// No description provided for @prov_nav_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get prov_nav_manage;
+
+  /// No description provided for @action_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get action_delete;
+
+  /// No description provided for @action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get action_cancel;
+
+  /// No description provided for @confirm_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete service?'**
+  String get confirm_delete_title;
+
+  /// No description provided for @confirm_delete_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get confirm_delete_msg;
+
+  /// No description provided for @staff_members.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff members'**
+  String get staff_members;
+
+  get deleted => null;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1229,26 +1451,27 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ru', 'uz'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'ru', 'uz'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'ru': return AppLocalizationsRu();
-    case 'uz': return AppLocalizationsUz();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'uz':
+      return AppLocalizationsUz();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

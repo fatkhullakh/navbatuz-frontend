@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
-import '../models/provider_service.dart';
+import '../api_service.dart';
+import '../../models/provider_service.dart';
 
 class ProviderServicesService {
   final Dio _dio = ApiService.client;

@@ -1,6 +1,6 @@
 // lib/navigation/role_router.dart
 import 'package:flutter/material.dart';
-import '../services/auth_roles.dart';
+import '../services/auth/auth_roles.dart';
 
 class RoleRouter {
   static Future<void> goHome(BuildContext context, Set<AppRole> roles) async {
