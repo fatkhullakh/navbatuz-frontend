@@ -503,4 +503,73 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Записаться снова';
+
+  @override
+  String get provider_nav_appointments => 'Записи';
+
+  @override
+  String get provider_nav_dashboard => 'Панель';
+
+  @override
+  String get provider_nav_manage => 'Управление';
+
+  @override
+  String get provider_nav_account => 'Аккаунт';
+
+  @override
+  String get provider_appt_today_title => 'Сегодняшнее расписание';
+
+  @override
+  String get provider_appt_today_subtitle => 'Подключите это к своим записям клиентов/сотрудников.';
+
+  @override
+  String get common_coming_soon => 'Скоро';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Здесь будут аналитика и обзор доходов.';
+
+  @override
+  String get provider_manage_services_title => 'Услуги';
+
+  @override
+  String get provider_manage_services_subtitle => 'Создавайте, редактируйте и сортируйте услуги';
+
+  @override
+  String get provider_manage_business_title => 'О бизнесе';
+
+  @override
+  String get provider_manage_business_subtitle => 'Название, описание, адрес, контакты';
+
+  @override
+  String get provider_manage_staff_title => 'Сотрудники';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Добавляйте/редактируйте сотрудников и назначайте им услуги';
+
+  @override
+  String get provider_manage_hours_title => 'Часы работы';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Установите рабочие часы и исключения';
+
+  @override
+  String get provider_action_add_service => 'Добавить услугу';
+
+  @override
+  String get provider_action_add_staff => 'Добавить сотрудника';
+
+  @override
+  String get provider_account_hint => 'Профиль, язык, выход…';
+
+  @override
+  String get provider_services_hint => 'Список и создание/редактирование услуг';
+
+  @override
+  String get provider_business_hint => 'Название, описание, адрес, email, телефон, логотип';
+
+  @override
+  String get provider_staff_hint => 'Список сотрудников, добавление/редактирование, назначение услуг';
+
+  @override
+  String get provider_hours_hint => 'Редактор расписания по неделе и исключения';
 }

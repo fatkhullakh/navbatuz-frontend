@@ -1080,6 +1080,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Book again'**
   String get appointment_action_book_again;
+
+  /// No description provided for @provider_nav_appointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get provider_nav_appointments;
+
+  /// No description provided for @provider_nav_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get provider_nav_dashboard;
+
+  /// No description provided for @provider_nav_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get provider_nav_manage;
+
+  /// No description provided for @provider_nav_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get provider_nav_account;
+
+  /// No description provided for @provider_appt_today_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s schedule'**
+  String get provider_appt_today_title;
+
+  /// No description provided for @provider_appt_today_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hook this up to your provider/worker appointments.'**
+  String get provider_appt_today_subtitle;
+
+  /// No description provided for @common_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get common_coming_soon;
+
+  /// No description provided for @provider_dashboard_coming_soon_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics and revenue overview will be here.'**
+  String get provider_dashboard_coming_soon_desc;
+
+  /// No description provided for @provider_manage_services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get provider_manage_services_title;
+
+  /// No description provided for @provider_manage_services_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, edit and sort services'**
+  String get provider_manage_services_subtitle;
+
+  /// No description provided for @provider_manage_business_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Info'**
+  String get provider_manage_business_title;
+
+  /// No description provided for @provider_manage_business_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, description, address, contacts'**
+  String get provider_manage_business_subtitle;
+
+  /// No description provided for @provider_manage_staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get provider_manage_staff_title;
+
+  /// No description provided for @provider_manage_staff_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add/edit workers and assign services'**
+  String get provider_manage_staff_subtitle;
+
+  /// No description provided for @provider_manage_hours_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get provider_manage_hours_title;
+
+  /// No description provided for @provider_manage_hours_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set weekly hours and overrides'**
+  String get provider_manage_hours_subtitle;
+
+  /// No description provided for @provider_action_add_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Add service'**
+  String get provider_action_add_service;
+
+  /// No description provided for @provider_action_add_staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get provider_action_add_staff;
+
+  /// No description provided for @provider_account_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile, language, logout…'**
+  String get provider_account_hint;
+
+  /// No description provided for @provider_services_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'List and create/edit services'**
+  String get provider_services_hint;
+
+  /// No description provided for @provider_business_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, description, address, email, phone, logo'**
+  String get provider_business_hint;
+
+  /// No description provided for @provider_staff_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'List workers, add/edit, assign services'**
+  String get provider_staff_hint;
+
+  /// No description provided for @provider_hours_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly grid editor and exceptions'**
+  String get provider_hours_hint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

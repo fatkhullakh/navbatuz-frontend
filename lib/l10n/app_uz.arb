@@ -184,6 +184,36 @@
   "appointments_finished": "Tugallangan uchrashuvlar",
   "appointments_empty": "Sizda hali hech qanday uchrashuv yo‘q.",
   "appointment_action_cancel": "Bekor qilish",
-  "appointment_action_book_again": "Qayta bron qilish"
+  "appointment_action_book_again": "Qayta bron qilish",
+
+  "provider_nav_appointments": "Uchrashuvlar",
+  "provider_nav_dashboard": "Panel",
+  "provider_nav_manage": "Boshqarish",
+  "provider_nav_account": "Profil",
+
+  "provider_appt_today_title": "Bugungi jadval",
+  "provider_appt_today_subtitle": "Bu yerda provayder/xodim uchrashuvlari bo‘ladi.",
+
+  "common_coming_soon": "Tez orada",
+  "provider_dashboard_coming_soon_desc": "Analitika va daromadlar shu yerda ko‘rsatiladi.",
+
+  "provider_manage_services_title": "Xizmatlar",
+  "provider_manage_services_subtitle": "Xizmatlarni yaratish, tahrirlash va tartiblash",
+  "provider_manage_business_title": "Biznes ma’lumotlari",
+  "provider_manage_business_subtitle": "Nom, tavsif, manzil, kontaktlar",
+  "provider_manage_staff_title": "Xodimlar",
+  "provider_manage_staff_subtitle": "Xodim qo‘shish/tahrirlash va xizmat biriktirish",
+  "provider_manage_hours_title": "Ish vaqtlari",
+  "provider_manage_hours_subtitle": "Haftalik ish vaqtlari va istisnolar",
+
+  "provider_action_add_service": "Xizmat qo‘shish",
+  "provider_action_add_staff": "Xodim qo‘shish",
+
+  "provider_account_hint": "Profil, til, chiqish…",
+
+  "provider_services_hint": "Xizmatlar ro‘yxati va yaratish/tahrirlash oynasi",
+  "provider_business_hint": "Nom, tavsif, manzil, email, telefon, logo",
+  "provider_staff_hint": "Xodimlar ro‘yxati, qo‘shish/tahrirlash, xizmat biriktirish",
+  "provider_hours_hint": "Haftalik jadval tahrirlash va istisnolar"
 
 }

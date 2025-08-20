@@ -503,4 +503,73 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Qayta bron qilish';
+
+  @override
+  String get provider_nav_appointments => 'Uchrashuvlar';
+
+  @override
+  String get provider_nav_dashboard => 'Panel';
+
+  @override
+  String get provider_nav_manage => 'Boshqarish';
+
+  @override
+  String get provider_nav_account => 'Profil';
+
+  @override
+  String get provider_appt_today_title => 'Bugungi jadval';
+
+  @override
+  String get provider_appt_today_subtitle => 'Bu yerda provayder/xodim uchrashuvlari bo‘ladi.';
+
+  @override
+  String get common_coming_soon => 'Tez orada';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Analitika va daromadlar shu yerda ko‘rsatiladi.';
+
+  @override
+  String get provider_manage_services_title => 'Xizmatlar';
+
+  @override
+  String get provider_manage_services_subtitle => 'Xizmatlarni yaratish, tahrirlash va tartiblash';
+
+  @override
+  String get provider_manage_business_title => 'Biznes ma’lumotlari';
+
+  @override
+  String get provider_manage_business_subtitle => 'Nom, tavsif, manzil, kontaktlar';
+
+  @override
+  String get provider_manage_staff_title => 'Xodimlar';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Xodim qo‘shish/tahrirlash va xizmat biriktirish';
+
+  @override
+  String get provider_manage_hours_title => 'Ish vaqtlari';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Haftalik ish vaqtlari va istisnolar';
+
+  @override
+  String get provider_action_add_service => 'Xizmat qo‘shish';
+
+  @override
+  String get provider_action_add_staff => 'Xodim qo‘shish';
+
+  @override
+  String get provider_account_hint => 'Profil, til, chiqish…';
+
+  @override
+  String get provider_services_hint => 'Xizmatlar ro‘yxati va yaratish/tahrirlash oynasi';
+
+  @override
+  String get provider_business_hint => 'Nom, tavsif, manzil, email, telefon, logo';
+
+  @override
+  String get provider_staff_hint => 'Xodimlar ro‘yxati, qo‘shish/tahrirlash, xizmat biriktirish';
+
+  @override
+  String get provider_hours_hint => 'Haftalik jadval tahrirlash va istisnolar';
 }

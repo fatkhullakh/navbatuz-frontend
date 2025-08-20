@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:jwt_decode/jwt_decode.dart';
+
 import '../../services/api_service.dart';
+import '../../services/provider_resolver_service.dart'; // ← NEW
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,12 +47,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
+  // ← RESTORED helper
   String _extractRole(dynamic raw) {
     if (raw == null) return 'CUSTOMER';
     if (raw is List) {
       return raw.map((e) => e.toString().toUpperCase()).join(',');
     }
     return raw.toString().toUpperCase();
+  }
+
+  bool _isProviderSide(String rolesCsvUpper) {
+    return rolesCsvUpper.contains('OWNER') ||
+        rolesCsvUpper.contains('PROVIDER') ||
+        rolesCsvUpper.contains('RECEPTIONIST') ||
+        rolesCsvUpper.contains('WORKER');
   }
 
   Future<void> _handleLogin() async {
@@ -63,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (token == null || token is! String || token.isEmpty) {
         throw Exception('Malformed login response');
       }
+
       final claims = Jwt.parseJwt(token);
       final rawRole = _extractRole(
         claims['role'] ??
@@ -75,10 +86,19 @@ class _LoginScreenState extends State<LoginScreen> {
       await storage.write(key: 'user_role', value: rawRole);
 
       if (!mounted) return;
-      // Simple routing by role
-      if (rawRole.contains('OWNER') || rawRole.contains('PROVIDER')) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/providers', (_) => false);
+
+      if (_isProviderSide(rawRole)) {
+        // Try to resolve providerId (nullable is OK)
+        String? providerId;
+        try {
+          providerId = await ProviderResolverService().resolveMyProviderId();
+        } catch (_) {}
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/providers',
+          (_) => false,
+          arguments:
+              providerId, // can be null, your /providers route should handle it
+        );
       } else {
         Navigator.of(context)
             .pushNamedAndRemoveUntil('/customers', (_) => false);

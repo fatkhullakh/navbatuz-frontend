@@ -182,5 +182,35 @@
   "appointments_finished": "Finished Appointments",
   "appointments_empty": "You don't have any appointments yet.",
   "appointment_action_cancel": "Cancel",
-  "appointment_action_book_again": "Book again"
+  "appointment_action_book_again": "Book again",
+
+  "provider_nav_appointments": "Appointments",
+  "provider_nav_dashboard": "Dashboard",
+  "provider_nav_manage": "Manage",
+  "provider_nav_account": "Account",
+
+  "provider_appt_today_title": "Today’s schedule",
+  "provider_appt_today_subtitle": "Hook this up to your provider/worker appointments.",
+
+  "common_coming_soon": "Coming soon",
+  "provider_dashboard_coming_soon_desc": "Analytics and revenue overview will be here.",
+
+  "provider_manage_services_title": "Services",
+  "provider_manage_services_subtitle": "Create, edit and sort services",
+  "provider_manage_business_title": "Business Info",
+  "provider_manage_business_subtitle": "Name, description, address, contacts",
+  "provider_manage_staff_title": "Staff",
+  "provider_manage_staff_subtitle": "Add/edit workers and assign services",
+  "provider_manage_hours_title": "Working hours",
+  "provider_manage_hours_subtitle": "Set weekly hours and overrides",
+
+  "provider_action_add_service": "Add service",
+  "provider_action_add_staff": "Add staff",
+
+  "provider_account_hint": "Profile, language, logout…",
+
+  "provider_services_hint": "List and create/edit services",
+  "provider_business_hint": "Name, description, address, email, phone, logo",
+  "provider_staff_hint": "List workers, add/edit, assign services",
+  "provider_hours_hint": "Weekly grid editor and exceptions"
 }

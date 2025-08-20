@@ -503,4 +503,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Book again';
+
+  @override
+  String get provider_nav_appointments => 'Appointments';
+
+  @override
+  String get provider_nav_dashboard => 'Dashboard';
+
+  @override
+  String get provider_nav_manage => 'Manage';
+
+  @override
+  String get provider_nav_account => 'Account';
+
+  @override
+  String get provider_appt_today_title => 'Today’s schedule';
+
+  @override
+  String get provider_appt_today_subtitle => 'Hook this up to your provider/worker appointments.';
+
+  @override
+  String get common_coming_soon => 'Coming soon';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Analytics and revenue overview will be here.';
+
+  @override
+  String get provider_manage_services_title => 'Services';
+
+  @override
+  String get provider_manage_services_subtitle => 'Create, edit and sort services';
+
+  @override
+  String get provider_manage_business_title => 'Business Info';
+
+  @override
+  String get provider_manage_business_subtitle => 'Name, description, address, contacts';
+
+  @override
+  String get provider_manage_staff_title => 'Staff';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Add/edit workers and assign services';
+
+  @override
+  String get provider_manage_hours_title => 'Working hours';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Set weekly hours and overrides';
+
+  @override
+  String get provider_action_add_service => 'Add service';
+
+  @override
+  String get provider_action_add_staff => 'Add staff';
+
+  @override
+  String get provider_account_hint => 'Profile, language, logout…';
+
+  @override
+  String get provider_services_hint => 'List and create/edit services';
+
+  @override
+  String get provider_business_hint => 'Name, description, address, email, phone, logo';
+
+  @override
+  String get provider_staff_hint => 'List workers, add/edit, assign services';
+
+  @override
+  String get provider_hours_hint => 'Weekly grid editor and exceptions';
 }

@@ -11,6 +11,8 @@ import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_request_screen.dart';
 import 'screens/auth/forgot_password_reset_screen.dart';
 import 'screens/onboarding/language_screen.dart';
+import 'navigation/provider_nav_root.dart';
+import 'navigation/worker_nav_root.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +42,18 @@ class MyApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/register': (_) => const RegisterScreen(),
         '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
-        //'/providers': (_) => const ProvidersHomeScreen(), // replace
+        '/providers': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          // Accept either a String id or a map like {'providerId': '...'}
+          String? providerId;
+          if (args is String) {
+            providerId = args;
+          } else if (args is Map && args['providerId'] is String) {
+            providerId = args['providerId'] as String;
+          }
+          return ProviderNavRoot(providerId: providerId); // nullable is OK now
+        },
+        '/workers': (context) => const WorkerNavRoot(),
       },
       initialRoute: '/',
     );

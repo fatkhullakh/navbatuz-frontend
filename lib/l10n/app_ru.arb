@@ -184,5 +184,36 @@
   "appointments_finished": "Завершённые записи",
   "appointments_empty": "У вас пока нет записей.",
   "appointment_action_cancel": "Отменить",
-  "appointment_action_book_again": "Записаться снова"
+  "appointment_action_book_again": "Записаться снова",
+
+  "provider_nav_appointments": "Записи",
+"provider_nav_dashboard": "Панель",
+"provider_nav_manage": "Управление",
+"provider_nav_account": "Аккаунт",
+
+"provider_appt_today_title": "Сегодняшнее расписание",
+"provider_appt_today_subtitle": "Подключите это к своим записям клиентов/сотрудников.",
+
+"common_coming_soon": "Скоро",
+"provider_dashboard_coming_soon_desc": "Здесь будут аналитика и обзор доходов.",
+
+"provider_manage_services_title": "Услуги",
+"provider_manage_services_subtitle": "Создавайте, редактируйте и сортируйте услуги",
+"provider_manage_business_title": "О бизнесе",
+"provider_manage_business_subtitle": "Название, описание, адрес, контакты",
+"provider_manage_staff_title": "Сотрудники",
+"provider_manage_staff_subtitle": "Добавляйте/редактируйте сотрудников и назначайте им услуги",
+"provider_manage_hours_title": "Часы работы",
+"provider_manage_hours_subtitle": "Установите рабочие часы и исключения",
+
+"provider_action_add_service": "Добавить услугу",
+"provider_action_add_staff": "Добавить сотрудника",
+
+"provider_account_hint": "Профиль, язык, выход…",
+
+"provider_services_hint": "Список и создание/редактирование услуг",
+"provider_business_hint": "Название, описание, адрес, email, телефон, логотип",
+"provider_staff_hint": "Список сотрудников, добавление/редактирование, назначение услуг",
+"provider_hours_hint": "Редактор расписания по неделе и исключения"
+
 }
