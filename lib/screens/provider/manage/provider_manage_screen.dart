@@ -4,6 +4,7 @@ import 'services/provider_services_screen.dart';
 import 'business_info/provider_business_info_screen.dart';
 import 'staff/provider_staff_screen.dart';
 import 'hours/provider_business_hours_screen.dart';
+import '../settings/provider_settings_screen.dart';
 
 class ProviderManageScreen extends StatelessWidget {
   final String? providerId; // ← nullable now
@@ -51,7 +52,7 @@ class ProviderManageScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) =>
-                      ProviderBusinessInfoScreen(providerId: providerId!),
+                      ProviderSettingsScreen(providerId: providerId!),
                 ),
               );
             },

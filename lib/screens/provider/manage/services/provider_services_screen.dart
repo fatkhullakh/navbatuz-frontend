@@ -71,7 +71,8 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(AppLocalizations.of(context)!.deleted ?? 'Deleted')),
+            content:
+                Text(AppLocalizations.of(context)!.action_delete ?? 'Deleted')),
       );
       await _refresh();
     } on DioException catch (e) {

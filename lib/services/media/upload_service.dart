@@ -169,4 +169,56 @@ class UploadService {
     if (raw.isEmpty) throw Exception('Upload failed: empty URL');
     return ApiService.normalizeMediaUrl(raw) ?? raw;
   }
+
+  /// Upload a provider logo image and return a public URL.
+  Future<String> uploadProviderLogo({
+    required String providerId,
+    required String filePath,
+  }) async {
+    final fileName = filePath.split(Platform.pathSeparator).last;
+    final form = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+
+    final res = await _dio.post(
+      '/uploads',
+      queryParameters: {'scope': 'provider', 'ownerId': providerId},
+      data: form,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+
+    final data = (res.data as Map).cast<String, dynamic>();
+    final raw =
+        (data['publicUrl'] ?? data['url'] ?? data['path'] ?? '').toString();
+    if (raw.isEmpty) throw Exception('Upload failed: empty URL');
+
+    // normalize to absolute URL if your backend returns relative paths
+    return ApiService.normalizeMediaUrl(raw) ?? raw;
+  }
+
+  /// One-shot helper: pick from gallery and set as provider logo.
+  /// Returns the final URL or null if cancelled.
+  Future<String?> pickAndSetProviderLogo({
+    required String providerId,
+    bool useCamera = false,
+    void Function(int sent, int total)? onProgress,
+  }) async {
+    final XFile? x = await _picker.pickImage(
+      source: useCamera ? ImageSource.camera : ImageSource.gallery,
+      imageQuality: 92,
+    );
+    if (x == null) return null;
+
+    final url = await uploadProviderLogo(
+      providerId: providerId,
+      filePath: x.path,
+    );
+
+    await _dio.put(
+      '/providers/$providerId/logo',
+      data: {'url': url},
+    );
+
+    return url;
+  }
 }
