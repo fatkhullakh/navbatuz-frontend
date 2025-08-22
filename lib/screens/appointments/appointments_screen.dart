@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/appointment.dart';
-import '../../services/appointment_service.dart';
+import '../../services/appointments/appointment_service.dart';
 import 'appointment_details_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';

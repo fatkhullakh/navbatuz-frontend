@@ -1,7 +1,7 @@
 // lib/services/provider_service.dart
 import 'package:dio/dio.dart';
-import '../core/dio_client.dart';
-import '../models/provider.dart';
+import '../../core/dio_client.dart';
+import '../../models/provider.dart';
 
 class PageResponse<T> {
   final List<T> content;

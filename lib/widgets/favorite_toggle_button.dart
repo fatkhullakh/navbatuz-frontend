@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/favorites_service.dart';
+import '../services/customers/favorites_service.dart';
 
 class FavoriteToggleButton extends StatefulWidget {
   const FavoriteToggleButton({

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import '../services/api_service.dart';
-import '../models/appointment.dart';
+import '../api_service.dart';
+import '../../models/appointment.dart';
 import 'package:intl/intl.dart';
-import '../models/appointment_detail.dart';
+import '../../models/appointment_detail.dart';
 
 class SlotUnavailableException implements Exception {}
 

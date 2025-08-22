@@ -503,4 +503,387 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Qayta bron qilish';
+
+  @override
+  String get provider_nav_appointments => 'Uchrashuvlar';
+
+  @override
+  String get provider_nav_dashboard => 'Panel';
+
+  @override
+  String get provider_nav_manage => 'Boshqarish';
+
+  @override
+  String get provider_nav_account => 'Profil';
+
+  @override
+  String get provider_appt_today_title => 'Bugungi jadval';
+
+  @override
+  String get provider_appt_today_subtitle => 'Bu yerda provayder/xodim uchrashuvlari bo‘ladi.';
+
+  @override
+  String get common_coming_soon => 'Tez orada';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Analitika va daromadlar shu yerda ko‘rsatiladi.';
+
+  @override
+  String get provider_manage_services_title => 'Xizmatlar';
+
+  @override
+  String get provider_manage_services_subtitle => 'Xizmatlarni yaratish, tahrirlash va tartiblash';
+
+  @override
+  String get provider_manage_business_title => 'Biznes ma’lumotlari';
+
+  @override
+  String get provider_manage_business_subtitle => 'Nom, tavsif, manzil, kontaktlar';
+
+  @override
+  String get provider_manage_staff_title => 'Xodimlar';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Xodim qo‘shish/tahrirlash va xizmat biriktirish';
+
+  @override
+  String get provider_manage_hours_title => 'Ish vaqtlari';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Haftalik ish vaqtlari va istisnolar';
+
+  @override
+  String get provider_action_add_service => 'Xizmat qo‘shish';
+
+  @override
+  String get provider_action_add_staff => 'Xodim qo‘shish';
+
+  @override
+  String get provider_account_hint => 'Profil, til, chiqish…';
+
+  @override
+  String get provider_services_hint => 'Xizmatlar ro‘yxati va yaratish/tahrirlash oynasi';
+
+  @override
+  String get provider_business_hint => 'Nom, tavsif, manzil, email, telefon, logo';
+
+  @override
+  String get provider_staff_hint => 'Xodimlar ro‘yxati, qo‘shish/tahrirlash, xizmat biriktirish';
+
+  @override
+  String get provider_hours_hint => 'Haftalik jadval tahrirlash va istisnolar';
+
+  @override
+  String get services_title => 'Xizmatlar';
+
+  @override
+  String get action_refresh => 'Yangilash';
+
+  @override
+  String get action_add => 'Qoʻshish';
+
+  @override
+  String get search_services_hint => 'Xizmatlarni qidirish…';
+
+  @override
+  String get no_data => 'Hali xizmatlar yoʻq';
+
+  @override
+  String get service_create => 'Xizmat yaratish';
+
+  @override
+  String get main_details_required => 'Asosiy ma\'lumotlar';
+
+  @override
+  String get service_name => 'Nomi';
+
+  @override
+  String get required => 'Majburiy';
+
+  @override
+  String get price => 'Narxi';
+
+  @override
+  String get service_duration => 'Davomiyligi';
+
+  @override
+  String get service_description => 'Tavsif';
+
+  @override
+  String get photos => 'Rasmlar';
+
+  @override
+  String get not_set => 'Belgilanmagan';
+
+  @override
+  String get active => 'Faol';
+
+  @override
+  String get add_photo => 'Rasm qoʻshish';
+
+  @override
+  String get image_updated => 'Rasm yangilandi';
+
+  @override
+  String get image_removed => 'Rasm olib tashlandi';
+
+  @override
+  String get error_upload_image => 'Yuklash muvaffaqiyatsiz';
+
+  @override
+  String get error_remove_image => 'Olib tashlashda xatolik';
+
+  @override
+  String get manage_title => 'Boshqaruv';
+
+  @override
+  String get manage_services_title => 'Xizmatlar';
+
+  @override
+  String get manage_services_subtitle => 'Xizmatlarni yaratish, tahrirlash va tartiblash';
+
+  @override
+  String get manage_business_info_title => 'Biznes ma’lumotlari';
+
+  @override
+  String get manage_business_info_subtitle => 'Nomi, kontaktlar, manzil, haqida';
+
+  @override
+  String get manage_staff_title => 'Xodimlar';
+
+  @override
+  String get manage_staff_subtitle => 'Xodimlarni taklif qiling va boshqaring';
+
+  @override
+  String get manage_hours_title => 'Ish vaqti';
+
+  @override
+  String get manage_hours_subtitle => 'Ish jadvali va tanaffuslarni sozlang';
+
+  @override
+  String get prov_nav_dashboard => 'Boshqaruv paneli';
+
+  @override
+  String get prov_nav_manage => 'Boshqaruv';
+
+  @override
+  String get action_delete => 'O‘chirish';
+
+  @override
+  String get action_cancel => 'Bekor qilish';
+
+  @override
+  String get confirm_delete_title => 'Xizmatni o‘chirasizmi?';
+
+  @override
+  String get confirm_delete_msg => 'Bu amalni bekor qilib bo‘lmaydi.';
+
+  @override
+  String get staff_members => 'Xodimlar';
+
+  @override
+  String get invalid => 'Noto‘g‘ri';
+
+  @override
+  String get working_hours => 'Ish vaqti';
+
+  @override
+  String get saved => 'Saqlandi';
+
+  @override
+  String get select_time => 'Vaqtni tanlang';
+
+  @override
+  String get start => 'Boshlanishi';
+
+  @override
+  String get end => 'Tugashi';
+
+  @override
+  String get action_done => 'Tayyor';
+
+  @override
+  String get copy_monday_to_all => 'Dushanba jadvalini barchasiga ko‘chirish';
+
+  @override
+  String get close_all => 'Barchasini yopish';
+
+  @override
+  String get mon_fri => 'Du–Ju';
+
+  @override
+  String get deleted => 'O‘chirilgan';
+
+  @override
+  String get business_info => 'Biznes ma\'lumotlari';
+
+  @override
+  String get change_logo => 'Logoni o‘zgartirish';
+
+  @override
+  String get remove_logo => 'O‘chirish';
+
+  @override
+  String get provider_name => 'Nom';
+
+  @override
+  String get category => 'Kategoriya';
+
+  @override
+  String get team_size => 'Jamoa soni';
+
+  @override
+  String get about => 'Tavsif';
+
+  @override
+  String get contact => 'Aloqa';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get phone => 'Telefon';
+
+  @override
+  String get location => 'Joylashuv';
+
+  @override
+  String get address_line1 => 'Manzil (1-qator)';
+
+  @override
+  String get address_line2 => 'Manzil (2-qator)';
+
+  @override
+  String get district => 'Tuman';
+
+  @override
+  String get city => 'Shahar';
+
+  @override
+  String get country_iso2 => 'Mamlakat (ISO2)';
+
+  @override
+  String get postal_code => 'Pochta indeksi';
+
+  @override
+  String get use_current_location => 'Joriy joylashuvdan foydalanish';
+
+  @override
+  String get location_permission_needed => 'Joylashuv ruxsati talab qilinadi';
+
+  @override
+  String get apply => 'Qo\'llash';
+
+  @override
+  String get edit => 'Tahrirlash';
+
+  @override
+  String get business_info_title => 'Biznes ma\'lumotlari';
+
+  @override
+  String get business_details_tab => 'Tafsilotlar';
+
+  @override
+  String get business_photos_tab => 'Rasmlar';
+
+  @override
+  String get business_location_tab => 'Manzil';
+
+  @override
+  String get business_details_title => 'Biznes maʼlumotlari';
+
+  @override
+  String get company_name_label => 'Nomi';
+
+  @override
+  String get invalid_email => 'Noto‘g‘ri email';
+
+  @override
+  String get logo_title => 'Logo';
+
+  @override
+  String get upload_logo => 'Logo yuklash';
+
+  @override
+  String get take_photo => 'Rasmga olish';
+
+  @override
+  String get gallery_title => 'Portfel / Interyer';
+
+  @override
+  String get add_photos => 'Rasm qo‘shish';
+
+  @override
+  String get gallery_hint => 'Interyer/portfel rasmlarini yuklang (hozircha saqlanmaydi).';
+
+  @override
+  String get location_details_title => 'Manzil tafsilotlari';
+
+  @override
+  String get country => 'Mamlakat';
+
+  @override
+  String get pin_on_map_title => 'Joylashuv nuqtasi (kenglik, uzunlik)';
+
+  @override
+  String get set_pin => 'Nuqtani belgilash';
+
+  @override
+  String get set_coordinates_title => 'Koordinatalarni belgilang';
+
+  @override
+  String get latitude_label => 'Kenglik (-90..90)';
+
+  @override
+  String get longitude_label => 'Uzunlik (-180..180)';
+
+  @override
+  String get use_this_pin => 'Shu pinni ishlatish';
+
+  @override
+  String get enter_valid_numbers => 'To‘g‘ri son kiriting';
+
+  @override
+  String get out_of_range => 'Ruxsat etilgan oraliqdan tashqarida';
+
+  @override
+  String phone_enter_digits_range(Object max, Object min) {
+    return '$min–$max ta raqam kiriting';
+  }
+
+  @override
+  String get location_services_disabled => 'Joylashuv xizmati o‘chirilgan';
+
+  @override
+  String get location_permission_denied => 'Joylashuvga ruxsat berilmadi';
+
+  @override
+  String get no_pin_set => 'Pin qo‘yilmagan';
+
+  @override
+  String get pick_location_title => 'Joylashuvni tanlang';
+
+  @override
+  String get business_settings_title => 'Biznes sozlamalari';
+
+  @override
+  String get business_details_subtitle => 'Nom, tavsif, email, telefon, toifa, logo';
+
+  @override
+  String get select_category => 'Toifani tanlang';
+
+  @override
+  String get save => 'Saqlash';
+
+  @override
+  String get saving => 'Saqlanmoqda…';
+
+  @override
+  String get location_pick_on_map => 'Xaritadan tanlash';
+
+  @override
+  String get location_no_pin => 'Pin qo‘yilmagan';
+
+  @override
+  String get working_hours_subtitle => 'Ish vaqtlarini sozlash';
 }

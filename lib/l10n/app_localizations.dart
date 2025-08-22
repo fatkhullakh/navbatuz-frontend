@@ -1080,6 +1080,768 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Book again'**
   String get appointment_action_book_again;
+
+  /// No description provided for @provider_nav_appointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get provider_nav_appointments;
+
+  /// No description provided for @provider_nav_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get provider_nav_dashboard;
+
+  /// No description provided for @provider_nav_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get provider_nav_manage;
+
+  /// No description provided for @provider_nav_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get provider_nav_account;
+
+  /// No description provided for @provider_appt_today_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s schedule'**
+  String get provider_appt_today_title;
+
+  /// No description provided for @provider_appt_today_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hook this up to your provider/worker appointments.'**
+  String get provider_appt_today_subtitle;
+
+  /// No description provided for @common_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get common_coming_soon;
+
+  /// No description provided for @provider_dashboard_coming_soon_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics and revenue overview will be here.'**
+  String get provider_dashboard_coming_soon_desc;
+
+  /// No description provided for @provider_manage_services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get provider_manage_services_title;
+
+  /// No description provided for @provider_manage_services_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, edit and sort services'**
+  String get provider_manage_services_subtitle;
+
+  /// No description provided for @provider_manage_business_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Info'**
+  String get provider_manage_business_title;
+
+  /// No description provided for @provider_manage_business_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, description, address, contacts'**
+  String get provider_manage_business_subtitle;
+
+  /// No description provided for @provider_manage_staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get provider_manage_staff_title;
+
+  /// No description provided for @provider_manage_staff_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add/edit workers and assign services'**
+  String get provider_manage_staff_subtitle;
+
+  /// No description provided for @provider_manage_hours_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get provider_manage_hours_title;
+
+  /// No description provided for @provider_manage_hours_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set weekly hours and overrides'**
+  String get provider_manage_hours_subtitle;
+
+  /// No description provided for @provider_action_add_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Add service'**
+  String get provider_action_add_service;
+
+  /// No description provided for @provider_action_add_staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get provider_action_add_staff;
+
+  /// No description provided for @provider_account_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile, language, logout…'**
+  String get provider_account_hint;
+
+  /// No description provided for @provider_services_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'List and create/edit services'**
+  String get provider_services_hint;
+
+  /// No description provided for @provider_business_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, description, address, email, phone, logo'**
+  String get provider_business_hint;
+
+  /// No description provided for @provider_staff_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'List workers, add/edit, assign services'**
+  String get provider_staff_hint;
+
+  /// No description provided for @provider_hours_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly grid editor and exceptions'**
+  String get provider_hours_hint;
+
+  /// No description provided for @services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get services_title;
+
+  /// No description provided for @action_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get action_refresh;
+
+  /// No description provided for @action_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get action_add;
+
+  /// No description provided for @search_services_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search services…'**
+  String get search_services_hint;
+
+  /// No description provided for @no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get no_data;
+
+  /// No description provided for @service_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create service'**
+  String get service_create;
+
+  /// No description provided for @main_details_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Main details'**
+  String get main_details_required;
+
+  /// No description provided for @service_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get service_name;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @service_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get service_duration;
+
+  /// No description provided for @service_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get service_description;
+
+  /// No description provided for @photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// No description provided for @not_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get not_set;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @add_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get add_photo;
+
+  /// No description provided for @image_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Image updated'**
+  String get image_updated;
+
+  /// No description provided for @image_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Image removed'**
+  String get image_removed;
+
+  /// No description provided for @error_upload_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed'**
+  String get error_upload_image;
+
+  /// No description provided for @error_remove_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove failed'**
+  String get error_remove_image;
+
+  /// No description provided for @manage_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage_title;
+
+  /// No description provided for @manage_services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get manage_services_title;
+
+  /// No description provided for @manage_services_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, edit, and organize services'**
+  String get manage_services_subtitle;
+
+  /// No description provided for @manage_business_info_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business info'**
+  String get manage_business_info_title;
+
+  /// No description provided for @manage_business_info_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, contacts, address, about'**
+  String get manage_business_info_subtitle;
+
+  /// No description provided for @manage_staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get manage_staff_title;
+
+  /// No description provided for @manage_staff_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite and manage workers'**
+  String get manage_staff_subtitle;
+
+  /// No description provided for @manage_hours_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get manage_hours_title;
+
+  /// No description provided for @manage_hours_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set business schedule and breaks'**
+  String get manage_hours_subtitle;
+
+  /// No description provided for @prov_nav_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get prov_nav_dashboard;
+
+  /// No description provided for @prov_nav_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get prov_nav_manage;
+
+  /// No description provided for @action_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get action_delete;
+
+  /// No description provided for @action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get action_cancel;
+
+  /// No description provided for @confirm_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete service?'**
+  String get confirm_delete_title;
+
+  /// No description provided for @confirm_delete_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get confirm_delete_msg;
+
+  /// No description provided for @staff_members.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff members'**
+  String get staff_members;
+
+  /// No description provided for @invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid'**
+  String get invalid;
+
+  /// No description provided for @working_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get working_hours;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @select_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get select_time;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @end.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get end;
+
+  /// No description provided for @action_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get action_done;
+
+  /// No description provided for @copy_monday_to_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Monday to all'**
+  String get copy_monday_to_all;
+
+  /// No description provided for @close_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Close all'**
+  String get close_all;
+
+  /// No description provided for @mon_fri.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon–Fri'**
+  String get mon_fri;
+
+  /// No description provided for @deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get deleted;
+
+  /// No description provided for @business_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Business info'**
+  String get business_info;
+
+  /// No description provided for @change_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change logo'**
+  String get change_logo;
+
+  /// No description provided for @remove_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove_logo;
+
+  /// No description provided for @provider_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get provider_name;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @team_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Team size'**
+  String get team_size;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @address_line1.
+  ///
+  /// In en, this message translates to:
+  /// **'Address line 1'**
+  String get address_line1;
+
+  /// No description provided for @address_line2.
+  ///
+  /// In en, this message translates to:
+  /// **'Address line 2'**
+  String get address_line2;
+
+  /// No description provided for @district.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get district;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @country_iso2.
+  ///
+  /// In en, this message translates to:
+  /// **'Country ISO2'**
+  String get country_iso2;
+
+  /// No description provided for @postal_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code'**
+  String get postal_code;
+
+  /// No description provided for @use_current_location.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current location'**
+  String get use_current_location;
+
+  /// No description provided for @location_permission_needed.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required'**
+  String get location_permission_needed;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @business_info_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business info'**
+  String get business_info_title;
+
+  /// No description provided for @business_details_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get business_details_tab;
+
+  /// No description provided for @business_photos_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get business_photos_tab;
+
+  /// No description provided for @business_location_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get business_location_tab;
+
+  /// No description provided for @business_details_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business details'**
+  String get business_details_title;
+
+  /// No description provided for @company_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get company_name_label;
+
+  /// No description provided for @invalid_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get invalid_email;
+
+  /// No description provided for @logo_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo'**
+  String get logo_title;
+
+  /// No description provided for @upload_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload logo'**
+  String get upload_logo;
+
+  /// No description provided for @take_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get take_photo;
+
+  /// No description provided for @gallery_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio / Interior'**
+  String get gallery_title;
+
+  /// No description provided for @add_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get add_photos;
+
+  /// No description provided for @gallery_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload interior/portfolio photos (not persisted yet).'**
+  String get gallery_hint;
+
+  /// No description provided for @location_details_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Location details'**
+  String get location_details_title;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @pin_on_map_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin location (lat, lng)'**
+  String get pin_on_map_title;
+
+  /// No description provided for @set_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set pin'**
+  String get set_pin;
+
+  /// No description provided for @set_coordinates_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Set coordinates'**
+  String get set_coordinates_title;
+
+  /// No description provided for @latitude_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude (-90..90)'**
+  String get latitude_label;
+
+  /// No description provided for @longitude_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude (-180..180)'**
+  String get longitude_label;
+
+  /// No description provided for @use_this_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this pin'**
+  String get use_this_pin;
+
+  /// No description provided for @enter_valid_numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid numbers'**
+  String get enter_valid_numbers;
+
+  /// No description provided for @out_of_range.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of range'**
+  String get out_of_range;
+
+  /// No description provided for @phone_enter_digits_range.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter {min}–{max} digits'**
+  String phone_enter_digits_range(Object max, Object min);
+
+  /// No description provided for @location_services_disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled'**
+  String get location_services_disabled;
+
+  /// No description provided for @location_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission denied'**
+  String get location_permission_denied;
+
+  /// No description provided for @no_pin_set.
+  ///
+  /// In en, this message translates to:
+  /// **'No pin set'**
+  String get no_pin_set;
+
+  /// No description provided for @pick_location_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick location'**
+  String get pick_location_title;
+
+  /// No description provided for @business_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Business settings'**
+  String get business_settings_title;
+
+  /// No description provided for @business_details_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, description, email, phone, category, logo'**
+  String get business_details_subtitle;
+
+  /// No description provided for @select_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get select_category;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get saving;
+
+  /// No description provided for @location_pick_on_map.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on map'**
+  String get location_pick_on_map;
+
+  /// No description provided for @location_no_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'No pin set'**
+  String get location_no_pin;
+
+  /// No description provided for @working_hours_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set business hours'**
+  String get working_hours_subtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

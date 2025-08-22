@@ -249,7 +249,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorGeneric => 'Не удалось загрузить';
 
   @override
-  String get closed => 'Выходной';
+  String get closed => 'Закрыто';
 
   @override
   String get dayMonday => 'Понедельник';
@@ -503,4 +503,387 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Записаться снова';
+
+  @override
+  String get provider_nav_appointments => 'Записи';
+
+  @override
+  String get provider_nav_dashboard => 'Панель';
+
+  @override
+  String get provider_nav_manage => 'Управление';
+
+  @override
+  String get provider_nav_account => 'Аккаунт';
+
+  @override
+  String get provider_appt_today_title => 'Сегодняшнее расписание';
+
+  @override
+  String get provider_appt_today_subtitle => 'Подключите это к своим записям клиентов/сотрудников.';
+
+  @override
+  String get common_coming_soon => 'Скоро';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Здесь будут аналитика и обзор доходов.';
+
+  @override
+  String get provider_manage_services_title => 'Услуги';
+
+  @override
+  String get provider_manage_services_subtitle => 'Создавайте, редактируйте и сортируйте услуги';
+
+  @override
+  String get provider_manage_business_title => 'О бизнесе';
+
+  @override
+  String get provider_manage_business_subtitle => 'Название, описание, адрес, контакты';
+
+  @override
+  String get provider_manage_staff_title => 'Сотрудники';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Добавляйте/редактируйте сотрудников и назначайте им услуги';
+
+  @override
+  String get provider_manage_hours_title => 'Часы работы';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Установите рабочие часы и исключения';
+
+  @override
+  String get provider_action_add_service => 'Добавить услугу';
+
+  @override
+  String get provider_action_add_staff => 'Добавить сотрудника';
+
+  @override
+  String get provider_account_hint => 'Профиль, язык, выход…';
+
+  @override
+  String get provider_services_hint => 'Список и создание/редактирование услуг';
+
+  @override
+  String get provider_business_hint => 'Название, описание, адрес, email, телефон, логотип';
+
+  @override
+  String get provider_staff_hint => 'Список сотрудников, добавление/редактирование, назначение услуг';
+
+  @override
+  String get provider_hours_hint => 'Редактор расписания по неделе и исключения';
+
+  @override
+  String get services_title => 'Услуги';
+
+  @override
+  String get action_refresh => 'Обновить';
+
+  @override
+  String get action_add => 'Добавить';
+
+  @override
+  String get search_services_hint => 'Поиск услуг…';
+
+  @override
+  String get no_data => 'Пока нет услуг';
+
+  @override
+  String get service_create => 'Создать услугу';
+
+  @override
+  String get main_details_required => 'Основные данные';
+
+  @override
+  String get service_name => 'Название';
+
+  @override
+  String get required => 'Обязательно';
+
+  @override
+  String get price => 'Цена';
+
+  @override
+  String get service_duration => 'Продолжительность';
+
+  @override
+  String get service_description => 'Описание';
+
+  @override
+  String get photos => 'Фотографии';
+
+  @override
+  String get not_set => 'Не задано';
+
+  @override
+  String get active => 'Активно';
+
+  @override
+  String get add_photo => 'Добавить фото';
+
+  @override
+  String get image_updated => 'Изображение обновлено';
+
+  @override
+  String get image_removed => 'Изображение удалено';
+
+  @override
+  String get error_upload_image => 'Не удалось загрузить';
+
+  @override
+  String get error_remove_image => 'Не удалось удалить';
+
+  @override
+  String get manage_title => 'Управление';
+
+  @override
+  String get manage_services_title => 'Услуги';
+
+  @override
+  String get manage_services_subtitle => 'Создание, редактирование и организация услуг';
+
+  @override
+  String get manage_business_info_title => 'Данные бизнеса';
+
+  @override
+  String get manage_business_info_subtitle => 'Название, контакты, адрес, описание';
+
+  @override
+  String get manage_staff_title => 'Персонал';
+
+  @override
+  String get manage_staff_subtitle => 'Приглашайте и управляйте сотрудниками';
+
+  @override
+  String get manage_hours_title => 'Часы работы';
+
+  @override
+  String get manage_hours_subtitle => 'Настройте расписание и перерывы';
+
+  @override
+  String get prov_nav_dashboard => 'Дашборд';
+
+  @override
+  String get prov_nav_manage => 'Управление';
+
+  @override
+  String get action_delete => 'Удалить';
+
+  @override
+  String get action_cancel => 'Отмена';
+
+  @override
+  String get confirm_delete_title => 'Удалить услугу?';
+
+  @override
+  String get confirm_delete_msg => 'Это действие нельзя отменить.';
+
+  @override
+  String get staff_members => 'Сотрудники';
+
+  @override
+  String get invalid => 'Некорректно';
+
+  @override
+  String get working_hours => 'Часы работы';
+
+  @override
+  String get saved => 'Сохранено';
+
+  @override
+  String get select_time => 'Выберите время';
+
+  @override
+  String get start => 'Начало';
+
+  @override
+  String get end => 'Окончание';
+
+  @override
+  String get action_done => 'Готово';
+
+  @override
+  String get copy_monday_to_all => 'Скопировать понедельник на все';
+
+  @override
+  String get close_all => 'Закрыть все';
+
+  @override
+  String get mon_fri => 'Пн–Пт';
+
+  @override
+  String get deleted => 'Удалено';
+
+  @override
+  String get business_info => 'Информация о бизнесе';
+
+  @override
+  String get change_logo => 'Сменить логотип';
+
+  @override
+  String get remove_logo => 'Удалить';
+
+  @override
+  String get provider_name => 'Название';
+
+  @override
+  String get category => 'Категория';
+
+  @override
+  String get team_size => 'Размер команды';
+
+  @override
+  String get about => 'Описание';
+
+  @override
+  String get contact => 'Контакты';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get phone => 'Телефон';
+
+  @override
+  String get location => 'Местоположение';
+
+  @override
+  String get address_line1 => 'Адрес (строка 1)';
+
+  @override
+  String get address_line2 => 'Адрес (строка 2)';
+
+  @override
+  String get district => 'Район';
+
+  @override
+  String get city => 'Город';
+
+  @override
+  String get country_iso2 => 'Код страны (ISO2)';
+
+  @override
+  String get postal_code => 'Почтовый индекс';
+
+  @override
+  String get use_current_location => 'Использовать текущее местоположение';
+
+  @override
+  String get location_permission_needed => 'Требуется разрешение на геолокацию';
+
+  @override
+  String get apply => 'Применить';
+
+  @override
+  String get edit => 'Редактировать';
+
+  @override
+  String get business_info_title => 'Информация о бизнесе';
+
+  @override
+  String get business_details_tab => 'Детали';
+
+  @override
+  String get business_photos_tab => 'Фото';
+
+  @override
+  String get business_location_tab => 'Локация';
+
+  @override
+  String get business_details_title => 'Данные бизнеса';
+
+  @override
+  String get company_name_label => 'Название';
+
+  @override
+  String get invalid_email => 'Неверный email';
+
+  @override
+  String get logo_title => 'Логотип';
+
+  @override
+  String get upload_logo => 'Загрузить логотип';
+
+  @override
+  String get take_photo => 'Сделать фото';
+
+  @override
+  String get gallery_title => 'Портфолио / Интерьер';
+
+  @override
+  String get add_photos => 'Добавить фото';
+
+  @override
+  String get gallery_hint => 'Загрузите фото интерьера/портфолио (пока не сохраняется).';
+
+  @override
+  String get location_details_title => 'Детали адреса';
+
+  @override
+  String get country => 'Страна';
+
+  @override
+  String get pin_on_map_title => 'Точка на карте (широта, долгота)';
+
+  @override
+  String get set_pin => 'Указать точку';
+
+  @override
+  String get set_coordinates_title => 'Задать координаты';
+
+  @override
+  String get latitude_label => 'Широта (-90..90)';
+
+  @override
+  String get longitude_label => 'Долгота (-180..180)';
+
+  @override
+  String get use_this_pin => 'Использовать этот пин';
+
+  @override
+  String get enter_valid_numbers => 'Введите корректные числа';
+
+  @override
+  String get out_of_range => 'Вне допустимого диапазона';
+
+  @override
+  String phone_enter_digits_range(Object max, Object min) {
+    return 'Введите от $min до $max цифр';
+  }
+
+  @override
+  String get location_services_disabled => 'Службы геолокации отключены';
+
+  @override
+  String get location_permission_denied => 'Доступ к геолокации отклонён';
+
+  @override
+  String get no_pin_set => 'Пин не установлен';
+
+  @override
+  String get pick_location_title => 'Выберите местоположение';
+
+  @override
+  String get business_settings_title => 'Настройки бизнеса';
+
+  @override
+  String get business_details_subtitle => 'Название, описание, email, телефон, категория, логотип';
+
+  @override
+  String get select_category => 'Выберите категорию';
+
+  @override
+  String get save => 'Сохранить';
+
+  @override
+  String get saving => 'Сохранение…';
+
+  @override
+  String get location_pick_on_map => 'Выбрать на карте';
+
+  @override
+  String get location_no_pin => 'Пин не установлен';
+
+  @override
+  String get working_hours_subtitle => 'Настройка рабочего времени';
 }

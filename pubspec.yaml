@@ -41,6 +41,8 @@ dependencies:
   salomon_bottom_bar: ^3.3.2
   jwt_decode: ^0.3.1
   image_picker: ^1.0.7
+  geolocator: ^13.0.1
+  google_maps_flutter: ^2.9.0
 
 
   # The following adds the Cupertino Icons font to your application.

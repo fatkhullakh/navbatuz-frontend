@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
-import '../../services/service_catalog_service.dart';
+import '../../services/services/service_catalog_service.dart';
 import '../services/service_details_screen.dart';
 
 class ServiceSearchScreen extends StatefulWidget {

@@ -503,4 +503,387 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appointment_action_book_again => 'Book again';
+
+  @override
+  String get provider_nav_appointments => 'Appointments';
+
+  @override
+  String get provider_nav_dashboard => 'Dashboard';
+
+  @override
+  String get provider_nav_manage => 'Manage';
+
+  @override
+  String get provider_nav_account => 'Account';
+
+  @override
+  String get provider_appt_today_title => 'Today’s schedule';
+
+  @override
+  String get provider_appt_today_subtitle => 'Hook this up to your provider/worker appointments.';
+
+  @override
+  String get common_coming_soon => 'Coming soon';
+
+  @override
+  String get provider_dashboard_coming_soon_desc => 'Analytics and revenue overview will be here.';
+
+  @override
+  String get provider_manage_services_title => 'Services';
+
+  @override
+  String get provider_manage_services_subtitle => 'Create, edit and sort services';
+
+  @override
+  String get provider_manage_business_title => 'Business Info';
+
+  @override
+  String get provider_manage_business_subtitle => 'Name, description, address, contacts';
+
+  @override
+  String get provider_manage_staff_title => 'Staff';
+
+  @override
+  String get provider_manage_staff_subtitle => 'Add/edit workers and assign services';
+
+  @override
+  String get provider_manage_hours_title => 'Working hours';
+
+  @override
+  String get provider_manage_hours_subtitle => 'Set weekly hours and overrides';
+
+  @override
+  String get provider_action_add_service => 'Add service';
+
+  @override
+  String get provider_action_add_staff => 'Add staff';
+
+  @override
+  String get provider_account_hint => 'Profile, language, logout…';
+
+  @override
+  String get provider_services_hint => 'List and create/edit services';
+
+  @override
+  String get provider_business_hint => 'Name, description, address, email, phone, logo';
+
+  @override
+  String get provider_staff_hint => 'List workers, add/edit, assign services';
+
+  @override
+  String get provider_hours_hint => 'Weekly grid editor and exceptions';
+
+  @override
+  String get services_title => 'Services';
+
+  @override
+  String get action_refresh => 'Refresh';
+
+  @override
+  String get action_add => 'Add';
+
+  @override
+  String get search_services_hint => 'Search services…';
+
+  @override
+  String get no_data => 'No services yet';
+
+  @override
+  String get service_create => 'Create service';
+
+  @override
+  String get main_details_required => 'Main details';
+
+  @override
+  String get service_name => 'Name';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get service_duration => 'Duration';
+
+  @override
+  String get service_description => 'Description';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get not_set => 'Not set';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get add_photo => 'Add photo';
+
+  @override
+  String get image_updated => 'Image updated';
+
+  @override
+  String get image_removed => 'Image removed';
+
+  @override
+  String get error_upload_image => 'Upload failed';
+
+  @override
+  String get error_remove_image => 'Remove failed';
+
+  @override
+  String get manage_title => 'Manage';
+
+  @override
+  String get manage_services_title => 'Services';
+
+  @override
+  String get manage_services_subtitle => 'Create, edit, and organize services';
+
+  @override
+  String get manage_business_info_title => 'Business info';
+
+  @override
+  String get manage_business_info_subtitle => 'Name, contacts, address, about';
+
+  @override
+  String get manage_staff_title => 'Staff';
+
+  @override
+  String get manage_staff_subtitle => 'Invite and manage workers';
+
+  @override
+  String get manage_hours_title => 'Working hours';
+
+  @override
+  String get manage_hours_subtitle => 'Set business schedule and breaks';
+
+  @override
+  String get prov_nav_dashboard => 'Dashboard';
+
+  @override
+  String get prov_nav_manage => 'Manage';
+
+  @override
+  String get action_delete => 'Delete';
+
+  @override
+  String get action_cancel => 'Cancel';
+
+  @override
+  String get confirm_delete_title => 'Delete service?';
+
+  @override
+  String get confirm_delete_msg => 'This action cannot be undone.';
+
+  @override
+  String get staff_members => 'Staff members';
+
+  @override
+  String get invalid => 'Invalid';
+
+  @override
+  String get working_hours => 'Working hours';
+
+  @override
+  String get saved => 'Saved';
+
+  @override
+  String get select_time => 'Select time';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get end => 'End';
+
+  @override
+  String get action_done => 'Done';
+
+  @override
+  String get copy_monday_to_all => 'Copy Monday to all';
+
+  @override
+  String get close_all => 'Close all';
+
+  @override
+  String get mon_fri => 'Mon–Fri';
+
+  @override
+  String get deleted => 'Deleted';
+
+  @override
+  String get business_info => 'Business info';
+
+  @override
+  String get change_logo => 'Change logo';
+
+  @override
+  String get remove_logo => 'Remove';
+
+  @override
+  String get provider_name => 'Name';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get team_size => 'Team size';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get address_line1 => 'Address line 1';
+
+  @override
+  String get address_line2 => 'Address line 2';
+
+  @override
+  String get district => 'District';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get country_iso2 => 'Country ISO2';
+
+  @override
+  String get postal_code => 'Postal code';
+
+  @override
+  String get use_current_location => 'Use current location';
+
+  @override
+  String get location_permission_needed => 'Location permission required';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get business_info_title => 'Business info';
+
+  @override
+  String get business_details_tab => 'Details';
+
+  @override
+  String get business_photos_tab => 'Photos';
+
+  @override
+  String get business_location_tab => 'Location';
+
+  @override
+  String get business_details_title => 'Business details';
+
+  @override
+  String get company_name_label => 'Name';
+
+  @override
+  String get invalid_email => 'Invalid email';
+
+  @override
+  String get logo_title => 'Logo';
+
+  @override
+  String get upload_logo => 'Upload logo';
+
+  @override
+  String get take_photo => 'Take photo';
+
+  @override
+  String get gallery_title => 'Portfolio / Interior';
+
+  @override
+  String get add_photos => 'Add photos';
+
+  @override
+  String get gallery_hint => 'Upload interior/portfolio photos (not persisted yet).';
+
+  @override
+  String get location_details_title => 'Location details';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get pin_on_map_title => 'Pin location (lat, lng)';
+
+  @override
+  String get set_pin => 'Set pin';
+
+  @override
+  String get set_coordinates_title => 'Set coordinates';
+
+  @override
+  String get latitude_label => 'Latitude (-90..90)';
+
+  @override
+  String get longitude_label => 'Longitude (-180..180)';
+
+  @override
+  String get use_this_pin => 'Use this pin';
+
+  @override
+  String get enter_valid_numbers => 'Enter valid numbers';
+
+  @override
+  String get out_of_range => 'Out of range';
+
+  @override
+  String phone_enter_digits_range(Object max, Object min) {
+    return 'Enter $min–$max digits';
+  }
+
+  @override
+  String get location_services_disabled => 'Location services are disabled';
+
+  @override
+  String get location_permission_denied => 'Location permission denied';
+
+  @override
+  String get no_pin_set => 'No pin set';
+
+  @override
+  String get pick_location_title => 'Pick location';
+
+  @override
+  String get business_settings_title => 'Business settings';
+
+  @override
+  String get business_details_subtitle => 'Name, description, email, phone, category, logo';
+
+  @override
+  String get select_category => 'Select category';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get saving => 'Saving…';
+
+  @override
+  String get location_pick_on_map => 'Pick on map';
+
+  @override
+  String get location_no_pin => 'No pin set';
+
+  @override
+  String get working_hours_subtitle => 'Set business hours';
 }

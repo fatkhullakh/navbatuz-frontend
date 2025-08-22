@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 
 class CategoryItem {
   final String id; // e.g. "CLINIC"

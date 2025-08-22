@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/service_catalog_service.dart';
-import '../../services/provider_public_service.dart';
-import '../../services/worker_service.dart';
-import '../../services/appointment_service.dart';
+import '../../services/services/service_catalog_service.dart';
+import '../../services/services/provider_public_service.dart';
+import '../../services/workers/worker_service.dart';
+import '../../services/appointments/appointment_service.dart';
 import 'review_confirm_screen.dart';
 
 class ServiceBookingScreen extends StatefulWidget {

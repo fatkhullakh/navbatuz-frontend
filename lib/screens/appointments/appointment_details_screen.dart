@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/appointment_detail.dart';
-import '../../services/appointment_service.dart';
+import '../../services/appointments/appointment_service.dart';
 import '../../services/api_service.dart';
 
 import '../providers/provider_screen.dart';

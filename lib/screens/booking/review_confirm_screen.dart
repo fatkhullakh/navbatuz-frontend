@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
-import '../../services/appointment_service.dart';
-import '../../services/service_catalog_service.dart';
-import '../../services/provider_public_service.dart';
+import '../../services/appointments/appointment_service.dart';
+import '../../services/services/service_catalog_service.dart';
+import '../../services/services/provider_public_service.dart';
 import 'booking_success_screen.dart';
-import '../../services/customer_service.dart';
+import '../../services/customers/customer_service.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */
 class _Brand {

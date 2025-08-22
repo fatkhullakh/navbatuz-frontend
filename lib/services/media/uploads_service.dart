@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 
 class UploadsService {
   final Dio _dio = ApiService.client;

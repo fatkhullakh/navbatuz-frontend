@@ -1,6 +1,6 @@
 // lib/widgets/change_avatar_tile.dart
 import 'package:flutter/material.dart';
-import '../services/upload_service.dart';
+import '../services/media/upload_service.dart';
 import '../services/api_service.dart';
 
 class ChangeAvatarTile extends StatefulWidget {

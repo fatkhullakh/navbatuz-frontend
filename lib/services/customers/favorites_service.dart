@@ -1,6 +1,6 @@
 // lib/services/favorites_service.dart
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 
 class FavoriteService {
   final Dio _dio = ApiService.client;

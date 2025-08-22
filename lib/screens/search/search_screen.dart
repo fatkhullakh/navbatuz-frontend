@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
-import '../../services/provider_public_service.dart';
-import '../../services/service_catalog_service.dart';
+import '../../services/services/provider_public_service.dart';
+import '../../services/services/service_catalog_service.dart';
 import '../providers/provider_screen.dart';
 import '../services/service_details_screen.dart';
 

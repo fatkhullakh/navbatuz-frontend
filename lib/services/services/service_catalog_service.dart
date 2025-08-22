@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'api_service.dart';
+import '../api_service.dart';
 import 'provider_public_service.dart'; // WorkerLite
 
 Duration? _parseIsoDuration(String? s) {
