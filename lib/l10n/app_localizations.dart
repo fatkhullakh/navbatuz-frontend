@@ -1842,6 +1842,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set business hours'**
   String get working_hours_subtitle;
+
+  /// No description provided for @staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff_title;
+
+  /// No description provided for @staff_add_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get staff_add_member;
+
+  /// No description provided for @staff_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name or phone…'**
+  String get staff_search_hint;
+
+  /// No description provided for @staff_show_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inactive'**
+  String get staff_show_inactive;
+
+  /// No description provided for @staff_invite_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite staff'**
+  String get staff_invite_title;
+
+  /// No description provided for @staff_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit staff'**
+  String get staff_edit_title;
+
+  /// No description provided for @staff_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get staff_role;
+
+  /// No description provided for @role_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get role_owner;
+
+  /// No description provided for @role_receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Receptionist'**
+  String get role_receptionist;
+
+  /// No description provided for @role_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get role_worker;
+
+  /// No description provided for @staff_remove_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get staff_remove_confirm_title;
+
+  /// No description provided for @staff_remove_confirm_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get staff_remove_confirm_msg;
+
+  /// No description provided for @invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get invite;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @action_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get action_remove;
+
+  /// No description provided for @action_deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get action_deactivate;
+
+  /// No description provided for @action_activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get action_activate;
+
+  /// No description provided for @person_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get person_name;
+
+  /// No description provided for @manage_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage services'**
+  String get manage_services;
+
+  /// No description provided for @edit_availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit availability'**
+  String get edit_availability;
+
+  /// No description provided for @activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// No description provided for @deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivate;
+
+  /// No description provided for @invite_worker_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite worker'**
+  String get invite_worker_title;
+
+  /// No description provided for @personal_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal info'**
+  String get personal_info;
+
+  /// No description provided for @first_name.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get first_name;
+
+  /// No description provided for @last_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get last_name;
+
+  /// No description provided for @upload_avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload avatar'**
+  String get upload_avatar;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @create_send_invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create & send invite'**
+  String get create_send_invite;
+
+  /// No description provided for @invite_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get invite_sent;
+
+  /// No description provided for @working_this_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Working this day'**
+  String get working_this_day;
+
+  /// No description provided for @breaks_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaks'**
+  String get breaks_title;
+
+  /// No description provided for @add_break.
+  ///
+  /// In en, this message translates to:
+  /// **'Add break'**
+  String get add_break;
+
+  /// No description provided for @select_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get select_date;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

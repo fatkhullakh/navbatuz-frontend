@@ -403,6 +403,45 @@
   "saved": "Saqlandi",
   "location_pick_on_map": "Xaritadan tanlash",
   "location_no_pin": "Pin qo‘yilmagan",
-  "working_hours_subtitle": "Ish vaqtlarini sozlash"
+  "working_hours_subtitle": "Ish vaqtlarini sozlash",
+
+  "staff_title": "Xodimlar",
+  "staff_add_member": "Xodim qo‘shish",
+  "staff_search_hint": "Ism yoki telefon bo‘yicha qidirish…",
+  "staff_show_inactive": "Noaktivlarni ko‘rsatish",
+  "staff_invite_title": "Xodim taklif qilish",
+  "staff_edit_title": "Xodimni tahrirlash",
+  "staff_role": "Roli",
+  "role_owner": "Ega",
+  "role_receptionist": "Administrator",
+  "role_worker": "Xodim",
+  "staff_remove_confirm_title": "Xodim o‘chirilsinmi?",
+  "staff_remove_confirm_msg": "Bu amalni qaytarib bo‘lmaydi.",
+  "invite": "Taklif qilish",
+
+  "inactive": "Noaktiv",
+  "action_remove": "O‘chirish",
+  "action_deactivate": "O‘chirib qo‘yish",
+  "action_activate": "Faollashtirish",
+  "person_name": "Ism",
+
+  "manage_services": "Xizmatlarni boshqarish",
+  "edit_availability": "Ish jadvalini tahrirlash",
+  "activate": "Faollashtirish",
+  "deactivate": "Faolsizlantirish",
+
+  "invite_worker_title": "Xodimni taklif qilish",
+  "personal_info": "Shaxsiy ma’lumotlar",
+  "first_name": "Ism",
+  "last_name": "Familiya",
+  "upload_avatar": "Avatar yuklash",
+  "next": "Keyingi",
+  "back": "Ortga",
+  "create_send_invite": "Yaratish va taklif yuborish",
+  "invite_sent": "Taklif yuborildi",
+  "working_this_day": "Ushbu kunda ishlaydi",
+  "breaks_title": "Tanaffuslar",
+  "add_break": "Tanaffus qo‘shish",
+  "select_date": "Sana tanlang"
 
 }

@@ -886,4 +886,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get working_hours_subtitle => 'Set business hours';
+
+  @override
+  String get staff_title => 'Staff';
+
+  @override
+  String get staff_add_member => 'Add staff';
+
+  @override
+  String get staff_search_hint => 'Search name or phone…';
+
+  @override
+  String get staff_show_inactive => 'Show inactive';
+
+  @override
+  String get staff_invite_title => 'Invite staff';
+
+  @override
+  String get staff_edit_title => 'Edit staff';
+
+  @override
+  String get staff_role => 'Role';
+
+  @override
+  String get role_owner => 'Owner';
+
+  @override
+  String get role_receptionist => 'Receptionist';
+
+  @override
+  String get role_worker => 'Staff';
+
+  @override
+  String get staff_remove_confirm_title => 'Remove member?';
+
+  @override
+  String get staff_remove_confirm_msg => 'This action cannot be undone.';
+
+  @override
+  String get invite => 'Invite';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get action_remove => 'Remove';
+
+  @override
+  String get action_deactivate => 'Deactivate';
+
+  @override
+  String get action_activate => 'Activate';
+
+  @override
+  String get person_name => 'Name';
+
+  @override
+  String get manage_services => 'Manage services';
+
+  @override
+  String get edit_availability => 'Edit availability';
+
+  @override
+  String get activate => 'Activate';
+
+  @override
+  String get deactivate => 'Deactivate';
+
+  @override
+  String get invite_worker_title => 'Invite worker';
+
+  @override
+  String get personal_info => 'Personal info';
+
+  @override
+  String get first_name => 'First name';
+
+  @override
+  String get last_name => 'Last name';
+
+  @override
+  String get upload_avatar => 'Upload avatar';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get create_send_invite => 'Create & send invite';
+
+  @override
+  String get invite_sent => 'Invitation sent';
+
+  @override
+  String get working_this_day => 'Working this day';
+
+  @override
+  String get breaks_title => 'Breaks';
+
+  @override
+  String get add_break => 'Add break';
+
+  @override
+  String get select_date => 'Select date';
 }

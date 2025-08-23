@@ -886,4 +886,109 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get working_hours_subtitle => 'Настройка рабочего времени';
+
+  @override
+  String get staff_title => 'Сотрудники';
+
+  @override
+  String get staff_add_member => 'Добавить сотрудника';
+
+  @override
+  String get staff_search_hint => 'Поиск по имени или телефону…';
+
+  @override
+  String get staff_show_inactive => 'Показывать неактивных';
+
+  @override
+  String get staff_invite_title => 'Пригласить сотрудника';
+
+  @override
+  String get staff_edit_title => 'Редактировать сотрудника';
+
+  @override
+  String get staff_role => 'Роль';
+
+  @override
+  String get role_owner => 'Владелец';
+
+  @override
+  String get role_receptionist => 'Администратор';
+
+  @override
+  String get role_worker => 'Сотрудник';
+
+  @override
+  String get staff_remove_confirm_title => 'Удалить сотрудника?';
+
+  @override
+  String get staff_remove_confirm_msg => 'Это действие нельзя отменить.';
+
+  @override
+  String get invite => 'Пригласить';
+
+  @override
+  String get inactive => 'Неактивен';
+
+  @override
+  String get action_remove => 'Удалить';
+
+  @override
+  String get action_deactivate => 'Деактивировать';
+
+  @override
+  String get action_activate => 'Активировать';
+
+  @override
+  String get person_name => 'Имя';
+
+  @override
+  String get manage_services => 'Управлять услугами';
+
+  @override
+  String get edit_availability => 'Редактировать график';
+
+  @override
+  String get activate => 'Активировать';
+
+  @override
+  String get deactivate => 'Деактивировать';
+
+  @override
+  String get invite_worker_title => 'Пригласить сотрудника';
+
+  @override
+  String get personal_info => 'Личные данные';
+
+  @override
+  String get first_name => 'Имя';
+
+  @override
+  String get last_name => 'Фамилия';
+
+  @override
+  String get upload_avatar => 'Загрузить аватар';
+
+  @override
+  String get next => 'Далее';
+
+  @override
+  String get back => 'Назад';
+
+  @override
+  String get create_send_invite => 'Создать и отправить приглашение';
+
+  @override
+  String get invite_sent => 'Приглашение отправлено';
+
+  @override
+  String get working_this_day => 'Работает в этот день';
+
+  @override
+  String get breaks_title => 'Перерывы';
+
+  @override
+  String get add_break => 'Добавить перерыв';
+
+  @override
+  String get select_date => 'Выбрать дату';
 }

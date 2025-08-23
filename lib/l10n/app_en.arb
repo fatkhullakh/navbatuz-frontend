@@ -401,6 +401,45 @@
   "saved": "Saved",
   "location_pick_on_map": "Pick on map",
   "location_no_pin": "No pin set",
-  "working_hours_subtitle": "Set business hours"
+  "working_hours_subtitle": "Set business hours",
+
+  "staff_title": "Staff",
+  "staff_add_member": "Add staff",
+  "staff_search_hint": "Search name or phone…",
+  "staff_show_inactive": "Show inactive",
+  "staff_invite_title": "Invite staff",
+  "staff_edit_title": "Edit staff",
+  "staff_role": "Role",
+  "role_owner": "Owner",
+  "role_receptionist": "Receptionist",
+  "role_worker": "Staff",
+  "staff_remove_confirm_title": "Remove member?",
+  "staff_remove_confirm_msg": "This action cannot be undone.",
+  "invite": "Invite",
+
+  "inactive": "Inactive",
+  "action_remove": "Remove",
+  "action_deactivate": "Deactivate",
+  "action_activate": "Activate",
+  "person_name": "Name",
+
+  "manage_services": "Manage services",
+  "edit_availability": "Edit availability",
+  "activate": "Activate",
+  "deactivate": "Deactivate",
+
+  "invite_worker_title": "Invite worker",
+  "personal_info": "Personal info",
+  "first_name": "First name",
+  "last_name": "Last name",
+  "upload_avatar": "Upload avatar",
+  "next": "Next",
+  "back": "Back",
+  "create_send_invite": "Create & send invite",
+  "invite_sent": "Invitation sent",
+  "working_this_day": "Working this day",
+  "breaks_title": "Breaks",
+  "add_break": "Add break",
+  "select_date": "Select date"
 
 }

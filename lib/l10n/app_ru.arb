@@ -403,6 +403,45 @@
   "saved": "Сохранено",
   "location_pick_on_map": "Выбрать на карте",
   "location_no_pin": "Пин не установлен",
-  "working_hours_subtitle": "Настройка рабочего времени"
+  "working_hours_subtitle": "Настройка рабочего времени",
+
+  "staff_title": "Сотрудники",
+  "staff_add_member": "Добавить сотрудника",
+  "staff_search_hint": "Поиск по имени или телефону…",
+  "staff_show_inactive": "Показывать неактивных",
+  "staff_invite_title": "Пригласить сотрудника",
+  "staff_edit_title": "Редактировать сотрудника",
+  "staff_role": "Роль",
+  "role_owner": "Владелец",
+  "role_receptionist": "Администратор",
+  "role_worker": "Сотрудник",
+  "staff_remove_confirm_title": "Удалить сотрудника?",
+  "staff_remove_confirm_msg": "Это действие нельзя отменить.",
+  "invite": "Пригласить",
+
+  "inactive": "Неактивен",
+  "action_remove": "Удалить",
+  "action_deactivate": "Деактивировать",
+  "action_activate": "Активировать",
+  "person_name": "Имя",
+
+  "manage_services": "Управлять услугами",
+  "edit_availability": "Редактировать график",
+  "activate": "Активировать",
+  "deactivate": "Деактивировать",
+
+  "invite_worker_title": "Пригласить сотрудника",
+  "personal_info": "Личные данные",
+  "first_name": "Имя",
+  "last_name": "Фамилия",
+  "upload_avatar": "Загрузить аватар",
+  "next": "Далее",
+  "back": "Назад",
+  "create_send_invite": "Создать и отправить приглашение",
+  "invite_sent": "Приглашение отправлено",
+  "working_this_day": "Работает в этот день",
+  "breaks_title": "Перерывы",
+  "add_break": "Добавить перерыв",
+  "select_date": "Выбрать дату"
 
 }

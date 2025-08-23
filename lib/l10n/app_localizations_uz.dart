@@ -886,4 +886,109 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get working_hours_subtitle => 'Ish vaqtlarini sozlash';
+
+  @override
+  String get staff_title => 'Xodimlar';
+
+  @override
+  String get staff_add_member => 'Xodim qo‘shish';
+
+  @override
+  String get staff_search_hint => 'Ism yoki telefon bo‘yicha qidirish…';
+
+  @override
+  String get staff_show_inactive => 'Noaktivlarni ko‘rsatish';
+
+  @override
+  String get staff_invite_title => 'Xodim taklif qilish';
+
+  @override
+  String get staff_edit_title => 'Xodimni tahrirlash';
+
+  @override
+  String get staff_role => 'Roli';
+
+  @override
+  String get role_owner => 'Ega';
+
+  @override
+  String get role_receptionist => 'Administrator';
+
+  @override
+  String get role_worker => 'Xodim';
+
+  @override
+  String get staff_remove_confirm_title => 'Xodim o‘chirilsinmi?';
+
+  @override
+  String get staff_remove_confirm_msg => 'Bu amalni qaytarib bo‘lmaydi.';
+
+  @override
+  String get invite => 'Taklif qilish';
+
+  @override
+  String get inactive => 'Noaktiv';
+
+  @override
+  String get action_remove => 'O‘chirish';
+
+  @override
+  String get action_deactivate => 'O‘chirib qo‘yish';
+
+  @override
+  String get action_activate => 'Faollashtirish';
+
+  @override
+  String get person_name => 'Ism';
+
+  @override
+  String get manage_services => 'Xizmatlarni boshqarish';
+
+  @override
+  String get edit_availability => 'Ish jadvalini tahrirlash';
+
+  @override
+  String get activate => 'Faollashtirish';
+
+  @override
+  String get deactivate => 'Faolsizlantirish';
+
+  @override
+  String get invite_worker_title => 'Xodimni taklif qilish';
+
+  @override
+  String get personal_info => 'Shaxsiy ma’lumotlar';
+
+  @override
+  String get first_name => 'Ism';
+
+  @override
+  String get last_name => 'Familiya';
+
+  @override
+  String get upload_avatar => 'Avatar yuklash';
+
+  @override
+  String get next => 'Keyingi';
+
+  @override
+  String get back => 'Ortga';
+
+  @override
+  String get create_send_invite => 'Yaratish va taklif yuborish';
+
+  @override
+  String get invite_sent => 'Taklif yuborildi';
+
+  @override
+  String get working_this_day => 'Ushbu kunda ishlaydi';
+
+  @override
+  String get breaks_title => 'Tanaffuslar';
+
+  @override
+  String get add_break => 'Tanaffus qo‘shish';
+
+  @override
+  String get select_date => 'Sana tanlang';
 }
