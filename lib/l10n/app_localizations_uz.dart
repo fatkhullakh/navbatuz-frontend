@@ -886,4 +886,223 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get working_hours_subtitle => 'Ish vaqtlarini sozlash';
+
+  @override
+  String get staff_title => 'Xodimlar';
+
+  @override
+  String get staff_add_member => 'Xodim qo‘shish';
+
+  @override
+  String get staff_search_hint => 'Ism yoki telefon bo‘yicha qidirish…';
+
+  @override
+  String get staff_show_inactive => 'Noaktivlarni ko‘rsatish';
+
+  @override
+  String get staff_invite_title => 'Xodimni taklif qilish';
+
+  @override
+  String get staff_edit_title => 'Xodimni tahrirlash';
+
+  @override
+  String get staff_role => 'Roli';
+
+  @override
+  String get role_owner => 'Ega';
+
+  @override
+  String get role_receptionist => 'Administrator';
+
+  @override
+  String get role_worker => 'Xodim';
+
+  @override
+  String get staff_remove_confirm_title => 'Xodim o‘chirilsinmi?';
+
+  @override
+  String get staff_remove_confirm_msg => 'Bu amalni qaytarib bo‘lmaydi.';
+
+  @override
+  String get invite => 'Taklif qilish';
+
+  @override
+  String get inactive => 'Noaktiv';
+
+  @override
+  String get action_remove => 'O‘chirish';
+
+  @override
+  String get action_deactivate => 'O‘chirib qo‘yish';
+
+  @override
+  String get action_activate => 'Faollashtirish';
+
+  @override
+  String get person_name => 'Ism';
+
+  @override
+  String get manage_services => 'Xizmatlarni boshqarish';
+
+  @override
+  String get edit_availability => 'Ish jadvalini tahrirlash';
+
+  @override
+  String get activate => 'Faollashtirish';
+
+  @override
+  String get deactivate => 'Faolsizlantirish';
+
+  @override
+  String get invite_worker_title => 'Xodimni qo‘shish va taklif qilish';
+
+  @override
+  String get personal_info => 'Shaxsiy ma’lumotlar';
+
+  @override
+  String get first_name => 'Ism';
+
+  @override
+  String get last_name => 'Familiya';
+
+  @override
+  String get upload_avatar => 'Avatar yuklash';
+
+  @override
+  String get next => 'Keyingi';
+
+  @override
+  String get back => 'Ortga';
+
+  @override
+  String get create_send_invite => 'Yaratish va taklif yuborish';
+
+  @override
+  String get invite_sent => 'Taklif yuborildi';
+
+  @override
+  String get working_this_day => 'Ushbu kunda ishlaydi';
+
+  @override
+  String get breaks_title => 'Tanaffuslar';
+
+  @override
+  String get add_break => 'Tanaffus qo‘shish';
+
+  @override
+  String get select_date => 'Sana tanlang';
+
+  @override
+  String get weekly_schedule => 'Haftalik';
+
+  @override
+  String get exceptions => 'Istisnolar';
+
+  @override
+  String get exception_for_day => 'Shu kun uchun istisno';
+
+  @override
+  String get delete_exception_title => 'Istisnoni o‘chirasizmi?';
+
+  @override
+  String get delete_exception_msg => 'Bu kunga qo‘yilgan istisno o‘chiriladi.';
+
+  @override
+  String get breaks_for_day => 'Ushbu kundagi tanaffuslar';
+
+  @override
+  String get no_breaks => 'Tanaffuslar yo‘q.';
+
+  @override
+  String get delete_break_title => 'Tanaffusni o‘chirish?';
+
+  @override
+  String get delete_break_msg => 'Bu amalni qaytarib bo‘lmaydi.';
+
+  @override
+  String get buffer_minutes => 'Buffer (daq)';
+
+  @override
+  String get activated => 'Faollashtirildi';
+
+  @override
+  String get deactivated => 'O‘chirildi';
+
+  @override
+  String get invite_flow_placeholder => 'Bu yerda yangi foydalanuvchini (ism, aloqa, avatar) ro‘yxatdan o‘tkazish, rol berish va login/parolni email/SMS orqali yuborish bo‘ladi.';
+
+  @override
+  String get staff_only_available => 'Faqat mavjudlarni ko‘rsatish';
+
+  @override
+  String get tab_week => 'Hafta';
+
+  @override
+  String get tab_exceptions => 'Istisnolar';
+
+  @override
+  String get tab_breaks => 'Tanaffuslar';
+
+  @override
+  String get copy_mon_all => 'Du ni → Hamma kunga nusxalash';
+
+  @override
+  String get copy_mon_fri => 'Du ni → Du–Ju nusxalash';
+
+  @override
+  String get copied_mon_all => 'Dushanba barcha kunlarga nusxalandi';
+
+  @override
+  String get copied_mon_fri => 'Dushanba Du–Ju ga nusxalandi';
+
+  @override
+  String get buffer_min_short => 'Buffer (daq)';
+
+  @override
+  String get delete_exception => 'Istisnoni o‘chirish';
+
+  @override
+  String get no_breaks_day => 'Tanaffuslar yo‘q.';
+
+  @override
+  String get break_added => 'Tanaffus qo‘shildi';
+
+  @override
+  String get only_available => 'Faqat mavjudlar';
+
+  @override
+  String get time_select_title => 'Vaqtni tanlang';
+
+  @override
+  String get step_personal => 'Shaxsiy ma’lumotlar va kontaktlar';
+
+  @override
+  String get surname => 'Familiya';
+
+  @override
+  String get gender => 'Jinsi';
+
+  @override
+  String get worker_type => 'Xodim turi';
+
+  @override
+  String get action_invite => 'Yaratish va taklif yuborish';
+
+  @override
+  String get invite_sent_title => 'Taklif yuborildi';
+
+  @override
+  String get login_email => 'Login (email)';
+
+  @override
+  String get temp_password => 'Vaqtinchalik parol';
+
+  @override
+  String get invite_note_change_password => 'Birinchi kirishda parolni almashtirish talab qilinadi.';
+
+  @override
+  String get date_of_birth => 'Tug‘ilgan sana';
+
+  @override
+  String get language => 'Til';
 }

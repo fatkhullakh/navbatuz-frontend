@@ -886,4 +886,223 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get working_hours_subtitle => 'Set business hours';
+
+  @override
+  String get staff_title => 'Staff';
+
+  @override
+  String get staff_add_member => 'Add staff';
+
+  @override
+  String get staff_search_hint => 'Search name or phone…';
+
+  @override
+  String get staff_show_inactive => 'Show inactive';
+
+  @override
+  String get staff_invite_title => 'Invite staff';
+
+  @override
+  String get staff_edit_title => 'Edit staff';
+
+  @override
+  String get staff_role => 'Role';
+
+  @override
+  String get role_owner => 'Owner';
+
+  @override
+  String get role_receptionist => 'Receptionist';
+
+  @override
+  String get role_worker => 'Staff';
+
+  @override
+  String get staff_remove_confirm_title => 'Remove member?';
+
+  @override
+  String get staff_remove_confirm_msg => 'This action cannot be undone.';
+
+  @override
+  String get invite => 'Invite';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get action_remove => 'Remove';
+
+  @override
+  String get action_deactivate => 'Deactivate';
+
+  @override
+  String get action_activate => 'Activate';
+
+  @override
+  String get person_name => 'Name';
+
+  @override
+  String get manage_services => 'Manage services';
+
+  @override
+  String get edit_availability => 'Edit availability';
+
+  @override
+  String get activate => 'Activate';
+
+  @override
+  String get deactivate => 'Deactivate';
+
+  @override
+  String get invite_worker_title => 'Add & Invite worker';
+
+  @override
+  String get personal_info => 'Personal info';
+
+  @override
+  String get first_name => 'First name';
+
+  @override
+  String get last_name => 'Last name';
+
+  @override
+  String get upload_avatar => 'Upload avatar';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get create_send_invite => 'Create & send invite';
+
+  @override
+  String get invite_sent => 'Invitation sent';
+
+  @override
+  String get working_this_day => 'Working this day';
+
+  @override
+  String get breaks_title => 'Breaks';
+
+  @override
+  String get add_break => 'Add break';
+
+  @override
+  String get select_date => 'Select date';
+
+  @override
+  String get weekly_schedule => 'Weekly';
+
+  @override
+  String get exceptions => 'Exceptions';
+
+  @override
+  String get exception_for_day => 'Exception for this day';
+
+  @override
+  String get delete_exception_title => 'Remove exception?';
+
+  @override
+  String get delete_exception_msg => 'This will delete the exception for this day.';
+
+  @override
+  String get breaks_for_day => 'Breaks for this day';
+
+  @override
+  String get no_breaks => 'No breaks.';
+
+  @override
+  String get delete_break_title => 'Delete break?';
+
+  @override
+  String get delete_break_msg => 'This action cannot be undone.';
+
+  @override
+  String get buffer_minutes => 'Buffer (min)';
+
+  @override
+  String get activated => 'Activated';
+
+  @override
+  String get deactivated => 'Deactivated';
+
+  @override
+  String get invite_flow_placeholder => 'This screen will register a new user (name, contacts, avatar), assign a role and send credentials via email/SMS.';
+
+  @override
+  String get staff_only_available => 'Show only available';
+
+  @override
+  String get tab_week => 'Week';
+
+  @override
+  String get tab_exceptions => 'Exceptions';
+
+  @override
+  String get tab_breaks => 'Breaks';
+
+  @override
+  String get copy_mon_all => 'Copy Mon → All';
+
+  @override
+  String get copy_mon_fri => 'Copy Mon → Fri';
+
+  @override
+  String get copied_mon_all => 'Copied Monday to all days';
+
+  @override
+  String get copied_mon_fri => 'Copied Monday to Mon–Fri';
+
+  @override
+  String get buffer_min_short => 'Buffer (min)';
+
+  @override
+  String get delete_exception => 'Delete this exception';
+
+  @override
+  String get no_breaks_day => 'No breaks for this day.';
+
+  @override
+  String get break_added => 'Break added';
+
+  @override
+  String get only_available => 'Only available';
+
+  @override
+  String get time_select_title => 'Select time';
+
+  @override
+  String get step_personal => 'Personal & contact';
+
+  @override
+  String get surname => 'Surname';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get worker_type => 'Worker type';
+
+  @override
+  String get action_invite => 'Create & send invite';
+
+  @override
+  String get invite_sent_title => 'Invitation sent';
+
+  @override
+  String get login_email => 'Login (email)';
+
+  @override
+  String get temp_password => 'Temporary password';
+
+  @override
+  String get invite_note_change_password => 'They will be asked to change the password on first login.';
+
+  @override
+  String get date_of_birth => 'Date of birth';
+
+  @override
+  String get language => 'Language';
 }

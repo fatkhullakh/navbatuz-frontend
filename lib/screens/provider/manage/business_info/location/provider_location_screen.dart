@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../services/api_service.dart';
-import 'map_pin_picker_screen.dart';
 import 'provider_location_picker_screen.dart';
 
 class ProviderLocationScreen extends StatefulWidget {

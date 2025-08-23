@@ -3,7 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../services/services/provider_services_service.dart';
 import '../../../../services/media/upload_service.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/providers/provider_owner_services_service.dart';

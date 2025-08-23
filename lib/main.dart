@@ -5,12 +5,8 @@ import 'core/locale_notifier.dart';
 import 'l10n/app_localizations.dart';
 import 'navigation/nav_root.dart';
 import 'screens/auth/login_screen.dart';
-import 'package:flutter/material.dart';
-import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_request_screen.dart';
-import 'screens/auth/forgot_password_reset_screen.dart';
-import 'screens/onboarding/language_screen.dart';
 import 'navigation/provider_nav_root.dart';
 import 'navigation/worker_nav_root.dart';
 

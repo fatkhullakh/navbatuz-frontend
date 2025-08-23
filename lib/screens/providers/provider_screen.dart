@@ -345,7 +345,7 @@ class _ServicesTab extends StatelessWidget {
     final priceFmt =
         NumberFormat.currency(locale: localeTag, symbol: '', decimalDigits: 0);
 
-    String _durText(Duration? d) {
+    String durText(Duration? d) {
       if (d == null) return '';
       final h = d.inHours;
       final m = d.inMinutes % 60;
@@ -379,7 +379,7 @@ class _ServicesTab extends StatelessWidget {
           itemBuilder: (_, i) {
             final s = items[i];
             final desc = (s.description ?? '').trim();
-            final dur = _durText(s.duration);
+            final dur = durText(s.duration);
             final priceText =
                 s.price == 0 ? t.provider_free : priceFmt.format(s.price);
 

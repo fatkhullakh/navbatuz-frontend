@@ -1842,6 +1842,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set business hours'**
   String get working_hours_subtitle;
+
+  /// No description provided for @staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff_title;
+
+  /// No description provided for @staff_add_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get staff_add_member;
+
+  /// No description provided for @staff_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name or phone…'**
+  String get staff_search_hint;
+
+  /// No description provided for @staff_show_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inactive'**
+  String get staff_show_inactive;
+
+  /// No description provided for @staff_invite_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite staff'**
+  String get staff_invite_title;
+
+  /// No description provided for @staff_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit staff'**
+  String get staff_edit_title;
+
+  /// No description provided for @staff_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get staff_role;
+
+  /// No description provided for @role_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get role_owner;
+
+  /// No description provided for @role_receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Receptionist'**
+  String get role_receptionist;
+
+  /// No description provided for @role_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get role_worker;
+
+  /// No description provided for @staff_remove_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get staff_remove_confirm_title;
+
+  /// No description provided for @staff_remove_confirm_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get staff_remove_confirm_msg;
+
+  /// No description provided for @invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get invite;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @action_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get action_remove;
+
+  /// No description provided for @action_deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get action_deactivate;
+
+  /// No description provided for @action_activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get action_activate;
+
+  /// No description provided for @person_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get person_name;
+
+  /// No description provided for @manage_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage services'**
+  String get manage_services;
+
+  /// No description provided for @edit_availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit availability'**
+  String get edit_availability;
+
+  /// No description provided for @activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// No description provided for @deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivate;
+
+  /// No description provided for @invite_worker_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add & Invite worker'**
+  String get invite_worker_title;
+
+  /// No description provided for @personal_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal info'**
+  String get personal_info;
+
+  /// No description provided for @first_name.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get first_name;
+
+  /// No description provided for @last_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get last_name;
+
+  /// No description provided for @upload_avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload avatar'**
+  String get upload_avatar;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @create_send_invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create & send invite'**
+  String get create_send_invite;
+
+  /// No description provided for @invite_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get invite_sent;
+
+  /// No description provided for @working_this_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Working this day'**
+  String get working_this_day;
+
+  /// No description provided for @breaks_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaks'**
+  String get breaks_title;
+
+  /// No description provided for @add_break.
+  ///
+  /// In en, this message translates to:
+  /// **'Add break'**
+  String get add_break;
+
+  /// No description provided for @select_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get select_date;
+
+  /// No description provided for @weekly_schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get weekly_schedule;
+
+  /// No description provided for @exceptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceptions'**
+  String get exceptions;
+
+  /// No description provided for @exception_for_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Exception for this day'**
+  String get exception_for_day;
+
+  /// No description provided for @delete_exception_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove exception?'**
+  String get delete_exception_title;
+
+  /// No description provided for @delete_exception_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete the exception for this day.'**
+  String get delete_exception_msg;
+
+  /// No description provided for @breaks_for_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaks for this day'**
+  String get breaks_for_day;
+
+  /// No description provided for @no_breaks.
+  ///
+  /// In en, this message translates to:
+  /// **'No breaks.'**
+  String get no_breaks;
+
+  /// No description provided for @delete_break_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete break?'**
+  String get delete_break_title;
+
+  /// No description provided for @delete_break_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get delete_break_msg;
+
+  /// No description provided for @buffer_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Buffer (min)'**
+  String get buffer_minutes;
+
+  /// No description provided for @activated.
+  ///
+  /// In en, this message translates to:
+  /// **'Activated'**
+  String get activated;
+
+  /// No description provided for @deactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated'**
+  String get deactivated;
+
+  /// No description provided for @invite_flow_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'This screen will register a new user (name, contacts, avatar), assign a role and send credentials via email/SMS.'**
+  String get invite_flow_placeholder;
+
+  /// No description provided for @staff_only_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only available'**
+  String get staff_only_available;
+
+  /// No description provided for @tab_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get tab_week;
+
+  /// No description provided for @tab_exceptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceptions'**
+  String get tab_exceptions;
+
+  /// No description provided for @tab_breaks.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaks'**
+  String get tab_breaks;
+
+  /// No description provided for @copy_mon_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Mon → All'**
+  String get copy_mon_all;
+
+  /// No description provided for @copy_mon_fri.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Mon → Fri'**
+  String get copy_mon_fri;
+
+  /// No description provided for @copied_mon_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied Monday to all days'**
+  String get copied_mon_all;
+
+  /// No description provided for @copied_mon_fri.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied Monday to Mon–Fri'**
+  String get copied_mon_fri;
+
+  /// No description provided for @buffer_min_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Buffer (min)'**
+  String get buffer_min_short;
+
+  /// No description provided for @delete_exception.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this exception'**
+  String get delete_exception;
+
+  /// No description provided for @no_breaks_day.
+  ///
+  /// In en, this message translates to:
+  /// **'No breaks for this day.'**
+  String get no_breaks_day;
+
+  /// No description provided for @break_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Break added'**
+  String get break_added;
+
+  /// No description provided for @only_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Only available'**
+  String get only_available;
+
+  /// No description provided for @time_select_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get time_select_title;
+
+  /// No description provided for @step_personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal & contact'**
+  String get step_personal;
+
+  /// No description provided for @surname.
+  ///
+  /// In en, this message translates to:
+  /// **'Surname'**
+  String get surname;
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @worker_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker type'**
+  String get worker_type;
+
+  /// No description provided for @action_invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create & send invite'**
+  String get action_invite;
+
+  /// No description provided for @invite_sent_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get invite_sent_title;
+
+  /// No description provided for @login_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Login (email)'**
+  String get login_email;
+
+  /// No description provided for @temp_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary password'**
+  String get temp_password;
+
+  /// No description provided for @invite_note_change_password.
+  ///
+  /// In en, this message translates to:
+  /// **'They will be asked to change the password on first login.'**
+  String get invite_note_change_password;
+
+  /// No description provided for @date_of_birth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get date_of_birth;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

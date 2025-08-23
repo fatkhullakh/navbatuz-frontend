@@ -40,8 +40,9 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   List<WorkerLite> get _allowedWorkers {
     if (_service == null || _provider == null) return const [];
     final ids = _service!.workerIds;
-    if (ids.isEmpty)
+    if (ids.isEmpty) {
       return _provider!.workers; // fallback: all provider workers
+    }
     return _provider!.workers.where((w) => ids.contains(w.id)).toList();
   }
 

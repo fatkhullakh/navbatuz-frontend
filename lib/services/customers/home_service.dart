@@ -115,8 +115,7 @@ class HomeService {
     final categories = (catsRaw is List)
         ? catsRaw
             .whereType<Map>()
-            .map((e) =>
-                CategoryItem.fromJson(Map<String, dynamic>.from(e as Map)))
+            .map((e) => CategoryItem.fromJson(Map<String, dynamic>.from(e)))
             .toList()
         : <CategoryItem>[];
 
@@ -159,7 +158,7 @@ class HomeService {
     final providers = content
         .whereType<Map>()
         .map<ProviderItem>(
-            (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e as Map)))
+            (e) => ProviderItem.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     // ---------- Favorites ----------
