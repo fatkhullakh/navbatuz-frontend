@@ -440,6 +440,59 @@
   "working_this_day": "Working this day",
   "breaks_title": "Breaks",
   "add_break": "Add break",
-  "select_date": "Select date"
+  "select_date": "Select date",
+
+  "weekly_schedule": "Weekly",
+  "exceptions": "Exceptions",
+  "exception_for_day": "Exception for this day",
+  "delete_exception_title": "Remove exception?",
+  "delete_exception_msg": "This will delete the exception for this day.",
+  "breaks_for_day": "Breaks for this day",
+  "no_breaks": "No breaks.",
+  "delete_break_title": "Delete break?",
+  "delete_break_msg": "This action cannot be undone.",
+  "add_break": "Add break",
+  "buffer_minutes": "Buffer (min)",
+  "activated": "Activated",
+  "deactivated": "Deactivated",
+  "edit_availability": "Edit availability",
+  "manage_services": "Manage services",
+  "staff_invite_title": "Invite staff",
+  "invite_flow_placeholder": "This screen will register a new user (name, contacts, avatar), assign a role and send credentials via email/SMS.",
+
+  "staff_only_available": "Show only available",
+
+  "tab_week": "Week",
+  "tab_exceptions": "Exceptions",
+  "tab_breaks": "Breaks",
+
+  "copy_mon_all": "Copy Mon → All",
+  "copy_mon_fri": "Copy Mon → Fri",
+  "copied_mon_all": "Copied Monday to all days",
+  "copied_mon_fri": "Copied Monday to Mon–Fri",
+
+  "buffer_min_short": "Buffer (min)",
+  "delete_exception": "Delete this exception",
+  "no_breaks_day": "No breaks for this day.",
+  "add_break": "Add break",
+  "break_added": "Break added",
+
+  "only_available": "Only available",
+  "time_select_title": "Select time",
+
+  "invite_worker_title": "Add & Invite worker",
+  "step_personal": "Personal & contact",
+  "surname": "Surname",
+  "gender": "Gender",
+  "worker_type": "Worker type",
+  "action_invite": "Create & send invite",
+  "invite_sent_title": "Invitation sent",
+  "login_email": "Login (email)",
+  "temp_password": "Temporary password",
+  "invite_note_change_password": "They will be asked to change the password on first login.",
+  "date_of_birth": "Date of birth",
+  "language": "Language",
+  "country": "Country"
+
 
 }

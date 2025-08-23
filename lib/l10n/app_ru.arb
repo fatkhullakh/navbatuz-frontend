@@ -442,6 +442,58 @@
   "working_this_day": "Работает в этот день",
   "breaks_title": "Перерывы",
   "add_break": "Добавить перерыв",
-  "select_date": "Выбрать дату"
+  "select_date": "Выбрать дату",
+
+  "weekly_schedule": "Неделя",
+  "exceptions": "Исключения",
+  "exception_for_day": "Исключение для этого дня",
+  "delete_exception_title": "Удалить исключение?",
+  "delete_exception_msg": "Это удалит исключение для выбранного дня.",
+  "breaks_for_day": "Перерывы в этот день",
+  "no_breaks": "Перерывов нет.",
+  "delete_break_title": "Удалить перерыв?",
+  "delete_break_msg": "Это действие необратимо.",
+  "add_break": "Добавить перерыв",
+  "buffer_minutes": "Буфер (мин)",
+  "activated": "Активирован",
+  "deactivated": "Деактивирован",
+  "edit_availability": "Редактировать график",
+  "manage_services": "Управлять услугами",
+  "staff_invite_title": "Пригласить сотрудника",
+  "invite_flow_placeholder": "Здесь будет регистрация нового пользователя (имя, контакты, аватар), назначение роли и отправка данных для входа по email/SMS.",
+
+  "staff_only_available": "Показывать только доступных",
+
+  "tab_week": "Неделя",
+  "tab_exceptions": "Исключения",
+  "tab_breaks": "Перерывы",
+
+  "copy_mon_all": "Копир. Пн → Все",
+  "copy_mon_fri": "Копир. Пн → Пн–Пт",
+  "copied_mon_all": "Понедельник скопирован на все дни",
+  "copied_mon_fri": "Понедельник скопирован на Пн–Пт",
+
+  "buffer_min_short": "Буфер (мин)",
+  "delete_exception": "Удалить исключение",
+  "no_breaks_day": "Перерывов нет.",
+  "add_break": "Добавить перерыв",
+  "break_added": "Перерыв добавлен",
+
+  "only_available": "Только доступные",
+  "time_select_title": "Выберите время",
+
+  "invite_worker_title": "Добавить и пригласить сотрудника",
+  "step_personal": "Личные данные и контакты",
+  "surname": "Фамилия",
+  "gender": "Пол",
+  "worker_type": "Тип сотрудника",
+  "action_invite": "Создать и отправить приглашение",
+  "invite_sent_title": "Приглашение отправлено",
+  "login_email": "Логин (email)",
+  "temp_password": "Временный пароль",
+  "invite_note_change_password": "При первом входе потребуется сменить пароль.",
+  "date_of_birth": "Дата рождения",
+  "language": "Язык",
+  "country": "Страна"
 
 }

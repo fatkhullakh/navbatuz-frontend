@@ -282,7 +282,7 @@ class _ProviderBusinessHoursScreenState
     required AppLocalizations t,
   }) async {
     // convert "HH:mm" -> DateTime today
-    DateTime _toDate(String v) {
+    DateTime toDate(String v) {
       final p = v.split(':');
       final h = int.tryParse(p[0]) ?? 0;
       final m = int.tryParse(p[1]) ?? 0;
@@ -290,8 +290,8 @@ class _ProviderBusinessHoursScreenState
       return DateTime(now.year, now.month, now.day, h, m);
     }
 
-    DateTime s = _toDate(start);
-    DateTime e = _toDate(end);
+    DateTime s = toDate(start);
+    DateTime e = toDate(end);
 
     return await showModalBottomSheet<(String, String)>(
       context: context,

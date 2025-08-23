@@ -1,4 +1,3 @@
-// lib/screens/provider/manage/staff/provider_worker_details_screen.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +7,7 @@ import '../../../../services/providers/provider_staff_service.dart';
 
 import 'provider_worker_services_screen.dart';
 import 'provider_worker_availability_screen.dart';
+import 'provider_worker_edit_screen.dart';
 
 class ProviderWorkerDetailsScreen extends StatefulWidget {
   final String providerId;
@@ -26,101 +26,197 @@ class ProviderWorkerDetailsScreen extends StatefulWidget {
 
 class _ProviderWorkerDetailsScreenState
     extends State<ProviderWorkerDetailsScreen> {
-  final Dio _dio = ApiService.client;
+  final ProviderStaffService _staff = ProviderStaffService();
 
-  late bool _active;
-  String? _phone;
-  String? _email;
-  String? _avatar;
-  String? _role;
-
-  bool _toggling = false;
-  bool _loadingUser = false;
+  late StaffMember _m;
+  bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _active = widget.member.isActive;
-    _phone = widget.member.phoneNumber;
-    _email = widget.member.email;
-    _avatar = widget.member.avatarUrl;
-    _role = widget.member.role;
-    _fetchUserIfMissing();
+    _m = widget.member;
+    _hydrate();
   }
 
-  Future<void> _fetchUserIfMissing() async {
-    final needPhone = _phone == null || _phone!.trim().isEmpty;
-    final needEmail = _email == null || _email!.trim().isEmpty;
-    final needAvatar = _avatar == null || _avatar!.trim().isEmpty;
-    if (!needPhone && !needEmail && !needAvatar) return;
-
-    setState(() => _loadingUser = true);
+  Future<void> _hydrate() async {
+    setState(() => _loading = true);
     try {
-      final r = await _dio.get('/users/${widget.member.userId}');
-      final m = (r.data as Map).cast<String, dynamic>();
-      setState(() {
-        _phone = (m['phoneNumber'] ?? _phone ?? '').toString();
-        _email = (m['email'] ?? _email ?? '').toString();
-        _avatar = (m['avatarUrl'] ?? _avatar ?? '').toString();
-      });
-    } catch (_) {
-      // ignore – UI will just show blanks
+      final fetched = await _staff.getWorker(_m.id);
+      setState(() => _m = fetched);
     } finally {
-      if (mounted) setState(() => _loadingUser = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<void> _toggleActive() async {
-    if (_toggling) return;
-    setState(() => _toggling = true);
-    try {
-      if (_active) {
-        await _dio.put('/workers/${widget.member.id}/deactivate');
-      } else {
-        await _dio.put('/workers/${widget.member.id}/activate');
-      }
-      if (!mounted) return;
-      setState(() => _active = !_active);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _active
-                ? (AppLocalizations.of(context)!.activate ?? 'Activated')
-                : (AppLocalizations.of(context)!.deactivate ?? 'Deactivated'),
-          ),
+  Color _statusColor(WorkerStatus? s) {
+    switch (s) {
+      case WorkerStatus.AVAILABLE:
+        return const Color(0xFF12B76A);
+      case WorkerStatus.ON_BREAK:
+        return const Color(0xFFF59E0B);
+      case WorkerStatus.ON_LEAVE:
+        return const Color(0xFF7C3AED);
+      case WorkerStatus.UNAVAILABLE:
+      default:
+        return const Color(0xFF667085);
+    }
+  }
+
+  String _statusText(WorkerStatus? s) {
+    switch (s) {
+      case WorkerStatus.AVAILABLE:
+        return 'Available';
+      case WorkerStatus.UNAVAILABLE:
+        return 'Unavailable';
+      case WorkerStatus.ON_BREAK:
+        return 'On break';
+      case WorkerStatus.ON_LEAVE:
+        return 'On leave';
+      default:
+        return '—';
+    }
+  }
+
+  Future<void> _changeStatus() async {
+    final choice = await showModalBottomSheet<WorkerStatus>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            _StatusPickTile(
+              label: 'Available',
+              color: _statusColor(WorkerStatus.AVAILABLE),
+              selected: _m.status == WorkerStatus.AVAILABLE,
+              onTap: () => Navigator.pop(ctx, WorkerStatus.AVAILABLE),
+            ),
+            _StatusPickTile(
+              label: 'Unavailable',
+              color: _statusColor(WorkerStatus.UNAVAILABLE),
+              selected: _m.status == WorkerStatus.UNAVAILABLE,
+              onTap: () => Navigator.pop(ctx, WorkerStatus.UNAVAILABLE),
+            ),
+            _StatusPickTile(
+              label: 'On break',
+              color: _statusColor(WorkerStatus.ON_BREAK),
+              selected: _m.status == WorkerStatus.ON_BREAK,
+              onTap: () => Navigator.pop(ctx, WorkerStatus.ON_BREAK),
+            ),
+            _StatusPickTile(
+              label: 'On leave',
+              color: _statusColor(WorkerStatus.ON_LEAVE),
+              selected: _m.status == WorkerStatus.ON_LEAVE,
+              onTap: () => Navigator.pop(ctx, WorkerStatus.ON_LEAVE),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
+      ),
+    );
+
+    if (choice == null) return;
+    setState(() => _loading = true);
+    try {
+      final updated = await _staff.updateWorker(_m.id, status: choice);
+      setState(() => _m = updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Status: ${_statusText(_m.status)}')),
       );
     } on DioException catch (e) {
-      if (!mounted) return;
       final code = e.response?.statusCode;
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('HTTP $code: $body')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
     } finally {
-      if (mounted) setState(() => _toggling = false);
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _removeFromTeam() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Remove worker?'),
+        content: const Text(
+            'This will deactivate the worker (soft delete). You can re-invite later.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(_, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(_, true),
+              child: const Text('Remove')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    setState(() => _loading = true);
+    try {
+      await _staff.deactivate(_m.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Removed from team')));
+      Navigator.pop(context, true);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final body = e.response?.data?.toString() ?? e.message ?? e.toString();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    final displayName =
-        (widget.member.name == null || widget.member.name!.trim().isEmpty)
-            ? (t.staff_title ?? 'Staff')
-            : widget.member.name!;
-    final avatarUrl = (_avatar ?? '').trim();
+
+    final avatarUrl = (_m.avatarUrl ?? '').trim();
     final normalizedAvatar = avatarUrl.isEmpty
         ? null
         : (ApiService.normalizeMediaUrl(avatarUrl) ?? avatarUrl);
 
+    String pretty(String? s) => (s == null || s.isEmpty) ? '—' : s;
+    String prettyGender(String? g) {
+      switch ((g ?? '').toUpperCase()) {
+        case 'MALE':
+          return 'Male';
+        case 'FEMALE':
+          return 'Female';
+        case 'OTHER':
+          return 'Other';
+        default:
+          return '—';
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(displayName)),
+      appBar: AppBar(
+        title: Text(_m.displayName),
+        actions: [
+          IconButton(
+            tooltip: 'Edit',
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () async {
+              final updated = await Navigator.push<StaffMember?>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProviderWorkerEditScreen(initial: _m),
+                ),
+              );
+              if (updated != null) {
+                setState(() => _m = updated);
+              } else {
+                // re-hydrate in case server changed something
+                _hydrate();
+              }
+            },
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
@@ -141,34 +237,58 @@ class _ProviderWorkerDetailsScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
+                    Text(_m.displayName,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
+                      runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        _StatusChip(active: _active),
-                        OutlinedButton.icon(
-                          icon: Icon(
-                            _active
-                                ? Icons.pause_circle_outline
-                                : Icons.play_circle_outline,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _statusColor(_m.status).withOpacity(.12),
+                            borderRadius: BorderRadius.circular(999),
                           ),
-                          onPressed: _toggling ? null : _toggleActive,
-                          label: Text(
-                            _active
-                                ? (t.deactivate ?? 'Deactivate')
-                                : (t.activate ?? 'Activate'),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.circle,
+                                  size: 10, color: _statusColor(_m.status)),
+                              const SizedBox(width: 6),
+                              Text(_statusText(_m.status),
+                                  style: TextStyle(
+                                      color: _statusColor(_m.status),
+                                      fontWeight: FontWeight.w600)),
+                            ],
                           ),
                         ),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.swap_horiz),
+                          onPressed: _loading ? null : _changeStatus,
+                          label: const Text('Change status'),
+                        ),
+                        if (_m.avgRating != null)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star,
+                                  size: 16, color: Color(0xFFFFB703)),
+                              const SizedBox(width: 4),
+                              Text('${_m.avgRating!.toStringAsFixed(1)}'),
+                            ],
+                          ),
+                        if ((_m.hireDate ?? '').isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.calendar_today,
+                                  size: 14, color: Color(0xFF667085)),
+                            ],
+                          ),
                       ],
                     ),
                   ],
@@ -176,55 +296,33 @@ class _ProviderWorkerDetailsScreenState
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Role
-          Card(
-            elevation: 0,
-            child: ListTile(
-              leading: const Icon(Icons.badge_outlined),
-              title: Text((_role ?? '').isEmpty ? '—' : _role!),
-              subtitle: const Text('Role'),
-            ),
+          _InfoTile(
+            leading: Icons.store_mall_directory_outlined,
+            title: pretty(_m.providerName),
+            subtitle: 'Provider',
           ),
-
-          // Phone
-          Card(
-            elevation: 0,
-            child: ListTile(
-              leading: const Icon(Icons.call_outlined),
-              title: Text((_phone ?? '').isEmpty ? '—' : _phone!),
-              subtitle: Text(t.phone ?? 'Phone'),
-              trailing: _loadingUser
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
+          _InfoTile(
+            leading: Icons.badge_outlined,
+            title: pretty(_m.role),
+            subtitle: 'Role',
           ),
-
-          // Email
-          Card(
-            elevation: 0,
-            child: ListTile(
-              leading: const Icon(Icons.alternate_email_outlined),
-              title: Text((_email ?? '').isEmpty ? '—' : _email!),
-              subtitle: Text(t.email ?? 'Email'),
-              trailing: _loadingUser
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
+          _InfoTile(
+            leading: Icons.wc_outlined,
+            title: prettyGender(_m.gender),
+            subtitle: 'Gender',
           ),
-
+          _InfoTile(
+            leading: Icons.call_outlined,
+            title: pretty(_m.phoneNumber),
+            subtitle: t.phone ?? 'Phone',
+          ),
+          _InfoTile(
+            leading: Icons.alternate_email_outlined,
+            title: pretty(_m.email),
+            subtitle: t.email ?? 'Email',
+          ),
           const SizedBox(height: 12),
-
           SizedBox(
             height: 48,
             child: FilledButton.icon(
@@ -235,8 +333,8 @@ class _ProviderWorkerDetailsScreenState
                   MaterialPageRoute(
                     builder: (_) => ProviderWorkerServicesScreen(
                       providerId: widget.providerId,
-                      workerId: widget.member.id,
-                      workerName: widget.member.name ?? '—',
+                      workerId: _m.id,
+                      workerName: _m.displayName,
                     ),
                   ),
                 );
@@ -254,13 +352,34 @@ class _ProviderWorkerDetailsScreenState
                   context,
                   MaterialPageRoute(
                     builder: (_) => ProviderWorkerAvailabilityScreen(
-                      workerId: widget.member.id,
-                      workerName: widget.member.name ?? '—',
+                      workerId: _m.id,
+                      workerName: _m.displayName,
                     ),
                   ),
                 );
               },
               label: Text(t.edit_availability ?? 'Edit availability'),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          Text('Danger zone',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.red)),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 48,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.person_off_outlined, color: Colors.red),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
+              onPressed: _loading ? null : _removeFromTeam,
+              label: const Text('Remove from team'),
             ),
           ),
         ],
@@ -269,38 +388,52 @@ class _ProviderWorkerDetailsScreenState
   }
 }
 
-class _StatusChip extends StatelessWidget {
-  final bool active;
-  const _StatusChip({required this.active});
+class _InfoTile extends StatelessWidget {
+  final IconData leading;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+
+  const _InfoTile({
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    final label = active ? (t.active ?? 'Active') : (t.closed ?? 'Inactive');
-    final color = active ? const Color(0xFF12B76A) : const Color(0xFF667085);
-    final bg = active ? const Color(0xFFEFFDF6) : const Color(0xFFF2F4F7);
+    return Card(
+      elevation: 0,
+      child: ListTile(
+        leading: Icon(leading),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: trailing,
+      ),
+    );
+  }
+}
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(active ? Icons.check_circle : Icons.pause_circle_filled,
-              size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+class _StatusPickTile extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+  const _StatusPickTile({
+    required this.label,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.circle, color: color),
+      title: Text(label),
+      trailing: selected ? const Icon(Icons.check, color: Colors.green) : null,
+      onTap: onTap,
     );
   }
 }

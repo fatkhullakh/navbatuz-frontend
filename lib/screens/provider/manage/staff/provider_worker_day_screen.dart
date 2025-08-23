@@ -179,7 +179,7 @@ class _ProviderWorkerDayScreenState extends State<ProviderWorkerDayScreen> {
     final t = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_localizeDay(context, widget.day)}'),
+        title: Text(_localizeDay(context, widget.day)),
         actions: [
           TextButton(
             onPressed: _saving ? null : _savePlanned,

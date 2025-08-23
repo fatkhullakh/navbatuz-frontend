@@ -62,27 +62,39 @@ class ApiService {
     if (url == null || url.isEmpty) return null;
 
     final isAbs = url.startsWith('http://') || url.startsWith('https://');
+    final o = Uri.parse(origin);
+
     if (isAbs) {
-      if (url.startsWith('http://localhost') ||
-          url.startsWith('https://localhost') ||
-          url.startsWith('http://127.0.0.1') ||
-          url.startsWith('https://127.0.0.1')) {
-        final u = Uri.parse(url);
-        final o = Uri.parse(origin);
-        final port = (o.hasPort && o.port != 0) ? o.port : null;
+      final u = Uri.parse(url);
+
+      // rewrite localhost/127.0.0.1 -> current origin (already handled)
+      if (u.host == 'localhost' || u.host == '127.0.0.1') {
         return Uri(
           scheme: o.scheme,
           host: o.host,
-          port: port,
+          port: o.hasPort ? o.port : null,
           path: u.path,
           query: u.query.isEmpty ? null : u.query,
           fragment: u.fragment.isEmpty ? null : u.fragment,
         ).toString();
       }
-      return url;
+
+      // NEW: rewrite 10.0.2.2 when NOT on Android (e.g., web or iOS simulators)
+      if (!Platform.isAndroid && u.host == '10.0.2.2') {
+        return Uri(
+          scheme: o.scheme,
+          host: o.host,
+          port: o.hasPort ? o.port : null,
+          path: u.path,
+          query: u.query.isEmpty ? null : u.query,
+          fragment: u.fragment.isEmpty ? null : u.fragment,
+        ).toString();
+      }
+
+      return url; // leave other absolute URLs as-is
     }
 
-    // Relative or bare path
+    // relative paths
     if (url.startsWith('/')) return '$origin$url';
     return '$origin/$url';
   }

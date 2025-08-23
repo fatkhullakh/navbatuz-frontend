@@ -954,7 +954,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deactivate => 'Деактивировать';
 
   @override
-  String get invite_worker_title => 'Пригласить сотрудника';
+  String get invite_worker_title => 'Добавить и пригласить сотрудника';
 
   @override
   String get personal_info => 'Личные данные';
@@ -991,4 +991,118 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get select_date => 'Выбрать дату';
+
+  @override
+  String get weekly_schedule => 'Неделя';
+
+  @override
+  String get exceptions => 'Исключения';
+
+  @override
+  String get exception_for_day => 'Исключение для этого дня';
+
+  @override
+  String get delete_exception_title => 'Удалить исключение?';
+
+  @override
+  String get delete_exception_msg => 'Это удалит исключение для выбранного дня.';
+
+  @override
+  String get breaks_for_day => 'Перерывы в этот день';
+
+  @override
+  String get no_breaks => 'Перерывов нет.';
+
+  @override
+  String get delete_break_title => 'Удалить перерыв?';
+
+  @override
+  String get delete_break_msg => 'Это действие необратимо.';
+
+  @override
+  String get buffer_minutes => 'Буфер (мин)';
+
+  @override
+  String get activated => 'Активирован';
+
+  @override
+  String get deactivated => 'Деактивирован';
+
+  @override
+  String get invite_flow_placeholder => 'Здесь будет регистрация нового пользователя (имя, контакты, аватар), назначение роли и отправка данных для входа по email/SMS.';
+
+  @override
+  String get staff_only_available => 'Показывать только доступных';
+
+  @override
+  String get tab_week => 'Неделя';
+
+  @override
+  String get tab_exceptions => 'Исключения';
+
+  @override
+  String get tab_breaks => 'Перерывы';
+
+  @override
+  String get copy_mon_all => 'Копир. Пн → Все';
+
+  @override
+  String get copy_mon_fri => 'Копир. Пн → Пн–Пт';
+
+  @override
+  String get copied_mon_all => 'Понедельник скопирован на все дни';
+
+  @override
+  String get copied_mon_fri => 'Понедельник скопирован на Пн–Пт';
+
+  @override
+  String get buffer_min_short => 'Буфер (мин)';
+
+  @override
+  String get delete_exception => 'Удалить исключение';
+
+  @override
+  String get no_breaks_day => 'Перерывов нет.';
+
+  @override
+  String get break_added => 'Перерыв добавлен';
+
+  @override
+  String get only_available => 'Только доступные';
+
+  @override
+  String get time_select_title => 'Выберите время';
+
+  @override
+  String get step_personal => 'Личные данные и контакты';
+
+  @override
+  String get surname => 'Фамилия';
+
+  @override
+  String get gender => 'Пол';
+
+  @override
+  String get worker_type => 'Тип сотрудника';
+
+  @override
+  String get action_invite => 'Создать и отправить приглашение';
+
+  @override
+  String get invite_sent_title => 'Приглашение отправлено';
+
+  @override
+  String get login_email => 'Логин (email)';
+
+  @override
+  String get temp_password => 'Временный пароль';
+
+  @override
+  String get invite_note_change_password => 'При первом входе потребуется сменить пароль.';
+
+  @override
+  String get date_of_birth => 'Дата рождения';
+
+  @override
+  String get language => 'Язык';
 }

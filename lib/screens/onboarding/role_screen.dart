@@ -65,7 +65,6 @@ class _RoleCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   const _RoleCard({
-    super.key,
     required this.color,
     required this.icon,
     required this.title,
@@ -126,8 +125,7 @@ class _RoleCard extends StatelessWidget {
 class _StepAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String stepLabel;
   final double progress;
-  const _StepAppBar(
-      {required this.stepLabel, required this.progress, super.key});
+  const _StepAppBar({required this.stepLabel, required this.progress});
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +153,7 @@ class _StepAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class _H1 extends StatelessWidget {
   final String text;
-  const _H1(this.text, {super.key});
+  const _H1(this.text);
   @override
   Widget build(BuildContext context) => Text(text,
       style: const TextStyle(
@@ -164,7 +162,7 @@ class _H1 extends StatelessWidget {
 
 class _Sub extends StatelessWidget {
   final String text;
-  const _Sub(this.text, {super.key});
+  const _Sub(this.text);
   @override
   Widget build(BuildContext context) =>
       Text(text, style: const TextStyle(fontSize: 14, color: _Brand.subtle));
