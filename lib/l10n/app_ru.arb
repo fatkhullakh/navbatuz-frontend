@@ -494,6 +494,29 @@
   "invite_note_change_password": "При первом входе потребуется сменить пароль.",
   "date_of_birth": "Дата рождения",
   "language": "Язык",
-  "country": "Страна"
+  "country": "Страна",
+
+  "appointments_title": "Записи",
+  "no_workers_selected": "Нет выбранных сотрудников",
+  "no_appointments": "Нет записей",
+  "new_appointment": "Новая запись",
+  "worker": "Сотрудник",
+  "date": "Дата",
+  "guest_details": "Данные гостя",
+  "required_field": "Обязательно",
+  "fill_all_fields": "Заполните все обязательные поля",
+  "create": "Создать",
+  "reschedule": "Перенести",
+  "no_free_slots": "Нет свободных слотов",
+  "calendar_view": "Календарь",
+  "list_view": "Список",
+  "today": "Сегодня",
+  "weekday_mon_short": "Пн",
+  "weekday_tue_short": "Вт",
+  "weekday_wed_short": "Ср",
+  "weekday_thu_short": "Чт",
+  "weekday_fri_short": "Пт",
+  "weekday_sat_short": "Сб",
+  "weekday_sun_short": "Вс"
 
 }

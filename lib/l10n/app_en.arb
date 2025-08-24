@@ -492,7 +492,30 @@
   "invite_note_change_password": "They will be asked to change the password on first login.",
   "date_of_birth": "Date of birth",
   "language": "Language",
-  "country": "Country"
+  "country": "Country",
+
+  "appointments_title": "Appointments",
+  "no_workers_selected": "No workers selected",
+  "no_appointments": "No appointments",
+  "new_appointment": "New appointment",
+  "worker": "Worker",
+  "date": "Date",
+  "guest_details": "Guest details",
+  "required_field": "Required",
+  "fill_all_fields": "Please fill all required fields",
+  "create": "Create",
+  "reschedule": "Reschedule",
+  "no_free_slots": "No free slots",
+  "calendar_view": "Calendar",
+  "list_view": "List",
+  "today": "Today",
+  "weekday_mon_short": "Mon",
+  "weekday_tue_short": "Tue",
+  "weekday_wed_short": "Wed",
+  "weekday_thu_short": "Thu",
+  "weekday_fri_short": "Fri",
+  "weekday_sat_short": "Sat",
+  "weekday_sun_short": "Sun"
 
 
 }

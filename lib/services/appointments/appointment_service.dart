@@ -3,6 +3,7 @@ import '../api_service.dart';
 import '../../models/appointment.dart';
 import 'package:intl/intl.dart';
 import '../../models/appointment_detail.dart';
+import '../../models/appointment_models.dart';
 
 class SlotUnavailableException implements Exception {}
 
@@ -17,6 +18,59 @@ class LateCancellationException implements Exception {
 
 class AppointmentService {
   final _dio = ApiService.client;
+
+  Future<List<Appointment>> getWorkerDay(String workerId, DateTime day) async {
+    final d = day.toIso8601String().split('T').first;
+    final r = await _dio.get('/appointments/worker/$workerId/day',
+        queryParameters: {'date': d});
+    final List data = r.data as List;
+    return data
+        .map((m) => Appointment.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+  }
+
+  Future<Appointment> book(NewAppointmentCmd cmd) async {
+    final r = await _dio.post('/appointments', data: cmd.toJson());
+    return Appointment.fromJson(Map<String, dynamic>.from(r.data));
+  }
+
+  // Future<void> cancel(String appointmentId) async {
+  //   await _dio.put('/appointments/$appointmentId/cancel');
+  // }
+
+  Future<void> complete(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/complete');
+  }
+
+  Future<Appointment> reschedule({
+    required String appointmentId,
+    required DateTime newDate,
+    required String newStartTime, // "HH:mm"
+  }) async {
+    final body = {
+      'newDate': newDate.toIso8601String().split('T').first,
+      'newStartTime': newStartTime,
+    };
+    final r =
+        await _dio.put('/appointments/$appointmentId/reschedule', data: body);
+    return Appointment.fromJson(Map<String, dynamic>.from(r.data));
+  }
+
+  /// Ask backend for free slots for the worker, given the service duration.
+  Future<List<String>> getFreeSlots({
+    required String workerId,
+    required DateTime date,
+    required int serviceDurationMinutes,
+  }) async {
+    final d = date.toIso8601String().split('T').first;
+    final r = await _dio.get('/workers/free-slots/$workerId', queryParameters: {
+      'date': d,
+      'serviceDurationMinutes': serviceDurationMinutes,
+    });
+    final List raw = r.data as List;
+    // Backend returns ["09:00","09:30",...] – keep as strings
+    return raw.map((e) => e.toString()).toList();
+  }
 
   Future<List<AppointmentItem>> listMine() async {
     final r = await _dio.get('/appointments/me');

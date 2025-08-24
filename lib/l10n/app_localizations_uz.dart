@@ -490,7 +490,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get cat_makeup_studio => 'Makiyaj studiyasi';
 
   @override
-  String get appointments_title => 'Uchrashuvlar';
+  String get appointments_title => 'Qabullar';
 
   @override
   String get appointments_upcoming => 'Yaqinlashayotgan uchrashuvlar';
@@ -1105,4 +1105,67 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get language => 'Til';
+
+  @override
+  String get no_workers_selected => 'Xodim tanlanmagan';
+
+  @override
+  String get no_appointments => 'Qabul yo‘q';
+
+  @override
+  String get new_appointment => 'Yangi qabul';
+
+  @override
+  String get worker => 'Xodim';
+
+  @override
+  String get date => 'Sana';
+
+  @override
+  String get guest_details => 'Mehmon ma’lumoti';
+
+  @override
+  String get required_field => 'Majburiy';
+
+  @override
+  String get fill_all_fields => 'Iltimos, majburiy maydonlarni to‘ldiring';
+
+  @override
+  String get create => 'Yaratish';
+
+  @override
+  String get reschedule => 'Ko‘chirish';
+
+  @override
+  String get no_free_slots => 'Bo‘sh vaqtlar yo‘q';
+
+  @override
+  String get calendar_view => 'Kalendar';
+
+  @override
+  String get list_view => 'Roʻyxat';
+
+  @override
+  String get today => 'Bugun';
+
+  @override
+  String get weekday_mon_short => 'Du';
+
+  @override
+  String get weekday_tue_short => 'Se';
+
+  @override
+  String get weekday_wed_short => 'Ch';
+
+  @override
+  String get weekday_thu_short => 'Pa';
+
+  @override
+  String get weekday_fri_short => 'Ju';
+
+  @override
+  String get weekday_sat_short => 'Sh';
+
+  @override
+  String get weekday_sun_short => 'Ya';
 }

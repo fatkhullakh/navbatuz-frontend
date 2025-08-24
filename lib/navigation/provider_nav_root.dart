@@ -3,7 +3,7 @@ import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import '../l10n/app_localizations.dart';
 
 // Root tabs
-import '../screens/provider/appointments/provider_appointments_screen.dart';
+import '../screens/provider/appointments/staff_appointments_screen.dart';
 import '../screens/provider/dashboard/provider_dashboard_screen.dart';
 import '../screens/provider/manage/provider_manage_screen.dart';
 import '../screens/account/account_screen.dart';
@@ -65,7 +65,8 @@ class _ProviderNavRootState extends State<ProviderNavRoot> {
             Navigator(
               key: _navKeys[_Tab.appointments],
               onGenerateRoute: (settings) => MaterialPageRoute(
-                builder: (_) => const ProviderAppointmentsScreen(),
+                builder: (_) =>
+                    StaffAppointmentsScreen(providerId: widget.providerId),
                 settings: settings,
               ),
             ),
