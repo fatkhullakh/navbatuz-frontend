@@ -6,7 +6,7 @@ import '../../services/appointments/appointment_service.dart';
 import 'appointment_details_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
-import '../../screens/booking/service_booking_screen.dart';
+import '../booking/service_booking_screen.dart';
 import '../../models/appointment_detail.dart';
 
 class AppointmentsScreen extends StatefulWidget {

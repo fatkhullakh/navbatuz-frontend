@@ -1,5 +1,4 @@
-// lib/models/appointment_models.dart
-import 'dart:convert';
+// Supports /appointments/... (STAFF responses too)
 
 enum AppointmentStatus { BOOKED, RESCHEDULED, CANCELLED, COMPLETED }
 
@@ -19,6 +18,12 @@ class Appointment {
   final String? guestId;
   final String? guestMask; // "********1234"
 
+  // extra fields available from *staff* endpoints
+  final String? serviceName;
+  final String? customerName;
+  final String? workerName;
+  final String? providerName;
+
   Appointment({
     required this.id,
     required this.workerId,
@@ -31,21 +36,32 @@ class Appointment {
     this.customerId,
     this.guestId,
     this.guestMask,
+    this.serviceName,
+    this.customerName,
+    this.workerName,
+    this.providerName,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> m) {
+    // backend sometimes returns startTime/endTime keys
+    final start = (m['startTime'] ?? m['start'] ?? '').toString();
+    final end = (m['endTime'] ?? m['end'] ?? '').toString();
     return Appointment(
-      id: m['id'],
-      workerId: m['workerId'],
-      serviceId: m['serviceId'],
-      providerId: m['providerId'],
+      id: m['id'].toString(),
+      workerId: m['workerId'].toString(),
+      serviceId: m['serviceId'].toString(),
+      providerId: m['providerId'].toString(),
       date: DateTime.parse(m['date']), // "YYYY-MM-DD"
-      start: (m['startTime'] ?? '').toString(),
-      end: (m['endTime'] ?? '').toString(),
-      status: statusFromString(m['status']),
-      customerId: m['customerId'],
-      guestId: m['guestId'],
-      guestMask: m['guestMask'],
+      start: start,
+      end: end,
+      status: statusFromString(m['status'].toString()),
+      customerId: m['customerId']?.toString(),
+      guestId: m['guestId']?.toString(),
+      guestMask: m['guestMask']?.toString(),
+      serviceName: m['serviceName']?.toString(),
+      customerName: m['customerName']?.toString(),
+      workerName: m['workerName']?.toString(),
+      providerName: m['providerName']?.toString(),
     );
   }
 }

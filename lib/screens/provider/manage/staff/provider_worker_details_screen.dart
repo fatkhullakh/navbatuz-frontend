@@ -278,7 +278,7 @@ class _ProviderWorkerDetailsScreenState
                               const Icon(Icons.star,
                                   size: 16, color: Color(0xFFFFB703)),
                               const SizedBox(width: 4),
-                              Text('${_m.avgRating!.toStringAsFixed(1)}'),
+                              Text(_m.avgRating!.toStringAsFixed(1)),
                             ],
                           ),
                         if ((_m.hireDate ?? '').isNotEmpty)
