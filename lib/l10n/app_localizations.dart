@@ -2280,6 +2280,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @no_workers_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'No workers selected'**
+  String get no_workers_selected;
+
+  /// No description provided for @no_appointments.
+  ///
+  /// In en, this message translates to:
+  /// **'No appointments'**
+  String get no_appointments;
+
+  /// No description provided for @new_appointment.
+  ///
+  /// In en, this message translates to:
+  /// **'New appointment'**
+  String get new_appointment;
+
+  /// No description provided for @worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get worker;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @guest_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest details'**
+  String get guest_details;
+
+  /// No description provided for @required_field.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required_field;
+
+  /// No description provided for @fill_all_fields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields'**
+  String get fill_all_fields;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @reschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule'**
+  String get reschedule;
+
+  /// No description provided for @no_free_slots.
+  ///
+  /// In en, this message translates to:
+  /// **'No free slots'**
+  String get no_free_slots;
+
+  /// No description provided for @calendar_view.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar_view;
+
+  /// No description provided for @list_view.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get list_view;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @weekday_mon_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get weekday_mon_short;
+
+  /// No description provided for @weekday_tue_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get weekday_tue_short;
+
+  /// No description provided for @weekday_wed_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get weekday_wed_short;
+
+  /// No description provided for @weekday_thu_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get weekday_thu_short;
+
+  /// No description provided for @weekday_fri_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get weekday_fri_short;
+
+  /// No description provided for @weekday_sat_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get weekday_sat_short;
+
+  /// No description provided for @weekday_sun_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get weekday_sun_short;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

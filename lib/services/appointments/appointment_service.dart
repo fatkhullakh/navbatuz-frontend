@@ -3,6 +3,8 @@ import '../api_service.dart';
 import '../../models/appointment.dart';
 import 'package:intl/intl.dart';
 import '../../models/appointment_detail.dart';
+import '../../models/appointment_models.dart';
+import '../../models/appointment_detail_staff.dart';
 
 class SlotUnavailableException implements Exception {}
 
@@ -11,23 +13,46 @@ class CustomerMissingException implements Exception {}
 class NotAuthorizedException implements Exception {}
 
 class LateCancellationException implements Exception {
-  final int? minutes; // window in minutes if we can parse it
+  final int? minutes;
   LateCancellationException([this.minutes]);
 }
 
 class AppointmentService {
   final _dio = ApiService.client;
 
-  Future<List<AppointmentItem>> listMine() async {
-    final r = await _dio.get('/appointments/me');
-    final list = (r.data as List).cast<Map<String, dynamic>>();
-    return list.map(AppointmentItem.fromJson).toList();
+  Future<List<Appointment>> getWorkerDay(String workerId, DateTime day) async {
+    final d = day.toIso8601String().split('T').first;
+    final r = await _dio.get(
+      '/appointments/worker/$workerId/day/staff',
+      queryParameters: {'date': d},
+    );
+    final List data = r.data as List;
+    return data
+        .map((m) => Appointment.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
   }
 
-  Future<AppointmentDetail> getById(String id) async {
-    final resp = await _dio.get('/appointments/$id');
-    return AppointmentDetail.fromJson(
-        Map<String, dynamic>.from(resp.data as Map));
+  Future<Appointment> book(NewAppointmentCmd cmd) async {
+    final r = await _dio.post('/appointments', data: cmd.toJson());
+    return Appointment.fromJson(Map<String, dynamic>.from(r.data));
+  }
+
+  Future<void> complete(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/complete');
+  }
+
+  Future<Appointment> reschedule({
+    required String appointmentId,
+    required DateTime newDate,
+    required String newStartTime,
+  }) async {
+    final body = {
+      'newDate': newDate.toIso8601String().split('T').first,
+      'newStartTime': newStartTime,
+    };
+    final r =
+        await _dio.put('/appointments/$appointmentId/reschedule', data: body);
+    return Appointment.fromJson(Map<String, dynamic>.from(r.data));
   }
 
   Future<void> cancel(String id) async {
@@ -44,6 +69,63 @@ class AppointmentService {
       rethrow;
     }
   }
+
+  Future<void> noShow(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/no-show');
+  }
+
+  Future<void> undoNoShow(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/undo-no-show');
+  }
+
+  Future<AppointmentDetailsStaff> getStaffDetails(String id) async {
+    final resp = await _dio.get('/appointments/$id/staff');
+    return AppointmentDetailsStaff.fromJson(
+        Map<String, dynamic>.from(resp.data as Map));
+  }
+
+  /// Ask backend for free slots for the worker, given the service duration.
+  Future<List<String>> getFreeSlots({
+    required String workerId,
+    required DateTime date,
+    required int serviceDurationMinutes,
+  }) async {
+    final r = await _dio.get(
+      '/workers/free-slots/$workerId',
+      queryParameters: {
+        'date': date.toIso8601String().split('T').first,
+        'serviceDurationMinutes': serviceDurationMinutes,
+      },
+    );
+    return (r.data as List).map((e) => e.toString()).toList();
+  }
+
+  Future<List<AppointmentItem>> listMine() async {
+    final r = await _dio.get('/appointments/me');
+    final list = (r.data as List).cast<Map<String, dynamic>>();
+    return list.map(AppointmentItem.fromJson).toList();
+  }
+
+  Future<AppointmentDetail> getById(String id) async {
+    final resp = await _dio.get('/appointments/$id');
+    return AppointmentDetail.fromJson(
+        Map<String, dynamic>.from(resp.data as Map));
+  }
+
+  // Future<void> cancel(String id) async {
+  //   try {
+  //     await _dio.put('/appointments/$id/cancel');
+  //   } on DioException catch (e) {
+  //     if (e.response?.statusCode == 409) {
+  //       final m = e.response?.data;
+  //       final mins = (m is Map && m['minutes'] is num)
+  //           ? (m['minutes'] as num).toInt()
+  //           : null;
+  //       throw LateCancellationException(mins);
+  //     }
+  //     rethrow;
+  //   }
+  // }
 
   Future<AppointmentItem> create({
     required String serviceId,

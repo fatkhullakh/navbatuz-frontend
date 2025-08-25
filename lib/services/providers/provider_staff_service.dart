@@ -238,6 +238,8 @@ class StaffMember {
       isActive: (m['isActive'] == true) || (m['active'] == true),
     );
   }
+
+  static stub(String id) {}
 }
 
 /// Planned weekly item

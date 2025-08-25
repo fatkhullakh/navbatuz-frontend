@@ -1105,4 +1105,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get no_workers_selected => 'No workers selected';
+
+  @override
+  String get no_appointments => 'No appointments';
+
+  @override
+  String get new_appointment => 'New appointment';
+
+  @override
+  String get worker => 'Worker';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get guest_details => 'Guest details';
+
+  @override
+  String get required_field => 'Required';
+
+  @override
+  String get fill_all_fields => 'Please fill all required fields';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get reschedule => 'Reschedule';
+
+  @override
+  String get no_free_slots => 'No free slots';
+
+  @override
+  String get calendar_view => 'Calendar';
+
+  @override
+  String get list_view => 'List';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get weekday_mon_short => 'Mon';
+
+  @override
+  String get weekday_tue_short => 'Tue';
+
+  @override
+  String get weekday_wed_short => 'Wed';
+
+  @override
+  String get weekday_thu_short => 'Thu';
+
+  @override
+  String get weekday_fri_short => 'Fri';
+
+  @override
+  String get weekday_sat_short => 'Sat';
+
+  @override
+  String get weekday_sun_short => 'Sun';
 }

@@ -494,7 +494,30 @@
   "invite_note_change_password": "Birinchi kirishda parolni almashtirish talab qilinadi.",
   "date_of_birth": "Tug‘ilgan sana",
   "language": "Til",
-  "country": "Mamlakat"
+  "country": "Mamlakat",
+
+  "appointments_title": "Qabullar",
+  "no_workers_selected": "Xodim tanlanmagan",
+  "no_appointments": "Qabul yo‘q",
+  "new_appointment": "Yangi qabul",
+  "worker": "Xodim",
+  "date": "Sana",
+  "guest_details": "Mehmon ma’lumoti",
+  "required_field": "Majburiy",
+  "fill_all_fields": "Iltimos, majburiy maydonlarni to‘ldiring",
+  "create": "Yaratish",
+  "reschedule": "Ko‘chirish",
+  "no_free_slots": "Bo‘sh vaqtlar yo‘q",
+  "calendar_view": "Kalendar",
+  "list_view": "Roʻyxat",
+  "today": "Bugun",
+  "weekday_mon_short": "Du",
+  "weekday_tue_short": "Se",
+  "weekday_wed_short": "Ch",
+  "weekday_thu_short": "Pa",
+  "weekday_fri_short": "Ju",
+  "weekday_sat_short": "Sh",
+  "weekday_sun_short": "Ya"
 
 
 }

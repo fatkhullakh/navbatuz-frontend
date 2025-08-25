@@ -490,7 +490,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cat_makeup_studio => 'Студия макияжа';
 
   @override
-  String get appointments_title => 'Назначения';
+  String get appointments_title => 'Записи';
 
   @override
   String get appointments_upcoming => 'Ближайшие записи';
@@ -1105,4 +1105,67 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get language => 'Язык';
+
+  @override
+  String get no_workers_selected => 'Нет выбранных сотрудников';
+
+  @override
+  String get no_appointments => 'Нет записей';
+
+  @override
+  String get new_appointment => 'Новая запись';
+
+  @override
+  String get worker => 'Сотрудник';
+
+  @override
+  String get date => 'Дата';
+
+  @override
+  String get guest_details => 'Данные гостя';
+
+  @override
+  String get required_field => 'Обязательно';
+
+  @override
+  String get fill_all_fields => 'Заполните все обязательные поля';
+
+  @override
+  String get create => 'Создать';
+
+  @override
+  String get reschedule => 'Перенести';
+
+  @override
+  String get no_free_slots => 'Нет свободных слотов';
+
+  @override
+  String get calendar_view => 'Календарь';
+
+  @override
+  String get list_view => 'Список';
+
+  @override
+  String get today => 'Сегодня';
+
+  @override
+  String get weekday_mon_short => 'Пн';
+
+  @override
+  String get weekday_tue_short => 'Вт';
+
+  @override
+  String get weekday_wed_short => 'Ср';
+
+  @override
+  String get weekday_thu_short => 'Чт';
+
+  @override
+  String get weekday_fri_short => 'Пт';
+
+  @override
+  String get weekday_sat_short => 'Сб';
+
+  @override
+  String get weekday_sun_short => 'Вс';
 }
