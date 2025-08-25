@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
@@ -7,9 +9,20 @@ import '../../../services/api_service.dart';
 import '../../../services/appointments/appointment_service.dart';
 import '../../../models/appointment_models.dart';
 import '../../../services/services/manage_services_service.dart'; // ProviderServiceItem
+import '../../../services/clients/provider_clients_service.dart';
+import '../../clients/pick_client_screen.dart';
 
 String _hhmmFromHms(String hms) => hms.length >= 5 ? hms.substring(0, 5) : hms;
 int _minsFromDuration(Duration? d) => d == null ? 30 : d.inMinutes;
+
+const String WALKIN_NAME = 'Walk-in';
+
+/// Deterministic, provider-scoped placeholder E.164 phone.
+/// We use +888 (non-geographic test-like region) + 10 stable digits from FNV-1a.
+/// Stays the same per provider, so repeat bookings index the same “Walk-in” guest.
+String walkInPhoneE164(String? providerId) {
+  return '+000000000000'; // 12 zeros; total length 13 incl. '+'
+}
 
 class CreateAppointmentScreen extends StatefulWidget {
   final String? providerId; // owner/receptionist mode
@@ -49,7 +62,10 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
 
   final _guestPhoneCtrl = TextEditingController();
   final _guestNameCtrl = TextEditingController();
+
   String? _pickedCustomerId;
+  String? _pickedGuestId;
+
   bool _walkIn = false;
 
   bool _loadingSlots = false;
@@ -66,6 +82,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       _workerId = widget.workers!.first.id;
     }
     _initLoad();
+  }
+
+  @override
+  void dispose() {
+    _guestPhoneCtrl.dispose();
+    _guestNameCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _initLoad() async {
@@ -113,7 +136,25 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
     }
   }
 
+  void _applyWalkInDefaults(bool on) {
+    _walkIn = on;
+    _pickedCustomerId = null;
+    _pickedGuestId = null;
+    if (_walkIn) {
+      _guestNameCtrl.text = WALKIN_NAME;
+      _guestPhoneCtrl.text = walkInPhoneE164(_providerId);
+    }
+    setState(() {});
+  }
+
   Future<void> _pickDeviceContact() async {
+    if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Contacts not supported on this platform')),
+      );
+      return;
+    }
     try {
       final res = await _contactsCh.invokeMethod<dynamic>('pick');
       if (res is Map) {
@@ -122,10 +163,19 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         final phone = (m['phone'] ?? '').toString();
         if (name.isNotEmpty) _guestNameCtrl.text = name;
         if (phone.isNotEmpty) _guestPhoneCtrl.text = phone;
-        setState(() => _walkIn = false);
+        setState(() {
+          _walkIn = false;
+          _pickedCustomerId = null;
+          _pickedGuestId = null;
+        });
       }
     } catch (_) {
-      // no native handler – just ignore
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Contacts permission denied. Enable it in Settings > App > Permissions.'),
+        ),
+      );
     }
   }
 
@@ -146,9 +196,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                 decoration: const InputDecoration(labelText: 'Worker'),
                 items: workers
                     .map((w) => DropdownMenuItem(
-                          value: w.id,
-                          child: Text(w.displayName),
-                        ))
+                        value: w.id, child: Text(w.displayName)))
                     .toList(),
                 onChanged: (v) async {
                   setState(() {
@@ -243,37 +291,43 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                 FilterChip(
                   label: const Text('Walk-in'),
                   selected: _walkIn,
-                  onSelected: (v) {
-                    setState(() {
-                      _walkIn = v;
-                      if (v) {
-                        _guestNameCtrl.text = 'Walk-in';
-                        _guestPhoneCtrl.clear(); // will send synthetic phone
-                      }
-                    });
-                  },
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.contacts_outlined, size: 18),
-                  label: const Text('Pick from contacts'),
-                  onPressed: _pickDeviceContact,
+                  onSelected: (v) => _applyWalkInDefaults(v),
                 ),
                 ActionChip(
                   avatar: const Icon(Icons.people_outline, size: 18),
-                  label: const Text('Pick from clients'),
+                  label: const Text('Pick client'),
                   onPressed: () async {
-                    // Expect a route that returns {'name':..., 'phone':...}
-                    final res = await Navigator.of(context)
-                        .pushNamed<Map>('clients/pick');
-                    if (res is Map) {
-                      final name = (res['name'] ?? '').toString();
-                      final phone = (res['phone'] ?? '').toString();
-                      if (name.isNotEmpty) _guestNameCtrl.text = name;
-                      if (phone.isNotEmpty) _guestPhoneCtrl.text = phone;
+                    if (_providerId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No provider')),
+                      );
+                      return;
+                    }
+                    final res =
+                        await Navigator.of(context).push<Map<String, String?>>(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            PickClientScreen(providerId: _providerId!),
+                      ),
+                    );
+                    if (res != null) {
+                      _pickedCustomerId = res['customerId'];
+                      _pickedGuestId = res['guestId'];
+                      _guestNameCtrl.text = res['name'] ?? '';
+                      // clear manual phone if we have a link id
+                      if (_pickedCustomerId != null || _pickedGuestId != null) {
+                        _guestPhoneCtrl.clear();
+                      }
                       setState(() => _walkIn = false);
                     }
                   },
                 ),
+                if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                  ActionChip(
+                    avatar: const Icon(Icons.contacts_outlined, size: 18),
+                    label: const Text('Pick from contacts'),
+                    onPressed: _pickDeviceContact,
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -282,8 +336,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _guestPhoneCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Phone (optional)'),
+                    decoration: const InputDecoration(labelText: 'Phone'),
                     keyboardType: TextInputType.phone,
                   ),
                 ),
@@ -291,8 +344,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _guestNameCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Name (optional)'),
+                    decoration: const InputDecoration(labelText: 'Name'),
                   ),
                 ),
               ],
@@ -328,28 +380,15 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
     try {
       final startHHmm = _hhmmFromHms(_timeRaw!);
 
-      String? guestPhone = _guestPhoneCtrl.text.trim().isEmpty
-          ? null
-          : _guestPhoneCtrl.text.trim();
-      String? guestName = _guestNameCtrl.text.trim().isEmpty
-          ? null
-          : _guestNameCtrl.text.trim();
+      // prefer linked customer/guest if chosen from Clients
+      final hasLink = (_pickedCustomerId != null) || (_pickedGuestId != null);
 
-      // Backend requires guestId or guestPhone for staff bookings.
-      if (_pickedCustomerId == null &&
-          (guestPhone == null || guestPhone.isEmpty)) {
-        if (_walkIn) {
-          // synthetic phone to satisfy backend, unique-ish
-          guestPhone = 'WALKIN-${DateTime.now().millisecondsSinceEpoch}';
-          guestName ??= 'Walk-in';
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Enter phone, pick a client, or mark Walk-in')),
-          );
-          setState(() => _saving = false);
-          return;
-        }
+      String phone = _guestPhoneCtrl.text.trim();
+      String name = _guestNameCtrl.text.trim();
+
+      if (!hasLink) {
+        if (phone.isEmpty) phone = walkInPhoneE164(_providerId);
+        if (name.isEmpty) name = WALKIN_NAME;
       }
 
       final cmd = NewAppointmentCmd(
@@ -358,12 +397,16 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         date: _day,
         startTime: startHHmm,
         customerId: _pickedCustomerId,
-        guestPhone: guestPhone,
-        guestName: guestName,
+        guestId: _pickedGuestId,
+        guestPhone: hasLink ? null : phone,
+        guestName: hasLink ? null : name,
       );
       await _appt.book(cmd);
       if (!mounted) return;
       Navigator.pop(context, true);
+    } on DioException catch (e) {
+      final msg = e.response?.data?.toString() ?? e.message ?? e.toString();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -70,9 +70,12 @@ class AppointmentService {
     }
   }
 
-  /// Mark as No-show (server route exists). If not yet deployed, you can keep a 404 fallback.
-  Future<void> noShow(String id) async {
-    await _dio.put('/appointments/$id/no-show');
+  Future<void> noShow(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/no-show');
+  }
+
+  Future<void> undoNoShow(String appointmentId) async {
+    await _dio.put('/appointments/$appointmentId/undo-no-show');
   }
 
   Future<AppointmentDetailsStaff> getStaffDetails(String id) async {

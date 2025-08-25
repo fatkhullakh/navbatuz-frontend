@@ -1,6 +1,6 @@
 // Supports /appointments/... (STAFF responses too)
 
-enum AppointmentStatus { BOOKED, RESCHEDULED, CANCELLED, COMPLETED }
+enum AppointmentStatus { BOOKED, RESCHEDULED, CANCELLED, COMPLETED, NO_SHOW }
 
 AppointmentStatus statusFromString(String s) => AppointmentStatus.values
     .firstWhere((e) => e.name == s, orElse: () => AppointmentStatus.BOOKED);

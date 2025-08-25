@@ -22,9 +22,7 @@ class _BreakSlot {
   static String _toHHmm(String s) {
     if (s.isEmpty) return s;
     final p = s.split(':');
-    if (p.length >= 2) {
-      return '${p[0].padLeft(2, '0')}:${p[1].padLeft(2, '0')}';
-    }
+    if (p.length >= 2) return '${p[0].padLeft(2, '0')}:${p[1].padLeft(2, '0')}';
     return s;
   }
 
@@ -34,7 +32,11 @@ class _BreakSlot {
     final et = (m['endTime'] ?? m['to'] ?? m['end'] ?? '').toString();
     final d = DateTime.parse(dStr);
     return _BreakSlot(
-        date: d, start: _toHHmm(st), end: _toHHmm(et), id: m['id']?.toString());
+      date: d,
+      start: _toHHmm(st),
+      end: _toHHmm(et),
+      id: m['id']?.toString(),
+    );
   }
 }
 
@@ -105,8 +107,9 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
   static const double _gutterWidth = 64;
   static const double _columnWidth = 260;
 
-  // >>> tweak this to move hour text relative to the line <<<
-  static const double _HOUR_LABEL_NUDGE = -8; // negative = move up
+  /// >>> Tweak this to align hour labels with the grid line <<<
+  /// Negative = move text UP; positive = move text DOWN.
+  static const double _HOUR_LABEL_NUDGE = -9.5;
 
   DateTime _selectedDay = DateTime.now();
   List<StaffMember> _workers = [];
@@ -134,6 +137,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     super.initState();
     _stripStart = DateTime.now().subtract(const Duration(days: 365));
 
+    // Keep worker header horizontally in sync with calendar scroll
     _calHScrollCtl.addListener(() {
       if (_chipHScrollCtl.hasClients) {
         final off = _calHScrollCtl.offset
@@ -204,11 +208,14 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
   Future<void> _loadWorkerDay(String workerId) async {
     final list = await _appt.getWorkerDay(workerId, _selectedDay);
     _agenda[workerId] = list;
+
+    // Opportunistic cache (if your backend enriches DTO with serviceName)
     for (final a in list) {
       if ((a as dynamic).serviceName != null) {
         _serviceNameCache[a.serviceId] = (a as dynamic).serviceName as String;
       }
     }
+
     await _loadBreaks(workerId);
     if (mounted) setState(() {});
     await _autoCompletePast(workerId);
@@ -259,6 +266,22 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     }
   }
 
+  // Color mapping (includes NO_SHOW)
+  Color _statusColor(AppointmentStatus s) {
+    switch (s) {
+      case AppointmentStatus.BOOKED:
+        return const Color(0xFF12B76A);
+      case AppointmentStatus.RESCHEDULED:
+        return const Color(0xFF7F56D9);
+      case AppointmentStatus.COMPLETED:
+        return const Color(0xFF155EEF);
+      case AppointmentStatus.NO_SHOW:
+        return const Color(0xFFB54708); // amber-ish
+      case AppointmentStatus.CANCELLED:
+        return const Color(0xFFD92D20);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isToday = _isSameDay(_selectedDay, DateTime.now());
@@ -297,9 +320,11 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 }
               });
             },
-            icon: Icon(_mode == StaffViewMode.list
-                ? Icons.calendar_month
-                : Icons.view_list),
+            icon: Icon(
+              _mode == StaffViewMode.list
+                  ? Icons.calendar_month
+                  : Icons.view_list,
+            ),
           ),
         ],
       ),
@@ -454,7 +479,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     );
   }
 
-  // ---- Worker chips header (CALENDAR) – show ALL workers
+  // ---- Worker chips header (CALENDAR) – show ALL workers; unselected are dimmed
   Widget _buildCalendarWorkerHeader() {
     final ordered = _orderedWorkers();
     return SizedBox(
@@ -473,25 +498,29 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: FilterChip(
-                    avatar: const Icon(Icons.person_outline, size: 16),
-                    label: Text(
-                      w.displayName,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontWeight: sel ? FontWeight.w700 : FontWeight.w500),
+                  child: Opacity(
+                    opacity: sel ? 1.0 : 0.35,
+                    child: FilterChip(
+                      avatar: const Icon(Icons.person_outline, size: 16),
+                      label: Text(
+                        w.displayName,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontWeight:
+                                sel ? FontWeight.w700 : FontWeight.w500),
+                      ),
+                      selected: sel,
+                      onSelected: (v) async {
+                        setState(() {
+                          if (v) {
+                            _selectedWorkerIds.add(w.id);
+                          } else {
+                            _selectedWorkerIds.remove(w.id);
+                          }
+                        });
+                        if (v) await _loadWorkerDay(w.id);
+                      },
                     ),
-                    selected: sel,
-                    onSelected: (v) async {
-                      setState(() {
-                        if (v) {
-                          _selectedWorkerIds.add(w.id);
-                        } else {
-                          _selectedWorkerIds.remove(w.id);
-                        }
-                      });
-                      if (v) await _loadWorkerDay(w.id);
-                    },
                   ),
                 ),
               );
@@ -542,11 +571,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                     child: Text('No items'),
                   ),
                 ...appts.map((a) {
-                  final statusColor = {
-                    AppointmentStatus.BOOKED: const Color(0xFF12B76A),
-                    AppointmentStatus.RESCHEDULED: const Color(0xFF7F56D9),
-                    AppointmentStatus.COMPLETED: const Color(0xFF155EEF),
-                  }[a.status]!;
+                  final statusColor = _statusColor(a.status);
                   final serviceName =
                       _serviceNameCache[a.serviceId] ?? 'Service';
                   final customerLabel = a.guestMask != null
@@ -565,9 +590,6 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => StaffAppointmentDetailsScreen(
                             appointmentId: a.id,
-                            date: a.date,
-                            endHHmm: a.end,
-                            status: a.status.name,
                           ),
                         ));
                       },
@@ -578,8 +600,13 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       ),
                       title: Text('${a.start}–${a.end} • $serviceName',
                           maxLines: 1, overflow: TextOverflow.ellipsis),
-                      subtitle: Text(customerLabel,
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        a.status == AppointmentStatus.NO_SHOW
+                            ? 'No-show'
+                            : customerLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       trailing: PopupMenuButton<String>(
                         onSelected: (v) async {
                           if (v == 'cancel') {
@@ -627,7 +654,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     );
   }
 
-  // ---- Calendar mode — show ALL workers; unselected columns are dimmed and empty
+  // ---- Calendar mode — ALL workers; unselected columns dimmed
   Widget _buildCalendar() {
     final all = _orderedWorkers();
     final selectedSet = _selectedWorkerIds;
@@ -636,7 +663,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     final totalHeight = totalHours * _hourHeight;
     final pxPerMinute = _hourHeight / 60.0;
 
-    // Hour gutter (this is where you tweak alignment)
+    // Hour gutter (adjust label alignment with _HOUR_LABEL_NUDGE)
     Widget timeGutter() => SizedBox(
           width: _gutterWidth,
           height: totalHeight,
@@ -649,29 +676,32 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   clipBehavior: Clip.none,
                   children: [
                     Positioned(
-                      top: _HOUR_LABEL_NUDGE, // <— tweak this
+                      top: _HOUR_LABEL_NUDGE,
                       right: 8,
                       child: Text('${h.toString().padLeft(2, '0')}:00',
                           style: const TextStyle(fontSize: 12)),
                     ),
                     Positioned(
-                        top: _hourHeight * .25 - 8,
-                        right: 8,
-                        child: const Text('15',
-                            style: TextStyle(
-                                fontSize: 10, color: Colors.black54))),
+                      top: _hourHeight * .25 - 8,
+                      right: 8,
+                      child: const Text('15',
+                          style:
+                              TextStyle(fontSize: 10, color: Colors.black54)),
+                    ),
                     Positioned(
-                        top: _hourHeight * .50 - 8,
-                        right: 8,
-                        child: const Text('30',
-                            style: TextStyle(
-                                fontSize: 10, color: Colors.black54))),
+                      top: _hourHeight * .50 - 8,
+                      right: 8,
+                      child: const Text('30',
+                          style:
+                              TextStyle(fontSize: 10, color: Colors.black54)),
+                    ),
                     Positioned(
-                        top: _hourHeight * .75 - 8,
-                        right: 8,
-                        child: const Text('45',
-                            style: TextStyle(
-                                fontSize: 10, color: Colors.black54))),
+                      top: _hourHeight * .75 - 8,
+                      right: 8,
+                      child: const Text('45',
+                          style:
+                              TextStyle(fontSize: 10, color: Colors.black54)),
+                    ),
                   ],
                 ),
               );
@@ -696,7 +726,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
           height: totalHeight,
           child: Stack(
             children: [
-              // breaks (behind)
+              // breaks (background)
               ...brks.map((b) {
                 final sh = int.parse(b.start.split(':')[0]);
                 final sm = int.parse(b.start.split(':')[1]);
@@ -740,16 +770,13 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 final height =
                     ((endMin - startMin) * pxPerMinute).clamp(24.0, 10000.0);
 
-                final statusColor = {
-                  AppointmentStatus.BOOKED: const Color(0xFF12B76A),
-                  AppointmentStatus.RESCHEDULED: const Color(0xFF7F56D9),
-                  AppointmentStatus.COMPLETED: const Color(0xFF155EEF),
-                }[a.status]!;
-
+                final statusColor = _statusColor(a.status);
                 final svc = _serviceNameCache[a.serviceId] ?? 'Service';
-                final cust = a.guestMask != null
-                    ? 'Guest ${a.guestMask}'
-                    : (a.customerId != null ? 'Customer' : 'Guest');
+                final cust = a.status == AppointmentStatus.NO_SHOW
+                    ? 'No-show'
+                    : (a.guestMask != null
+                        ? 'Guest ${a.guestMask}'
+                        : (a.customerId != null ? 'Customer' : 'Guest'));
 
                 final tight = height < 56;
                 final veryTight = height < 40;
@@ -764,9 +791,6 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => StaffAppointmentDetailsScreen(
                           appointmentId: a.id,
-                          date: a.date,
-                          endHHmm: a.end,
-                          status: a.status.name,
                         ),
                       ));
                     },
@@ -775,10 +799,19 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(.15),
+                          color: statusColor.withOpacity(
+                              a.status == AppointmentStatus.NO_SHOW
+                                  ? .08
+                                  : .15),
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: statusColor.withOpacity(.4)),
+                          border: Border.all(
+                            color: statusColor.withOpacity(
+                                a.status == AppointmentStatus.NO_SHOW
+                                    ? .55
+                                    : .4),
+                            width:
+                                a.status == AppointmentStatus.NO_SHOW ? 1.2 : 1,
+                          ),
                         ),
                         child: DefaultTextStyle(
                           style: const TextStyle(
@@ -842,10 +875,8 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: _orderedWorkers()
-                            .map((w) => workerColumn(
-                                  w,
-                                  selected: selectedSet.contains(w.id),
-                                ))
+                            .map((w) => workerColumn(w,
+                                selected: selectedSet.contains(w.id)))
                             .toList(),
                       ),
                     ),
@@ -853,6 +884,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 ),
               ],
             ),
+            // Grid lines overlay
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
@@ -865,6 +897,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 ),
               ),
             ),
+            // "Now" indicator
             if (nowTop != null)
               Positioned(
                 top: nowTop,
