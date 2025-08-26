@@ -7,7 +7,7 @@ import '../../services/services/service_catalog_service.dart';
 import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
 import '../../screens/services/service_details_screen.dart';
-import '../../screens/worker/worker_screen.dart';
+import '../workers/worker_screen.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */
 class _Brand {

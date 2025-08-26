@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/workers/worker_service.dart';
 import '../../services/services/service_catalog_service.dart';
-import '../../screens/booking/service_booking_screen.dart';
+import '../booking/service_booking_screen.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */
 class _Brand {

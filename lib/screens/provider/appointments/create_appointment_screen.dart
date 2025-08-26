@@ -3,31 +3,41 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
-import 'package:frontend/services/providers/provider_staff_service.dart';
 
 import '../../../services/api_service.dart';
 import '../../../services/appointments/appointment_service.dart';
 import '../../../models/appointment_models.dart';
-import '../../../services/services/manage_services_service.dart'; // ProviderServiceItem
-import '../../../services/clients/provider_clients_service.dart';
+
+import '../../../services/providers/provider_staff_service.dart';
+import '../../../services/services/manage_services_service.dart'; // <-- updated
 import '../../clients/pick_client_screen.dart';
 
 String _hhmmFromHms(String hms) => hms.length >= 5 ? hms.substring(0, 5) : hms;
 int _minsFromDuration(Duration? d) => d == null ? 30 : d.inMinutes;
 
 const String WALKIN_NAME = 'Walk-in';
+String walkInPhoneE164(String? _) => '+000000000000';
 
-/// Deterministic, provider-scoped placeholder E.164 phone.
-/// We use +888 (non-geographic test-like region) + 10 stable digits from FNV-1a.
-/// Stays the same per provider, so repeat bookings index the same “Walk-in” guest.
-String walkInPhoneE164(String? providerId) {
-  return '+000000000000'; // 12 zeros; total length 13 incl. '+'
+class _UiService {
+  final String id;
+  final String name;
+  final int durationMin;
+  final num? price;
+  final String
+      providerId; // <-- keep so we can open clients even if screen didn't resolve it
+  const _UiService({
+    required this.id,
+    required this.name,
+    required this.durationMin,
+    required this.providerId,
+    this.price,
+  });
 }
 
 class CreateAppointmentScreen extends StatefulWidget {
   final String? providerId; // owner/receptionist mode
-  final List<StaffMember>? workers; // provider view (pick staff)
-  final String? fixedWorkerId; // worker self view
+  final List<StaffMember>? workers; // owner/receptionist mode
+  final String? fixedWorkerId; // worker-self mode
 
   const CreateAppointmentScreen({
     super.key,
@@ -47,13 +57,17 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   final _form = GlobalKey<FormState>();
   final _appt = AppointmentService();
   final _manageSvc = ManageServicesService();
+  final _staffSvc = ProviderStaffService();
   final _dio = ApiService.client;
 
   String? _providerId;
   String? _workerId;
 
-  List<ProviderServiceItem> _services = [];
-  ProviderServiceItem? _selectedService;
+  String _workerDisplayName = '—';
+  String? _workerAvatar;
+
+  List<_UiService> _services = [];
+  _UiService? _selectedService;
   int _serviceDurationMin = 30;
 
   DateTime _day = DateTime.now();
@@ -62,10 +76,8 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
 
   final _guestPhoneCtrl = TextEditingController();
   final _guestNameCtrl = TextEditingController();
-
   String? _pickedCustomerId;
   String? _pickedGuestId;
-
   bool _walkIn = false;
 
   bool _loadingSlots = false;
@@ -76,7 +88,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   void initState() {
     super.initState();
     _providerId = widget.providerId;
-    if (widget.fixedWorkerId != null) {
+    if ((widget.fixedWorkerId ?? '').isNotEmpty) {
       _workerId = widget.fixedWorkerId;
     } else if (widget.workers != null && widget.workers!.isNotEmpty) {
       _workerId = widget.workers!.first.id;
@@ -92,30 +104,68 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   }
 
   Future<void> _initLoad() async {
-    if (_providerId == null && _workerId != null) {
+    // Load worker header (for worker-self UX)
+    if (_workerId != null) {
       try {
-        final r = await _dio.get('/workers/$_workerId');
-        if (r.data is Map && (r.data as Map)['providerId'] != null) {
-          _providerId = (r.data as Map)['providerId'].toString();
-        }
+        final w = await _staffSvc.getWorker(_workerId!);
+        _workerDisplayName = w.displayName;
+        _workerAvatar = ApiService.normalizeMediaUrl(w.avatarUrl);
       } catch (_) {}
     }
-    await _loadServicesForWorker();
+
+    await _loadServicesForWorker(); // resolves providerId in worker-self mode
     await _loadSlots();
   }
 
   Future<void> _loadServicesForWorker() async {
-    if (_providerId == null || _workerId == null) return;
+    if (_workerId == null) return;
+
     setState(() => _loadingServices = true);
     try {
-      final all = await _manageSvc.listAllByProvider(_providerId!);
-      _services = all
-          .where((s) => s.isActive && s.workerIds.contains(_workerId!))
-          .toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
+      List<_UiService> items = [];
+
+      if (_providerId == null) {
+        // Worker-self: use worker endpoint then set providerId from the first item
+        final byWorker = await _manageSvc.listAllByWorker(_workerId!);
+        items = byWorker
+            .where((s) => s.isActive)
+            .map((s) => _UiService(
+                  id: s.id,
+                  name: s.name,
+                  durationMin: _minsFromDuration(s.duration),
+                  price: s.price,
+                  providerId: s.providerId,
+                ))
+            .toList();
+
+        items.sort((a, b) => a.name.compareTo(b.name));
+        if (items.isNotEmpty) {
+          _providerId =
+              items.first.providerId; // <-- resolve for Clients picker
+        }
+      } else {
+        // Owner/receptionist flow: list provider -> filter by worker id
+        final all = await _manageSvc.listAllByProvider(_providerId!);
+        items = all
+            .where((s) => s.isActive && s.workerIds.contains(_workerId!))
+            .map((s) => _UiService(
+                  id: s.id,
+                  name: s.name,
+                  durationMin: _minsFromDuration(s.duration),
+                  price: s.price,
+                  providerId: s.providerId,
+                ))
+            .toList();
+        items.sort((a, b) => a.name.compareTo(b.name));
+      }
+
+      _services = items;
       if (_services.isNotEmpty) {
         _selectedService = _services.first;
-        _serviceDurationMin = _minsFromDuration(_selectedService!.duration);
+        _serviceDurationMin = _selectedService!.durationMin;
+      } else {
+        _selectedService = null;
+        _serviceDurationMin = 30;
       }
     } finally {
       if (mounted) setState(() => _loadingServices = false);
@@ -131,6 +181,9 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         date: _day,
         serviceDurationMinutes: _serviceDurationMin,
       );
+      if (_timeRaw == null || !_freeRaw.contains(_timeRaw)) {
+        _timeRaw = _freeRaw.isEmpty ? null : _freeRaw.first;
+      }
     } finally {
       if (mounted) setState(() => _loadingSlots = false);
     }
@@ -182,6 +235,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     final workers = widget.workers;
+    final workerSelfMode = workers == null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('New appointment')),
@@ -190,13 +244,35 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
-            if (workers != null)
+            if (workerSelfMode)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  radius: 20,
+                  backgroundImage:
+                      (_workerAvatar != null && _workerAvatar!.isNotEmpty)
+                          ? NetworkImage(_workerAvatar!)
+                          : null,
+                  child: (_workerAvatar == null || _workerAvatar!.isEmpty)
+                      ? const Icon(Icons.person)
+                      : null,
+                ),
+                title: const Text('Worker'),
+                subtitle: Text(_workerDisplayName,
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                trailing:
+                    const Icon(Icons.lock, size: 18, color: Colors.black54),
+              )
+            else
               DropdownButtonFormField<String>(
                 value: _workerId,
                 decoration: const InputDecoration(labelText: 'Worker'),
-                items: workers
+                items: workers!
                     .map((w) => DropdownMenuItem(
-                        value: w.id, child: Text(w.displayName)))
+                          value: w.id,
+                          child: Text(w.displayName,
+                              overflow: TextOverflow.ellipsis),
+                        ))
                     .toList(),
                 onChanged: (v) async {
                   setState(() {
@@ -220,15 +296,14 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                     value: _selectedService?.id,
                     decoration: const InputDecoration(labelText: 'Service'),
                     items: _services.map((s) {
-                      final mins = _minsFromDuration(s.duration);
                       final priceText = s.price == null
                           ? ''
                           : (s.price! % 1 == 0
                               ? s.price!.toInt().toString()
                               : s.price!.toString());
                       final label = priceText.isEmpty
-                          ? '${s.name} • ${mins}m'
-                          : '${s.name} • ${mins}m • $priceText';
+                          ? '${s.name} • ${s.durationMin}m'
+                          : '${s.name} • ${s.durationMin}m • $priceText';
                       return DropdownMenuItem(
                         value: s.id,
                         child: Text(label, overflow: TextOverflow.ellipsis),
@@ -238,11 +313,20 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                       final sel = _services.firstWhere((s) => s.id == v);
                       setState(() {
                         _selectedService = sel;
-                        _serviceDurationMin = _minsFromDuration(sel.duration);
+                        _serviceDurationMin = sel.durationMin;
                       });
                       await _loadSlots();
                     },
+                    validator: (v) => v == null ? 'Choose a service' : null,
                   ),
+            if (!_loadingServices && _services.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'No services are assigned to this worker.',
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -297,9 +381,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   avatar: const Icon(Icons.people_outline, size: 18),
                   label: const Text('Pick client'),
                   onPressed: () async {
-                    if (_providerId == null) {
+                    // If provider still unknown, try from chosen service.
+                    final provForPicker =
+                        _providerId ?? _selectedService?.providerId;
+                    if (provForPicker == null || provForPicker.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No provider')),
+                        const SnackBar(
+                            content: Text('No provider to list clients from')),
                       );
                       return;
                     }
@@ -307,14 +395,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                         await Navigator.of(context).push<Map<String, String?>>(
                       MaterialPageRoute(
                         builder: (_) =>
-                            PickClientScreen(providerId: _providerId!),
+                            PickClientScreen(providerId: provForPicker),
                       ),
                     );
                     if (res != null) {
                       _pickedCustomerId = res['customerId'];
                       _pickedGuestId = res['guestId'];
                       _guestNameCtrl.text = res['name'] ?? '';
-                      // clear manual phone if we have a link id
                       if (_pickedCustomerId != null || _pickedGuestId != null) {
                         _guestPhoneCtrl.clear();
                       }
@@ -379,8 +466,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
     setState(() => _saving = true);
     try {
       final startHHmm = _hhmmFromHms(_timeRaw!);
-
-      // prefer linked customer/guest if chosen from Clients
       final hasLink = (_pickedCustomerId != null) || (_pickedGuestId != null);
 
       String phone = _guestPhoneCtrl.text.trim();
@@ -401,6 +486,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         guestPhone: hasLink ? null : phone,
         guestName: hasLink ? null : name,
       );
+
       await _appt.book(cmd);
       if (!mounted) return;
       Navigator.pop(context, true);

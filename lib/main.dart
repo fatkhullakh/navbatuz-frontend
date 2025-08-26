@@ -49,7 +49,12 @@ class MyApp extends StatelessWidget {
           }
           return ProviderNavRoot(providerId: providerId); // nullable is OK now
         },
-        '/workers': (context) => const WorkerNavRoot(),
+        '/workers': (context) {
+          final args =
+              (ModalRoute.of(context)!.settings.arguments as Map?) ?? {};
+          final workerId = (args['workerId'] ?? '') as String;
+          return WorkerNavRoot(workerId: workerId);
+        },
       },
       initialRoute: '/',
     );

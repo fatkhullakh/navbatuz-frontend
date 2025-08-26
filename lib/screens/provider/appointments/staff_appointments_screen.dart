@@ -202,6 +202,20 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
 
   Future<void> _loadWorkerRosterIfNeeded(String workerId) async {
     if (_workers.any((w) => w.id == workerId)) return;
+
+    // Try to hydrate from /workers/me (your payload sample matches fromWorkerJson)
+    try {
+      final r = await _dio.get('/workers/me');
+      if (r.data is Map) {
+        final m = Map<String, dynamic>.from(r.data as Map);
+        _workers = [StaffMember.fromWorkerJson(m)];
+        return;
+      }
+    } catch (_) {
+      // ignore and fall back
+    }
+
+    // Last resort: a safe stub so UI doesn't crash
     _workers = [StaffMember.stub(workerId)];
   }
 
