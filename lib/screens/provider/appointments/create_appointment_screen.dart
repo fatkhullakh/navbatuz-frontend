@@ -9,8 +9,9 @@ import '../../../services/appointments/appointment_service.dart';
 import '../../../models/appointment_models.dart';
 
 import '../../../services/providers/provider_staff_service.dart';
-import '../../../services/services/manage_services_service.dart'; // <-- updated
+import '../../../services/services/manage_services_service.dart';
 import '../../clients/pick_client_screen.dart';
+import '../../../core/phone_utils.dart'; // <-- NEW
 
 String _hhmmFromHms(String hms) => hms.length >= 5 ? hms.substring(0, 5) : hms;
 int _minsFromDuration(Duration? d) => d == null ? 30 : d.inMinutes;
@@ -23,8 +24,7 @@ class _UiService {
   final String name;
   final int durationMin;
   final num? price;
-  final String
-      providerId; // <-- keep so we can open clients even if screen didn't resolve it
+  final String providerId;
   const _UiService({
     required this.id,
     required this.name,
@@ -104,7 +104,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   }
 
   Future<void> _initLoad() async {
-    // Load worker header (for worker-self UX)
     if (_workerId != null) {
       try {
         final w = await _staffSvc.getWorker(_workerId!);
@@ -113,7 +112,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       } catch (_) {}
     }
 
-    await _loadServicesForWorker(); // resolves providerId in worker-self mode
+    await _loadServicesForWorker();
     await _loadSlots();
   }
 
@@ -125,7 +124,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       List<_UiService> items = [];
 
       if (_providerId == null) {
-        // Worker-self: use worker endpoint then set providerId from the first item
         final byWorker = await _manageSvc.listAllByWorker(_workerId!);
         items = byWorker
             .where((s) => s.isActive)
@@ -136,15 +134,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   price: s.price,
                   providerId: s.providerId,
                 ))
-            .toList();
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
 
-        items.sort((a, b) => a.name.compareTo(b.name));
         if (items.isNotEmpty) {
-          _providerId =
-              items.first.providerId; // <-- resolve for Clients picker
+          _providerId = items.first.providerId; // resolve for client picker
         }
       } else {
-        // Owner/receptionist flow: list provider -> filter by worker id
         final all = await _manageSvc.listAllByProvider(_providerId!);
         items = all
             .where((s) => s.isActive && s.workerIds.contains(_workerId!))
@@ -155,8 +151,8 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   price: s.price,
                   providerId: s.providerId,
                 ))
-            .toList();
-        items.sort((a, b) => a.name.compareTo(b.name));
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
       }
 
       _services = items;
@@ -214,8 +210,14 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         final m = Map<String, dynamic>.from(res.cast<String, dynamic>());
         final name = (m['name'] ?? '').toString();
         final phone = (m['phone'] ?? '').toString();
+
         if (name.isNotEmpty) _guestNameCtrl.text = name;
-        if (phone.isNotEmpty) _guestPhoneCtrl.text = phone;
+        if (phone.isNotEmpty) {
+          // Normalize immediately so DB won’t get multiple formats
+          _guestPhoneCtrl.text =
+              normalizePhoneE164(phone, defaultCountry: 'UZ');
+        }
+
         setState(() {
           _walkIn = false;
           _pickedCustomerId = null;
@@ -381,7 +383,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   avatar: const Icon(Icons.people_outline, size: 18),
                   label: const Text('Pick client'),
                   onPressed: () async {
-                    // If provider still unknown, try from chosen service.
                     final provForPicker =
                         _providerId ?? _selectedService?.providerId;
                     if (provForPicker == null || provForPicker.isEmpty) {
@@ -425,6 +426,12 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                     controller: _guestPhoneCtrl,
                     decoration: const InputDecoration(labelText: 'Phone'),
                     keyboardType: TextInputType.phone,
+                    onEditingComplete: () {
+                      // Optional: normalize as soon as user finishes editing
+                      final norm = normalizePhoneE164(_guestPhoneCtrl.text,
+                          defaultCountry: 'UZ');
+                      _guestPhoneCtrl.text = norm;
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -472,6 +479,8 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       String name = _guestNameCtrl.text.trim();
 
       if (!hasLink) {
+        // Normalize right before sending to API
+        phone = normalizePhoneE164(phone, defaultCountry: 'UZ');
         if (phone.isEmpty) phone = walkInPhoneE164(_providerId);
         if (name.isEmpty) name = WALKIN_NAME;
       }
