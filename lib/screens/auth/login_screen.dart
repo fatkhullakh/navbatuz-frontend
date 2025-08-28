@@ -4,7 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../services/api_service.dart';
-import '../../services/providers/provider_resolver_service.dart'; // ← NEW
+import '../../services/providers/provider_resolver_service.dart';
+import '../../services/workers/workers_api.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,11 +13,10 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-/* ---------------------------- Brand constants ---------------------------- */
 class _Brand {
-  static const primary = Color(0xFF6A89A7); // #6A89A7
-  static const accentSoft = Color(0xFFBDDDFC); // #BDDDFC
-  static const ink = Color(0xFF384959); // #384959
+  static const primary = Color(0xFF6A89A7);
+  static const accentSoft = Color(0xFFBDDDFC);
+  static const ink = Color(0xFF384959);
   static const border = Color(0xFFE6ECF2);
   static const subtle = Color(0xFF7C8B9B);
   static const surfaceSoft = Color(0xFFF6F9FC);
@@ -47,7 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-  // ← RESTORED helper
   String _extractRole(dynamic raw) {
     if (raw == null) return 'CUSTOMER';
     if (raw is List) {
@@ -56,53 +55,62 @@ class _LoginScreenState extends State<LoginScreen> {
     return raw.toString().toUpperCase();
   }
 
-  bool _isProviderSide(String rolesCsvUpper) {
-    return rolesCsvUpper.contains('OWNER') ||
-        rolesCsvUpper.contains('PROVIDER') ||
-        rolesCsvUpper.contains('RECEPTIONIST') ||
-        rolesCsvUpper.contains('WORKER');
-  }
+  bool _has(String rolesCsvUpper, String needle) =>
+      rolesCsvUpper.contains(needle);
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      final response =
-          await ApiService.login(_email.text.trim(), _password.text);
-      final token = response.data?['token'];
-      if (token == null || token is! String || token.isEmpty) {
+      final resp = await ApiService.login(_email.text.trim(), _password.text);
+      final token = resp.data?['token'];
+      if (token is! String || token.isEmpty) {
         throw Exception('Malformed login response');
       }
 
+      await storage.write(key: 'jwt_token', value: token);
+      ApiService.setToken(token);
+
       final claims = Jwt.parseJwt(token);
-      final rawRole = _extractRole(
+      final rolesCsv = _extractRole(
         claims['role'] ??
             claims['roles'] ??
             claims['authorities'] ??
             'CUSTOMER',
       );
 
-      await storage.write(key: 'jwt_token', value: token);
-      await storage.write(key: 'user_role', value: rawRole);
+      // 1) Pure worker (no owner/receptionist) → worker shell
+      if (_has(rolesCsv, 'WORKER') &&
+          !_has(rolesCsv, 'OWNER') &&
+          !_has(rolesCsv, 'RECEPTIONIST')) {
+        final me = await WorkersApi().me();
+        if (!mounted) return;
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/workers',
+          (_) => false,
+          arguments: {'workerId': me.id},
+        );
+        return;
+      }
 
-      if (!mounted) return;
-
-      if (_isProviderSide(rawRole)) {
-        // Try to resolve providerId (nullable is OK)
+      // 2) Owner / Receptionist (provider-side) → provider shell
+      if (_has(rolesCsv, 'OWNER') || _has(rolesCsv, 'RECEPTIONIST')) {
         String? providerId;
         try {
           providerId = await ProviderResolverService().resolveMyProviderId();
         } catch (_) {}
+        if (!mounted) return;
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/providers',
           (_) => false,
-          arguments:
-              providerId, // can be null, your /providers route should handle it
+          arguments: providerId, // your /providers route handles null
         );
-      } else {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/customers', (_) => false);
+        return;
       }
+
+      // 3) Everyone else → customer shell
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/customers', (_) => false);
     } on DioException catch (dioErr) {
       if (!mounted) return;
       final code = dioErr.response?.statusCode;

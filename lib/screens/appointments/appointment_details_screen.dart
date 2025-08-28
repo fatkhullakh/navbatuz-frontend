@@ -8,7 +8,7 @@ import '../../services/appointments/appointment_service.dart';
 import '../../services/api_service.dart';
 
 import '../providers/provider_screen.dart';
-import '../../screens/worker/worker_screen.dart';
+import '../workers/worker_screen.dart';
 import '../../screens/booking/service_booking_screen.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */

@@ -33,7 +33,12 @@ class NavbatUzApp extends StatelessWidget {
               ModalRoute.of(context)!.settings.arguments as String;
           return ProviderNavRoot(providerId: providerId);
         },
-        '/workers': (context) => const WorkerNavRoot(), // ✅ NEW
+        '/workers': (context) {
+          final args =
+              (ModalRoute.of(context)!.settings.arguments as Map?) ?? {};
+          final workerId = (args['workerId'] ?? '') as String;
+          return WorkerNavRoot(workerId: workerId);
+        },
         '/register': (context) => const RegisterScreen(),
         '/test-customer-home': (context) => FoodAppHomeScreen1(),
         '/customer-appointments': (_) => const AppointmentsScreen(),

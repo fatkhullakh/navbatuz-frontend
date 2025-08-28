@@ -36,18 +36,18 @@ String? _toIso(Duration? d) {
   if (h > 0) buf.write('${h}H');
   if (m > 0) buf.write('${m}M');
   if (s > 0 && h == 0) buf.write('${s}S');
-  if (buf.length == 2) buf.write('0S'); // PT0S
+  if (buf.length == 2) buf.write('0S');
   return buf.toString();
 }
 
-/// Backend DTO used on the provider(OWNER) side.
+/// Backend DTO used on provider-side management APIs.
 class ProviderServiceItem {
   final String id;
   final String name;
   final String? description;
-  final String category; // backend enum name
-  final num? price; // BigDecimal on server (nullable)
-  final Duration? duration; // ISO on server
+  final String category;
+  final num? price;
+  final Duration? duration; // ISO 8601 on server
   final bool isActive;
   final String providerId;
   final List<String> workerIds;
@@ -102,8 +102,8 @@ class ProviderServiceItem {
 class CreateServiceRequest {
   final String name;
   final String? description;
-  final String category; // enum name
-  final num? price; // nullable
+  final String category;
+  final num? price;
   final Duration? duration;
   final String providerId;
   final List<String> workerIds;
@@ -132,8 +132,19 @@ class CreateServiceRequest {
 class ManageServicesService {
   final Dio _dio = ApiService.client;
 
+  /// Provider scope
   Future<List<ProviderServiceItem>> listAllByProvider(String providerId) async {
     final r = await _dio.get('/services/provider/all/$providerId');
+    final list = (r.data as List?) ?? const [];
+    return list
+        .whereType<Map>()
+        .map((e) => ProviderServiceItem.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  /// Worker scope (what you needed): `/services/worker/all/{workerId}`
+  Future<List<ProviderServiceItem>> listAllByWorker(String workerId) async {
+    final r = await _dio.get('/services/worker/all/$workerId');
     final list = (r.data as List?) ?? const [];
     return list
         .whereType<Map>()
@@ -144,7 +155,6 @@ class ManageServicesService {
   Future<ProviderServiceItem> create(CreateServiceRequest req) async {
     final r = await _dio.post('/services', data: req.toJson());
     return ProviderServiceItem.fromJson(Map<String, dynamic>.from(r.data));
-    // NOTE: backend returns detailed response
   }
 
   Future<void> update(ProviderServiceItem item) async {

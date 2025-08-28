@@ -101,6 +101,22 @@ class ApiService {
 
   static String fixPublicUrl(String url) => normalizeMediaUrl(url) ?? url;
 
+  static Future<void> setToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      await _storage.delete(key: 'jwt_token');
+      _dio.options.headers.remove('Authorization');
+      return;
+    }
+    await _storage.write(key: 'jwt_token', value: token);
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+
+  /// Convenience helper for logout flows.
+  static Future<void> clearToken() async {
+    await setToken(null);
+    await _storage.delete(key: 'user_role');
+  }
+
   // --- Auth endpoints ---
   static Future<Response> login(String email, String password) =>
       _dio.post('/auth/login', data: {'email': email, 'password': password});

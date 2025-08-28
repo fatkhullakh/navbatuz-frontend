@@ -153,7 +153,6 @@ class ProviderStaffService {
   static String _t(String hhmm) => hhmm.length == 5 ? '$hhmm:00' : hhmm;
 }
 
-/// Worker list element
 class StaffMember {
   final String id; // workerId
   final String name; // fullName
@@ -239,10 +238,23 @@ class StaffMember {
     );
   }
 
-  static stub(String id) {}
+  /// Used when we only know workerId (e.g., worker self mode)
+  static StaffMember stub(String id) => StaffMember(
+        id: id,
+        name: '—',
+        isActive: true,
+        providerName: null,
+        gender: null,
+        phoneNumber: null,
+        email: null,
+        avatarUrl: null,
+        role: null,
+        status: null,
+        avgRating: null,
+        hireDate: null,
+      );
 }
 
-/// Planned weekly item
 class PlannedDay {
   final String day; // MONDAY..SUNDAY
   String? start; // "HH:mm"
@@ -255,7 +267,6 @@ class PlannedDay {
     String _toHHmm(String s) {
       s = (s).toString();
       if (s.isEmpty) return '';
-      // LocalTime may come as "HH:mm:ss"
       return s.length >= 5 ? s.substring(0, 5) : s;
     }
 
@@ -268,7 +279,6 @@ class PlannedDay {
       }
       if (s.contains(':')) {
         final parts = s.split(':');
-        // HH:mm:ss -> minutes
         return (int.tryParse(parts[0]) ?? 0) * 60 +
             (int.tryParse(parts[1]) ?? 0);
       }
