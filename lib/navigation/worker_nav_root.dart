@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/worker/manage/worker_hours_services_screen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 import '../l10n/app_localizations.dart';
@@ -7,8 +8,14 @@ import '../screens/provider/appointments/staff_appointments_screen.dart';
 import '../services/workers/worker_resolver_service.dart';
 
 class WorkerNavRoot extends StatefulWidget {
-  final String? workerId; // optional
-  const WorkerNavRoot({super.key, this.workerId});
+  final String? workerId; // optional — resolved if null
+  final String? providerId; // optional — resolved if null
+
+  const WorkerNavRoot({
+    super.key,
+    this.workerId,
+    this.providerId,
+  });
 
   @override
   State<WorkerNavRoot> createState() => _WorkerNavRootState();
@@ -33,6 +40,8 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
   };
 
   String? _workerId;
+  String? _providerId;
+
   bool _loading = true;
   String? _error;
 
@@ -48,10 +57,18 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
       _error = null;
     });
     try {
-      _workerId = widget.workerId;
-      if (_workerId == null || _workerId!.isEmpty) {
-        _workerId = await WorkerResolverService().resolveMyWorkerId();
-      }
+      final resolver = WorkerResolverService();
+
+      // 1) Resolve workerId if not supplied
+      _workerId = (widget.workerId != null && widget.workerId!.isNotEmpty)
+          ? widget.workerId
+          : await resolver.resolveMyWorkerId();
+
+      // 2) Resolve providerId if not supplied
+      _providerId = (widget.providerId != null && widget.providerId!.isNotEmpty)
+          ? widget.providerId
+          // implement this in your resolver to fetch the providerId for a worker
+          : await resolver.resolveMyWorkerId();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -87,9 +104,13 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
     if (_error != null) {
       return Scaffold(body: Center(child: Text(_error!)));
     }
-    if (_workerId == null || _workerId!.isEmpty) {
+    if ((_workerId ?? '').isEmpty) {
       return const Scaffold(
           body: Center(child: Text('Cannot resolve worker id')));
+    }
+    if ((_providerId ?? '').isEmpty) {
+      return const Scaffold(
+          body: Center(child: Text('Cannot resolve provider id')));
     }
 
     return WillPopScope(
@@ -106,6 +127,7 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
                 settings: settings,
               ),
             ),
+
             // Dashboard (placeholder)
             Navigator(
               key: _navKeys[_WTab.dashboard],
@@ -115,15 +137,19 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
                 settings: settings,
               ),
             ),
-            // Working Hours & Services (placeholder)
+
+            // Working Hours & Services
             Navigator(
               key: _navKeys[_WTab.hours],
               onGenerateRoute: (settings) => MaterialPageRoute(
-                builder: (_) => const _ComingSoon(
-                    title: 'Working Hours & Services (coming soon)'),
+                builder: (_) => WorkerHoursServicesScreen(
+                  workerId: _workerId!,
+                  //providerId: _providerId!, // <-- pass providerId
+                ),
                 settings: settings,
               ),
             ),
+
             // Account — shared for all roles
             Navigator(
               key: _navKeys[_WTab.account],
@@ -150,7 +176,7 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
             ),
             SalomonBottomBarItem(
               icon: const Icon(Icons.schedule_rounded),
-              title: Text('Hours & Services'),
+              title: const Text('Hours & Services'),
               selectedColor: _Brand.primary,
             ),
             SalomonBottomBarItem(
