@@ -176,4 +176,6 @@ class ProviderOwnerServicesService {
     );
     await _dio.put('/services/$id', data: item.toJsonForUpdate(providerId));
   }
+
+  Future resolveProviderIdForWorker(String workerId) async {}
 }
