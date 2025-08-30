@@ -145,6 +145,8 @@ class _WorkerHoursServicesScreenState extends State<WorkerHoursServicesScreen> {
         children: [
           const SizedBox(height: 4),
 
+          if (_me != null) WorkerProfileMiniCard(me: _me!),
+
           // My Availability
           _CardAction(
             icon: Icons.schedule_rounded,
@@ -197,6 +199,158 @@ class _WorkerHoursServicesScreenState extends State<WorkerHoursServicesScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class WorkerProfileMiniCard extends StatelessWidget {
+  final WorkerDetailsLite me;
+  const WorkerProfileMiniCard({super.key, required this.me});
+
+  Color _statusColor(String key) {
+    switch (key) {
+      case 'AVAILABLE':
+        return const Color(0xFF12B76A);
+      case 'ON_BREAK':
+        return const Color(0xFFF59E0B);
+      case 'ON_LEAVE':
+        return const Color(0xFF7C3AED);
+      case 'UNAVAILABLE':
+      default:
+        return const Color(0xFF667085);
+    }
+  }
+
+  String _statusText(String key) {
+    switch (key) {
+      case 'AVAILABLE':
+        return 'Available';
+      case 'UNAVAILABLE':
+        return 'Unavailable';
+      case 'ON_BREAK':
+        return 'On break';
+      case 'ON_LEAVE':
+        return 'On leave';
+      default:
+        return '—';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // status can be enum or string — normalize to UPPER string
+    final String statusKey = me.status.toString().split('.').last.toUpperCase();
+
+    // provider label: prefer name if your DTO has it; fallback to id
+    final providerLabel = (me.providerName?.isNotEmpty ?? false)
+        ? me.providerName!
+        : (me.providerId ?? '—');
+
+    final workerTypeLabel =
+        (me.workerType?.isNotEmpty ?? false) ? me.workerType! : '—';
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: const Color(0xFFF2F4F7),
+              backgroundImage: (me.avatarUrl == null || me.avatarUrl!.isEmpty)
+                  ? null
+                  : NetworkImage(me.avatarUrl!),
+              child: (me.avatarUrl == null || me.avatarUrl!.isEmpty)
+                  ? const Icon(Icons.person_outline, color: Color(0xFF7C8B9B))
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            // Texts
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name + rating
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          me.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
+                      ),
+                      if (me.avgRating != null) ...[
+                        const Icon(Icons.star,
+                            size: 16, color: Color(0xFFFFB703)),
+                        const SizedBox(width: 4),
+                        Text(me.avgRating!.toStringAsFixed(1)),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Status chip
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _statusColor(statusKey).withOpacity(.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: _statusColor(statusKey).withOpacity(.28),
+                      ),
+                    ),
+                    child: Text(
+                      _statusText(statusKey),
+                      style: TextStyle(
+                        color: _statusColor(statusKey),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Provider + Worker type lines
+                  Row(
+                    children: [
+                      const Icon(Icons.store_mall_directory_outlined, size: 16),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          providerLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Color(0xFF7C8B9B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.badge_outlined, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        workerTypeLabel,
+                        style: const TextStyle(color: Color(0xFF7C8B9B)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

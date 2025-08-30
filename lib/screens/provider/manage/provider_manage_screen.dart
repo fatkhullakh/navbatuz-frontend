@@ -12,9 +12,8 @@ import 'staff/provider_staff_list_screen.dart';
 import 'hours/provider_business_hours_screen.dart';
 import '../manage/business_info/provider_settings_screen.dart';
 
-// Worker management shortcuts (already in your project)
-// Public worker view (optional shortcut)
-import '../../workers/worker_screen.dart';
+// Optional public worker view
+// import '../../workers/worker_screen.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */
 class _Brand {
@@ -27,7 +26,7 @@ class _Brand {
 
 /* ------------------------------ Screen ---------------------------------- */
 class ProviderManageScreen extends StatefulWidget {
-  final String? providerId; // ← nullable stays
+  final String? providerId;
   const ProviderManageScreen({super.key, required this.providerId});
 
   @override
@@ -44,11 +43,13 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
   String? _meAvatarUrl;
   String? _meStatus; // AVAILABLE / UNAVAILABLE / ...
   double? _meAvgRating;
+  bool _meActive = false; // ← NEW: track active flag
 
   // enable form
   String _workerType = 'GENERAL';
   String _status = 'AVAILABLE';
   bool _busyEnable = false;
+  bool _busyReactivate = false; // ← NEW
 
   @override
   void initState() {
@@ -61,8 +62,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       _checkingMe = true;
     });
     try {
-      // Secured endpoint, will 403/404 if owner isn’t a worker yet — that’s OK.
-      final r = await _dio.get('/workers/me');
+      final r = await _dio.get('/workers/me'); // 403/404 if not a worker yet
       if (r.data is Map) {
         final m = Map<String, dynamic>.from(r.data as Map);
         setState(() {
@@ -74,21 +74,25 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
               : double.tryParse('${m['avgRating']}');
           final rawAvatar = (m['avatarUrl'] ?? '').toString();
           _meAvatarUrl = ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar;
+
+          // tolerate both "active" and "isActive"
+          final dynamic act = (m['active'] ?? m['isActive']);
+          _meActive = act == true || act?.toString() == 'true';
         });
       } else {
         setState(() {
           _meWorkerId = null;
+          _meActive = false;
         });
       }
     } on DioException catch (e) {
-      // 403/404 → treat as “not a worker yet”
-      if ((e.response?.statusCode ?? 0) == 403 ||
-          (e.response?.statusCode ?? 0) == 404) {
+      final code = e.response?.statusCode ?? 0;
+      if (code == 403 || code == 404) {
         setState(() {
           _meWorkerId = null;
+          _meActive = false;
         });
       } else {
-        // Other errors → also treat as not ready, but log to snackbar once.
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -97,6 +101,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
         }
         setState(() {
           _meWorkerId = null;
+          _meActive = false;
         });
       }
     } finally {
@@ -124,14 +129,13 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       final body = {
         'workerType': _workerType,
         'status': _status,
-        'isActive': true,
+        'isActive': true, // ensure active on create/enable
       };
       final r = await _dio.post(
         '/providers/${widget.providerId}/owner-as-worker',
         data: body,
       );
 
-      // Expect WorkerDetailsDto back
       if (r.data is Map) {
         final m = Map<String, dynamic>.from(r.data as Map);
         setState(() {
@@ -143,6 +147,9 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
               : double.tryParse('${m['avgRating']}');
           final rawAvatar = (m['avatarUrl'] ?? '').toString();
           _meAvatarUrl = ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar;
+
+          final dynamic act = (m['active'] ?? m['isActive']);
+          _meActive = act == true || act?.toString() == 'true';
         });
       }
 
@@ -159,6 +166,28 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       );
     } finally {
       if (mounted) setState(() => _busyEnable = false);
+    }
+  }
+
+  Future<void> _reactivateMe() async {
+    if (_meWorkerId == null) return;
+    setState(() => _busyReactivate = true);
+    try {
+      await _dio.put('/workers/${_meWorkerId}/activate');
+      await _loadMe(); // refresh state
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Worker profile re-enabled')),
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final code = e.response?.statusCode;
+      final msg = e.response?.data?.toString() ?? e.message ?? e.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('HTTP $code: $msg')),
+      );
+    } finally {
+      if (mounted) setState(() => _busyReactivate = false);
     }
   }
 
@@ -199,6 +228,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       appBar: AppBar(title: Text(t.provider_tab_details ?? 'Manage')),
       body: RefreshIndicator(
         onRefresh: _loadMe,
+        color: _Brand.primary,
         child: ListView(
           children: [
             // -------- Owner-as-worker section (top) --------
@@ -243,16 +273,22 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w800)),
                                 const SizedBox(height: 4),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                Wrap(
+                                  spacing: 10,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
                                     _StatusChip(
                                       text: _statusText(_meStatus),
                                       color: _statusColor(_meStatus),
                                     ),
-                                    const SizedBox(width: 10),
+                                    if (!_meActive)
+                                      const _StatusChip(
+                                        text: 'Inactive',
+                                        color: Color(0xFFB42318), // red-ish
+                                      ),
                                     if (_meAvgRating != null)
                                       Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           const Icon(Icons.star,
                                               size: 16,
@@ -270,73 +306,83 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.schedule),
-                            label: const Text('My availability'),
-                            onPressed: () {
-                              if (widget.providerId == null) {
-                                _needProvider(context);
-                                return;
-                              }
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      ProviderWorkerAvailabilityScreen(
-                                    workerId: _meWorkerId!,
-                                    workerName: _meName ?? 'Me',
+                      if (_meActive) // normal shortcuts
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.schedule),
+                              label: const Text('My availability'),
+                              onPressed: () {
+                                if (widget.providerId == null) {
+                                  _needProvider(context);
+                                  return;
+                                }
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProviderWorkerAvailabilityScreen(
+                                      workerId: _meWorkerId!,
+                                      workerName: _meName ?? 'Me',
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.design_services_outlined),
-                            label: const Text('My services'),
-                            onPressed: () {
-                              if (widget.providerId == null) {
-                                _needProvider(context);
-                                return;
-                              }
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProviderWorkerServicesScreen(
-                                    providerId: widget.providerId!,
-                                    workerId: _meWorkerId!,
-                                    workerName: _meName ?? 'Me',
+                                );
+                              },
+                            ),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.design_services_outlined),
+                              label: const Text('My services'),
+                              onPressed: () {
+                                if (widget.providerId == null) {
+                                  _needProvider(context);
+                                  return;
+                                }
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProviderWorkerServicesScreen(
+                                      providerId: widget.providerId!,
+                                      workerId: _meWorkerId!,
+                                      workerName: _meName ?? 'Me',
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                          // OutlinedButton.icon(
-                          //   icon: const Icon(Icons.open_in_new),
-                          //   label: const Text('Public page'),
-                          //   onPressed: () {
-                          //     Navigator.push(
-                          //       context,
-                          //       MaterialPageRoute(
-                          //         builder: (_) => WorkerScreen(
-                          //           workerId: _meWorkerId!,
-                          //           providerId: widget.providerId,
-                          //           workerNameFallback: _meName,
-                          //         ),
-                          //       ),
-                          //     );
-                          //   },
-                          // ),
-                        ],
-                      ),
+                                );
+                              },
+                            ),
+                          ],
+                        )
+                      else // inactive → show re-enable CTA
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'You are currently removed from the team.',
+                              style:
+                                  TextStyle(fontSize: 12, color: _Brand.subtle),
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              height: 40,
+                              child: FilledButton.icon(
+                                onPressed:
+                                    _busyReactivate ? null : _reactivateMe,
+                                icon: const Icon(Icons.play_arrow_rounded),
+                                label: Text(_busyReactivate
+                                    ? 'Re-enabling…'
+                                    : 'Re-enable me'),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
               )
             else
+              // Not a worker yet → enable card
               Card(
                 elevation: 0,
                 margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -395,10 +441,9 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
+                      const Text(
                         'You’ll be able to set your hours and assign services to yourself after enabling.',
-                        style:
-                            const TextStyle(fontSize: 12, color: _Brand.subtle),
+                        style: TextStyle(fontSize: 12, color: _Brand.subtle),
                       ),
                     ],
                   ),
