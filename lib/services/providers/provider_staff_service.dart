@@ -354,3 +354,21 @@ class BreakItem {
     );
   }
 }
+
+class OwnerWorkerService {
+  final Dio _dio = ApiService.client;
+
+  Future<void> enableOwnerAsWorker({
+    required String providerId,
+    String? workerType, // e.g. "BARBER" or your enum names
+    String? status, // e.g. "AVAILABLE"
+    bool? isActive, // default true
+  }) async {
+    final body = <String, dynamic>{
+      if (workerType != null) 'workerType': workerType,
+      if (status != null) 'status': status,
+      if (isActive != null) 'isActive': isActive,
+    };
+    await _dio.post('/providers/$providerId/owner-as-worker', data: body);
+  }
+}
