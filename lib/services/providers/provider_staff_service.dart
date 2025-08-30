@@ -95,13 +95,38 @@ String? statusToString(WorkerStatus? s) => s?.name;
 class ProviderStaffService {
   final Dio _dio = ApiService.client;
 
-  Future<List<StaffMember>> getProviderStaff(String providerId) async {
-    final r = await _dio.get('/workers/provider/$providerId');
-    final list = (r.data as List? ?? []);
-    return list
+  Future<List<StaffMember>> getProviderStaffExt(
+    String providerId, {
+    bool? activeOnly,
+  }) async {
+    Response r;
+    if (activeOnly == null) {
+      r = await _dio.get('/workers/provider/$providerId');
+    } else {
+      // If BE supports ?active= filter, this will use it; otherwise we filter after.
+      r = await _dio.get(
+        '/workers/provider/$providerId',
+        queryParameters: {'active': activeOnly},
+      );
+    }
+
+    final data = (r.data as List? ?? []);
+    final list = data
         .whereType<Map>()
         .map((e) => StaffMember.fromWorkerJson(e.cast<String, dynamic>()))
         .toList();
+
+    if (activeOnly == true) return list.where((e) => e.isActive).toList();
+    if (activeOnly == false) return list.where((e) => !e.isActive).toList();
+    return list;
+  }
+
+  // ✅ NEW: add named param to the simpler method and delegate to the ext method
+  Future<List<StaffMember>> getProviderStaff(
+    String providerId, {
+    bool? activeOnly, // <— now supported
+  }) {
+    return getProviderStaffExt(providerId, activeOnly: activeOnly);
   }
 
   /// Full details
@@ -145,9 +170,21 @@ class ProviderStaffService {
     return StaffMember.fromWorkerJson(m);
   }
 
-  /// Soft-delete (remove from team)
+  /// Soft-delete (remove from team) — kept for backward compatibility.
+  /// Now uses dedicated endpoint if available.
   Future<void> deactivate(String workerId) async {
-    await updateWorker(workerId, isActive: false);
+    // Preferred: dedicated endpoint
+    await _dio.put('/workers/$workerId/deactivate');
+  }
+
+  /// New alias if you want explicit naming.
+  Future<void> deactivateWorker(String workerId) => deactivate(workerId);
+
+  /// Reactivate worker and get updated model.
+  Future<StaffMember> activateWorker(String workerId) async {
+    final r = await _dio.put('/workers/$workerId/activate');
+    final m = (r.data as Map).cast<String, dynamic>();
+    return StaffMember.fromWorkerJson(m);
   }
 
   // availability (planned)
@@ -218,12 +255,34 @@ class ProviderStaffService {
     await _dio.delete('/workers/availability/break/$workerId/$breakId');
   }
 
+  /* ---------------- Receptionists ---------------- */
+
   Future<List<ReceptionistMember>> getActiveReceptionists(
       String providerId) async {
     final res = await _dio.get(
       '/providers/$providerId/receptionists',
       queryParameters: {'active': true},
     );
+    final list = (res.data as List?) ?? const [];
+    return list
+        .map((e) => ReceptionistMember.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  /// New: list with optional active flag (null -> all)
+  Future<List<ReceptionistMember>> getReceptionists(
+    String providerId, {
+    bool? active,
+  }) async {
+    Response res;
+    if (active == null) {
+      res = await _dio.get('/providers/$providerId/receptionists');
+    } else {
+      res = await _dio.get(
+        '/providers/$providerId/receptionists',
+        queryParameters: {'active': active},
+      );
+    }
     final list = (res.data as List?) ?? const [];
     return list
         .map((e) => ReceptionistMember.fromJson(Map<String, dynamic>.from(e)))
@@ -256,12 +315,30 @@ class ProviderStaffService {
     return ReceptionistMember.fromJson(Map<String, dynamic>.from(r.data));
   }
 
+  /// Keep existing void methods for compatibility
   Future<void> deactivateReceptionist(String providerId, String id) async {
     await _dio.put('/providers/$providerId/receptionists/$id/deactivate');
   }
 
   Future<void> activateReceptionist(String providerId, String id) async {
     await _dio.put('/providers/$providerId/receptionists/$id/activate');
+  }
+
+  /// New: returning variants so callers can refresh UI state immediately
+  Future<ReceptionistMember> deactivateReceptionistReturn(
+      String providerId, String id) async {
+    final r =
+        await _dio.put('/providers/$providerId/receptionists/$id/deactivate');
+    return ReceptionistMember.fromJson(
+        Map<String, dynamic>.from(r.data as Map));
+  }
+
+  Future<ReceptionistMember> activateReceptionistReturn(
+      String providerId, String id) async {
+    final r =
+        await _dio.put('/providers/$providerId/receptionists/$id/activate');
+    return ReceptionistMember.fromJson(
+        Map<String, dynamic>.from(r.data as Map));
   }
 
   // ---- helpers

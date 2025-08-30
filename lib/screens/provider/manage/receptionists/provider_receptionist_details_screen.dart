@@ -1,6 +1,6 @@
+// lib/screens/provider/manage/receptionists/provider_receptionist_details_screen.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/providers/provider_staff_service.dart';
@@ -44,6 +44,32 @@ class _ProviderReceptionistDetailsScreenState
     }
   }
 
+  Future<void> _reactivate() async {
+    setState(() => _loading = true);
+    try {
+      final updated = await _svc.activateReceptionistReturn(
+        widget.providerId,
+        _m.id,
+      ); // <-- returning variant
+      setState(() => _m = updated);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Receptionist reactivated')),
+      );
+      Navigator.pop(context, true);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final body = e.response?.data?.toString() ?? e.message ?? e.toString();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _removeFromTeam() async {
     final ok = await showDialog<bool>(
       context: context,
@@ -72,8 +98,10 @@ class _ProviderReceptionistDetailsScreenState
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -152,37 +180,25 @@ class _ProviderReceptionistDetailsScreenState
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: (_m.isActive
-                                    ? const Color(0xFF12B76A)
-                                    : const Color(0xFFB42318))
-                                .withOpacity(.12),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            _m.isActive ? 'Active' : 'Inactive',
-                            style: TextStyle(
-                              color: _m.isActive
-                                  ? const Color(0xFF12B76A)
-                                  : const Color(0xFFB42318),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: (_m.isActive
+                                ? const Color(0xFF12B76A)
+                                : const Color(0xFFB42318))
+                            .withOpacity(.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _m.isActive ? 'Active' : 'Inactive',
+                        style: TextStyle(
+                          color: _m.isActive
+                              ? const Color(0xFF12B76A)
+                              : const Color(0xFFB42318),
+                          fontWeight: FontWeight.w600,
                         ),
-                        if ((_m.hireDate ?? '').isNotEmpty)
-                          Row(mainAxisSize: MainAxisSize.min, children: const [
-                            Icon(Icons.calendar_today,
-                                size: 14, color: Color(0xFF667085)),
-                          ]),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -196,9 +212,10 @@ class _ProviderReceptionistDetailsScreenState
             subtitle: 'Provider',
           ),
           const _InfoTile(
-              leading: Icons.badge_outlined,
-              title: 'Receptionist',
-              subtitle: 'Role'),
+            leading: Icons.badge_outlined,
+            title: 'Receptionist',
+            subtitle: 'Role',
+          ),
           _InfoTile(
             leading: Icons.wc_outlined,
             title: prettyGender(_m.gender),
@@ -223,23 +240,28 @@ class _ProviderReceptionistDetailsScreenState
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 8),
-          Text('Danger zone',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Colors.red)),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 48,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.person_off_outlined, color: Colors.red),
-              style: OutlinedButton.styleFrom(
+          if (_m.isActive)
+            SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.person_off_outlined, color: Colors.red),
+                style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red)),
-              onPressed: _loading ? null : _removeFromTeam,
-              label: const Text('Remove from team'),
+                  side: const BorderSide(color: Colors.red),
+                ),
+                onPressed: _loading ? null : _removeFromTeam,
+                label: const Text('Remove from team'),
+              ),
+            )
+          else
+            SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: _loading ? null : _reactivate,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: const Text('Reactivate receptionist'),
+              ),
             ),
-          ),
         ],
       ),
     );

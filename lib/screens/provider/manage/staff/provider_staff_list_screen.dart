@@ -1,11 +1,13 @@
+// lib/screens/provider/manage/staff/provider_staff_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
-import 'package:frontend/screens/provider/manage/receptionists/provider_receptionist_invite_screen.dart';
-import 'package:frontend/screens/provider/manage/receptionists/provider_receptionist_details_screen.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/providers/provider_staff_service.dart';
+
+import '../receptionists/provider_receptionist_invite_screen.dart';
+import '../receptionists/provider_receptionist_details_screen.dart';
 import 'provider_worker_details_screen.dart';
 import 'provider_worker_invite_screen.dart';
 
@@ -35,6 +37,9 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
   String _qRecs = '';
   bool _onlyAvailable = false;
 
+  bool _showInactiveWorkers = false;
+  bool _showInactiveRecs = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,8 +50,18 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
   Future<void> _loadWorkers() async {
     setState(() => _loadingWorkers = true);
     try {
-      final list = await _service.getProviderStaff(widget.providerId);
+      final list = await _service.getProviderStaff(
+        widget.providerId,
+        activeOnly: !_showInactiveWorkers,
+      );
       setState(() => _workers = list);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final txt = e.response?.data?.toString() ?? e.message ?? e.toString();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $txt')));
+      }
     } finally {
       if (mounted) setState(() => _loadingWorkers = false);
     }
@@ -55,8 +70,18 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
   Future<void> _loadReceptionists() async {
     setState(() => _loadingRecs = true);
     try {
-      final recs = await _service.getActiveReceptionists(widget.providerId);
+      final recs = await _service.getReceptionists(
+        widget.providerId,
+        active: !_showInactiveRecs,
+      );
       setState(() => _receptionists = recs);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final txt = e.response?.data?.toString() ?? e.message ?? e.toString();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $txt')));
+      }
     } finally {
       if (mounted) setState(() => _loadingRecs = false);
     }
@@ -95,21 +120,23 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
-    // Workers filtering
+    // Workers filter
     final workers = _workers.where((m) {
-      if (!m.isActive) return false;
+      if (_showInactiveWorkers == false && !m.isActive) return false;
       if (_qWorkers.isNotEmpty) {
         final s =
             '${m.displayName} ${m.role ?? ''} ${m.email ?? ''} ${m.phoneNumber ?? ''}'
                 .toLowerCase();
         if (!s.contains(_qWorkers.toLowerCase())) return false;
       }
-      if (_onlyAvailable && m.status != WorkerStatus.AVAILABLE) return false;
+      if (_onlyAvailable && (m.isActive && m.status != WorkerStatus.AVAILABLE))
+        return false;
       return true;
     }).toList();
 
-    // Receptionists filtering (already active only from backend)
+    // Receptionists filter
     final recs = _receptionists.where((r) {
+      if (_showInactiveRecs == false && !r.isActive) return false;
       if (_qRecs.isNotEmpty) {
         final s = '${r.displayName} ${r.email ?? ''} ${r.phoneNumber ?? ''}'
             .toLowerCase();
@@ -148,6 +175,14 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
                   value: _onlyAvailable,
                   onChanged: (v) => setState(() => _onlyAvailable = v),
                 ),
+                SwitchListTile(
+                  title: const Text('Show inactive workers'),
+                  value: _showInactiveWorkers,
+                  onChanged: (v) async {
+                    setState(() => _showInactiveWorkers = v);
+                    await _loadWorkers();
+                  },
+                ),
                 const Divider(height: 1),
                 Expanded(
                   child: _loadingWorkers
@@ -183,15 +218,23 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color:
-                                        _statusColor(m.status).withOpacity(.12),
+                                    color: (m.isActive
+                                            ? _statusColor(m.status)
+                                            : const Color(0xFFB42318))
+                                        .withOpacity(.12),
                                     borderRadius: BorderRadius.circular(999),
                                   ),
-                                  child: Text(_statusText(m.status),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: _statusColor(m.status),
-                                      )),
+                                  child: Text(
+                                    m.isActive
+                                        ? _statusText(m.status)
+                                        : 'Inactive',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: m.isActive
+                                          ? _statusColor(m.status)
+                                          : const Color(0xFFB42318),
+                                    ),
+                                  ),
                                 ),
                                 onTap: () async {
                                   final changed = await Navigator.push(
@@ -226,6 +269,14 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
                     ),
                     onChanged: (s) => setState(() => _qRecs = s),
                   ),
+                ),
+                SwitchListTile(
+                  title: const Text('Show inactive receptionists'),
+                  value: _showInactiveRecs,
+                  onChanged: (v) async {
+                    setState(() => _showInactiveRecs = v);
+                    await _loadReceptionists();
+                  },
                 ),
                 const Divider(height: 1),
                 Expanded(

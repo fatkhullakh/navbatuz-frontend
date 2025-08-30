@@ -1,3 +1,4 @@
+// lib/screens/provider/manage/staff/provider_worker_details_screen.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -120,14 +121,17 @@ class _ProviderWorkerDetailsScreenState
     try {
       final updated = await _staff.updateWorker(_m.id, status: choice);
       setState(() => _m = updated);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status: ${_statusText(_m.status)}')),
       );
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -139,7 +143,7 @@ class _ProviderWorkerDetailsScreenState
       builder: (_) => AlertDialog(
         title: const Text('Remove worker?'),
         content: const Text(
-            'This will deactivate the worker (soft delete). You can re-invite later.'),
+            'This will deactivate the worker (soft delete). You can reactivate later.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(_, false),
@@ -154,7 +158,7 @@ class _ProviderWorkerDetailsScreenState
 
     setState(() => _loading = true);
     try {
-      await _staff.deactivate(_m.id);
+      await _staff.deactivateWorker(_m.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Removed from team')));
@@ -162,8 +166,32 @@ class _ProviderWorkerDetailsScreenState
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _reactivate() async {
+    setState(() => _loading = true);
+    try {
+      final updated = await _staff.activateWorker(_m.id);
+      setState(() => _m = updated);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Worker reactivated')),
+      );
+      Navigator.pop(context, true);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final body = e.response?.data?.toString() ?? e.message ?? e.toString();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -209,7 +237,6 @@ class _ProviderWorkerDetailsScreenState
               if (updated != null) {
                 setState(() => _m = updated);
               } else {
-                // re-hydrate in case server changed something
                 _hydrate();
               }
             },
@@ -250,19 +277,32 @@ class _ProviderWorkerDetailsScreenState
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _statusColor(_m.status).withOpacity(.12),
+                            color: (_m.isActive
+                                    ? _statusColor(_m.status)
+                                    : const Color(0xFFB42318))
+                                .withOpacity(.12),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.circle,
-                                  size: 10, color: _statusColor(_m.status)),
+                                  size: 10,
+                                  color: _m.isActive
+                                      ? _statusColor(_m.status)
+                                      : const Color(0xFFB42318)),
                               const SizedBox(width: 6),
-                              Text(_statusText(_m.status),
-                                  style: TextStyle(
-                                      color: _statusColor(_m.status),
-                                      fontWeight: FontWeight.w600)),
+                              Text(
+                                _m.isActive
+                                    ? _statusText(_m.status)
+                                    : 'Inactive',
+                                style: TextStyle(
+                                  color: _m.isActive
+                                      ? _statusColor(_m.status)
+                                      : const Color(0xFFB42318),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -323,44 +363,49 @@ class _ProviderWorkerDetailsScreenState
             subtitle: t.email ?? 'Email',
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 48,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.design_services_outlined),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProviderWorkerServicesScreen(
-                      providerId: widget.providerId,
-                      workerId: _m.id,
-                      workerName: _m.displayName,
+
+          // Manage area only when active
+          if (_m.isActive) ...[
+            SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.design_services_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProviderWorkerServicesScreen(
+                        providerId: widget.providerId,
+                        workerId: _m.id,
+                        workerName: _m.displayName,
+                      ),
                     ),
-                  ),
-                );
-              },
-              label: Text(t.manage_services ?? 'Manage services'),
+                  );
+                },
+                label: Text(t.manage_services ?? 'Manage services'),
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 48,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.schedule),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProviderWorkerAvailabilityScreen(
-                      workerId: _m.id,
-                      workerName: _m.displayName,
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.schedule),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProviderWorkerAvailabilityScreen(
+                        workerId: _m.id,
+                        workerName: _m.displayName,
+                      ),
                     ),
-                  ),
-                );
-              },
-              label: Text(t.edit_availability ?? 'Edit availability'),
+                  );
+                },
+                label: Text(t.edit_availability ?? 'Edit availability'),
+              ),
             ),
-          ),
+          ],
+
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 8),
@@ -370,18 +415,29 @@ class _ProviderWorkerDetailsScreenState
                   .titleMedium
                   ?.copyWith(color: Colors.red)),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 48,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.person_off_outlined, color: Colors.red),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
+
+          if (_m.isActive)
+            SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.person_off_outlined, color: Colors.red),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                ),
+                onPressed: _loading ? null : _removeFromTeam,
+                label: const Text('Remove from team'),
               ),
-              onPressed: _loading ? null : _removeFromTeam,
-              label: const Text('Remove from team'),
+            )
+          else
+            SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: _loading ? null : _reactivate,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: const Text('Reactivate worker'),
+              ),
             ),
-          ),
         ],
       ),
     );

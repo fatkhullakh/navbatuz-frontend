@@ -1,12 +1,11 @@
+// lib/screens/provider/manage/receptionists/provider_receptionist_edit_screen.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../services/providers/provider_staff_service.dart';
 
 class ProviderReceptionistEditScreen extends StatefulWidget {
   final String providerId;
   final ReceptionistMember initial;
-
   const ProviderReceptionistEditScreen({
     super.key,
     required this.providerId,
@@ -56,40 +55,12 @@ class _ProviderReceptionistEditScreenState
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _remove() async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Remove receptionist?'),
-        content: const Text('This will deactivate the receptionist.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(_, false),
-              child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(_, true),
-              child: const Text('Remove')),
-        ],
-      ),
-    );
-    if (ok != true) return;
-
-    try {
-      await _svc.deactivateReceptionist(widget.providerId, widget.initial.id);
-      if (!mounted) return;
-      Navigator.pop(context, true);
-    } on DioException catch (e) {
-      final code = e.response?.statusCode;
-      final body = e.response?.data?.toString() ?? e.message ?? e.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('HTTP $code: $body')));
     }
   }
 
@@ -138,16 +109,6 @@ class _ProviderReceptionistEditScreenState
                 onPressed: _saving ? null : _save,
                 child: Text(_saving ? 'Saving…' : 'Save'),
               ),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.person_off_outlined, color: Colors.red),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
-              ),
-              onPressed: _remove,
-              label: const Text('Remove from team'),
             ),
           ],
         ),
