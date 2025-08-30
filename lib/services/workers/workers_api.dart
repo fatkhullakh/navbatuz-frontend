@@ -51,12 +51,23 @@ class WorkerDetails {
   }
 }
 
+class WorkerMe {
+  final String id;
+  WorkerMe(this.id);
+}
+
 class WorkersApi {
   final Dio _dio = ApiService.client;
 
-  Future<WorkerDetails> me() async {
+  // Future<WorkerDetails> me() async {
+  //   final r = await _dio.get('/workers/me');
+  //   return WorkerDetails.fromJson(Map<String, dynamic>.from(r.data as Map));
+  // }
+
+  Future<WorkerMe> me() async {
     final r = await _dio.get('/workers/me');
-    return WorkerDetails.fromJson(Map<String, dynamic>.from(r.data as Map));
+    final id = r.data?['id'] as String;
+    return WorkerMe(id);
   }
 
   Future<WorkerDetails> byId(String id) async {

@@ -3,6 +3,79 @@ import '../../services/api_service.dart';
 
 enum WorkerStatus { AVAILABLE, UNAVAILABLE, ON_BREAK, ON_LEAVE }
 
+enum ReceptionistStatus { ACTIVE, TERMINATED, UNKNOWN }
+
+ReceptionistStatus _recStatusOf(dynamic v) {
+  final s = (v ?? '').toString().toUpperCase();
+  if (s == 'ACTIVE') return ReceptionistStatus.ACTIVE;
+  if (s == 'TERMINATED') return ReceptionistStatus.TERMINATED;
+  return ReceptionistStatus.UNKNOWN;
+}
+
+class ReceptionistMember {
+  final String id; // receptionist (membership) id
+  final String? userId;
+  final String name;
+  final String surname;
+  final String? providerName;
+  final String? gender;
+  final String? phoneNumber;
+  final String? email;
+  final String? hireDate;
+  final bool isActive;
+  final String? avatarUrl;
+
+  const ReceptionistMember({
+    required this.id,
+    this.userId,
+    required this.name,
+    required this.surname,
+    required this.providerName,
+    required this.gender,
+    required this.phoneNumber,
+    required this.email,
+    required this.hireDate,
+    required this.isActive,
+    required this.avatarUrl,
+  });
+
+  String get displayName {
+    final d = ([name, surname]..removeWhere((e) => e.trim().isEmpty)).join(' ');
+    return d.isEmpty ? (email ?? 'Receptionist') : d;
+  }
+
+  // tolerate Name/name, Surname/surname, isActive/active
+  static String _str(Map m, String a, [String? b]) {
+    final v = m[a] ?? (b == null ? null : m[b]);
+    return (v == null) ? '' : v.toString();
+  }
+
+  factory ReceptionistMember.fromJson(Map<String, dynamic> m) {
+    String? nz(String? s) => (s == null || s.isEmpty) ? null : s;
+    final rawAvatar = nz(_str(m, 'avatarUrl'));
+    final avatar = rawAvatar == null
+        ? null
+        : ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar;
+
+    final isAct = (m['isActive'] ?? m['active']) == true ||
+        (m['isActive'] ?? m['active'])?.toString() == 'true';
+
+    return ReceptionistMember(
+      id: _str(m, 'id'),
+      userId: nz(_str(m, 'userId')),
+      name: _str(m, 'name', 'Name'),
+      surname: _str(m, 'surname', 'Surname'),
+      providerName: nz(_str(m, 'providerName')),
+      gender: nz(_str(m, 'gender')),
+      phoneNumber: nz(_str(m, 'phoneNumber')),
+      email: nz(_str(m, 'email')),
+      hireDate: nz(_str(m, 'hireDate')),
+      isActive: isAct,
+      avatarUrl: avatar,
+    );
+  }
+}
+
 WorkerStatus? statusFromString(String? s) {
   switch ((s ?? '').toUpperCase()) {
     case 'AVAILABLE':
@@ -143,6 +216,52 @@ class ProviderStaffService {
 
   Future<void> deleteBreak(String workerId, int breakId) async {
     await _dio.delete('/workers/availability/break/$workerId/$breakId');
+  }
+
+  Future<List<ReceptionistMember>> getActiveReceptionists(
+      String providerId) async {
+    final res = await _dio.get(
+      '/providers/$providerId/receptionists',
+      queryParameters: {'active': true},
+    );
+    final list = (res.data as List?) ?? const [];
+    return list
+        .map((e) => ReceptionistMember.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  Future<ReceptionistMember> getReceptionist(
+      String providerId, String receptionistId) async {
+    final res =
+        await _dio.get('/providers/$providerId/receptionists/$receptionistId');
+    return ReceptionistMember.fromJson(
+        Map<String, dynamic>.from(res.data as Map));
+  }
+
+  Future<ReceptionistMember> updateReceptionist(
+    String providerId,
+    String id, {
+    String? name,
+    String? surname,
+    String? phoneNumber,
+    String? email,
+  }) async {
+    final r =
+        await _dio.patch('/providers/$providerId/receptionists/$id', data: {
+      if (name != null) 'name': name,
+      if (surname != null) 'surname': surname,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      if (email != null) 'email': email,
+    });
+    return ReceptionistMember.fromJson(Map<String, dynamic>.from(r.data));
+  }
+
+  Future<void> deactivateReceptionist(String providerId, String id) async {
+    await _dio.put('/providers/$providerId/receptionists/$id/deactivate');
+  }
+
+  Future<void> activateReceptionist(String providerId, String id) async {
+    await _dio.put('/providers/$providerId/receptionists/$id/activate');
   }
 
   // ---- helpers

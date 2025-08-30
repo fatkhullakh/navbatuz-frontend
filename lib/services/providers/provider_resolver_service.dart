@@ -6,25 +6,40 @@ import '../api_service.dart';
 class ProviderResolverService {
   final Dio _dio = ApiService.client;
 
-  Future<String?> resolveMyProviderId() async {
-    // Ordered guesses (stop at first that returns an id)
-    final candidates = <Future<String?> Function()>[
-      _from('/providers/me'),
-    ];
+  // Future<String?> resolveMyProviderId() async {
+  //   // Ordered guesses (stop at first that returns an id)
+  //   final candidates = <Future<String?> Function()>[
+  //     _from('/providers/me'),
+  //   ];
 
-    for (final fn in candidates) {
-      try {
-        final id = await fn();
-        if (id != null && id.isNotEmpty) return id;
-      } catch (_) {
-        // ignore and try next
-      }
+  //   for (final fn in candidates) {
+  //     try {
+  //       final id = await fn();
+  //       if (id != null && id.isNotEmpty) return id;
+  //     } catch (_) {
+  //       // ignore and try next
+  //     }
+  //   }
+  //   return null;
+  // }
+
+  Future<String> resolveMyProviderId() async {
+    try {
+      final r = await _dio.get('/providers/me');
+      final id = r.data?['id'];
+      if (id is String && id.isNotEmpty) return id;
+    } on DioException catch (e) {
+      // fall through for 401/403/404
+      final sc = e.response?.statusCode ?? 0;
+      if (sc != 401 && sc != 403 && sc != 404) rethrow;
     }
 
-    // As a last resort, you can try to fetch a list and pick the first
-    // provider the user owns — but only if your payload contains ownership info.
-    // Leaving it out for safety.
-    return null;
+    // receptionist path
+    final r2 = await _dio.get('/receptionists/my-provider');
+    final pid = r2.data?['providerId'];
+    if (pid is String && pid.isNotEmpty) return pid;
+
+    throw StateError('No provider mapped to current user.');
   }
 
   // Helper to build a getter for a specific path.

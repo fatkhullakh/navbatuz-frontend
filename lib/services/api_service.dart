@@ -5,6 +5,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   static final _storage = const FlutterSecureStorage();
+  static Future<Response> receptionistMe() => _dio.get('/receptionists/me');
+
+  static Future<String> receptionistMyProviderId() async {
+    final res = await _dio.get('/receptionists/my-provider');
+    return (res.data['providerId'] as String);
+  }
 
   static final Dio _dio = Dio(
     BaseOptions(
@@ -94,7 +100,7 @@ class ApiService {
       return url; // leave other absolute URLs as-is
     }
 
-    // relative paths
+    // relative pathsx
     if (url.startsWith('/')) return '$origin$url';
     return '$origin/$url';
   }

@@ -95,16 +95,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 2) Owner / Receptionist (provider-side) → provider shell
       if (_has(rolesCsv, 'OWNER') || _has(rolesCsv, 'RECEPTIONIST')) {
-        String? providerId;
         try {
-          providerId = await ProviderResolverService().resolveMyProviderId();
-        } catch (_) {}
-        if (!mounted) return;
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/providers',
-          (_) => false,
-          arguments: providerId, // your /providers route handles null
-        );
+          final providerId =
+              await ProviderResolverService().resolveMyProviderId();
+          if (!mounted) return;
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/providers', (_) => false,
+            arguments: providerId, // non-null now
+          );
+        } catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ваш аккаунт не привязан к филиалу')),
+          );
+        }
         return;
       }
 
