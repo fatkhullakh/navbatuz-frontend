@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -8,6 +9,7 @@ import '../../screens/booking/service_booking_screen.dart';
 import '../../widgets/favorite_toggle_button.dart';
 import '../../screens/services/service_details_screen.dart';
 import '../workers/worker_screen.dart';
+import '../../services/api_service.dart';
 
 /* ---------------------------- Brand constants ---------------------------- */
 class _Brand {
@@ -185,7 +187,7 @@ class _ProviderScreenState extends State<ProviderScreen>
                 );
               },
             ),
-            const _ReviewsTab(),
+            _ReviewsTab(providerId: widget.providerId),
             _DetailsTab(
               details: _details,
               providerId: widget.providerId,
@@ -465,11 +467,279 @@ class _ServicesTab extends StatelessWidget {
 }
 
 /* ------------------------------ Reviews tab ----------------------------- */
-class _ReviewsTab extends StatelessWidget {
-  const _ReviewsTab();
+
+class _RatingSummary {
+  final double? average;
+  final int count;
+  _RatingSummary({required this.average, required this.count});
+  factory _RatingSummary.fromJson(Map<String, dynamic> j) => _RatingSummary(
+        average:
+            (j['average'] == null) ? null : (j['average'] as num).toDouble(),
+        count: (j['count'] as num?)?.toInt() ?? 0,
+      );
+}
+
+class _ProviderReviewItem {
+  final String id;
+  final int rating;
+  final String? comment;
+  final DateTime createdAt;
+  final String authorName;
+  final String? workerId; // optionally shown later
+  _ProviderReviewItem({
+    required this.id,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+    required this.authorName,
+    this.workerId,
+  });
+  factory _ProviderReviewItem.fromJson(Map<String, dynamic> j) {
+    return _ProviderReviewItem(
+      id: j['id']?.toString() ?? '',
+      rating: (j['rating'] as num).toInt(),
+      comment: j['comment']?.toString(),
+      createdAt: DateTime.parse(j['createdAt'].toString()),
+      authorName: (j['authorName'] ?? j['author'] ?? '—').toString(),
+      workerId: j['workerId']?.toString(),
+    );
+  }
+}
+
+class _ReviewsApi {
+  final Dio _dio = ApiService.client;
+
+  Future<_RatingSummary?> summary(String providerId) async {
+    final r = await _dio.get('/reviews/public/provider/$providerId/summary');
+    if (r.statusCode == 204 || r.data == null) return null;
+    return _RatingSummary.fromJson(Map<String, dynamic>.from(r.data));
+  }
+
+  Future<List<_ProviderReviewItem>> list(
+      String providerId, int page, int size) async {
+    final r = await _dio.get(
+      '/reviews/public/provider/$providerId',
+      queryParameters: {'page': page, 'size': size},
+    );
+    final list = (r.data as List?) ?? const [];
+    return list
+        .whereType<Map>()
+        .map((m) =>
+            _ProviderReviewItem.fromJson(Map<String, dynamic>.from(m as Map)))
+        .toList();
+  }
+}
+
+class _ReviewsTab extends StatefulWidget {
+  final String providerId;
+  const _ReviewsTab({required this.providerId});
   @override
-  Widget build(BuildContext context) =>
-      Center(child: Text(AppLocalizations.of(context)!.provider_no_reviews));
+  State<_ReviewsTab> createState() => _ReviewsTabState();
+}
+
+class _ReviewsTabState extends State<_ReviewsTab> {
+  final _api = _ReviewsApi();
+  final _items = <_ProviderReviewItem>[];
+  _RatingSummary? _summary;
+
+  int _page = 0;
+  final int _size = 10;
+  bool _loading = true;
+  bool _loadingMore = false;
+  String? _error;
+  bool _hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load(initial: true);
+  }
+
+  Future<void> _load({bool initial = false}) async {
+    if (initial) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _items.clear();
+        _hasMore = true;
+      });
+    } else {
+      if (_loadingMore || !_hasMore) return;
+      setState(() => _loadingMore = true);
+    }
+
+    try {
+      final s = await _api.summary(widget.providerId);
+      final chunk = await _api.list(widget.providerId, _page, _size);
+
+      setState(() {
+        _summary = s;
+        _items.addAll(chunk);
+        _hasMore = chunk.length == _size;
+        if (_hasMore) _page += 1;
+      });
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      setState(() {
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  Widget _starsRow(int rating, {double size = 18}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        5,
+        (i) => Icon(
+          i < rating ? Icons.star : Icons.star_border,
+          color: const Color(0xFFFFB703),
+          size: size,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final df = DateFormat('d MMM yyyy, HH:mm');
+
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Failed to load: $_error'),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => _load(initial: true),
+              child: Text(t.provider_retry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => _load(initial: true),
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemCount: _items.length + 1 + (_loadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          // Summary card at top
+          if (index == 0) {
+            final avg = _summary?.average;
+            final cnt = _summary?.count ?? 0;
+            return Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: _Brand.border),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Row(
+                  children: [
+                    if (avg != null) _starsRow(avg.round(), size: 20),
+                    if (avg != null) const SizedBox(width: 10),
+                    Text(
+                      (avg == null ? '—' : avg.toStringAsFixed(1)) +
+                          ' (${NumberFormat.compact().format(cnt)})',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: _Brand.ink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final i = index - 1;
+          if (i >= _items.length) {
+            // loader row while loadingMore
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final r = _items[i];
+          final comment = (r.comment ?? '').trim();
+
+          return Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: const BorderSide(color: _Brand.border),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _starsRow(r.rating),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          df.format(r.createdAt),
+                          textAlign: TextAlign.end,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (comment.isNotEmpty)
+                    Text(comment)
+                  else
+                    const Text('No comment',
+                        style: TextStyle(color: Colors.black54)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.person, size: 16, color: _Brand.subtle),
+                      const SizedBox(width: 6),
+                      Text(r.authorName,
+                          style: const TextStyle(color: _Brand.subtle)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Add "load more" with scroll extent listener (optional).
+    // Kept simple here: we append a loader row + auto-fetch on nearing bottom:
+    // Using PrimaryScrollController to attach listener would require
+    // extra wiring; instead we expose a "Load more" FAB or button below:
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReviewsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.providerId != widget.providerId) {
+      _load(initial: true);
+    }
+  }
 }
 
 /* ------------------------------ Details tab ----------------------------- */

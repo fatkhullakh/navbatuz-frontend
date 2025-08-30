@@ -20,6 +20,67 @@ class _Brand {
   static const border = Color(0xFFE6ECF2);
 }
 
+/* ----------------------------- Review client ----------------------------- */
+
+class ReviewDto {
+  final String id;
+  final String? providerId;
+  final String? workerId;
+  final int rating;
+  final String? comment;
+  final DateTime createdAt;
+  final String author;
+
+  ReviewDto({
+    required this.id,
+    required this.providerId,
+    required this.workerId,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+    required this.author,
+  });
+
+  factory ReviewDto.fromJson(Map<String, dynamic> j) => ReviewDto(
+        id: j['id']?.toString() ?? '',
+        providerId: j['providerId']?.toString(),
+        workerId: j['workerId']?.toString(),
+        rating: (j['rating'] as num).toInt(),
+        comment: j['comment']?.toString(),
+        createdAt: DateTime.parse(j['createdAt'].toString()),
+        author: (j['authorName'] ?? j['author'] ?? '—').toString(),
+      );
+}
+
+class ReviewApi {
+  final Dio _dio = ApiService.client;
+
+  Future<ReviewDto?> getByAppointment(String appointmentId) async {
+    try {
+      final r = await _dio.get('/reviews/appointment/$appointmentId');
+      return ReviewDto.fromJson(Map<String, dynamic>.from(r.data));
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  Future<ReviewDto> create({
+    required String appointmentId,
+    required int rating,
+    String? comment,
+  }) async {
+    final r = await _dio.post('/reviews', data: {
+      'appointmentId': appointmentId,
+      'rating': rating,
+      'comment': (comment ?? '').trim().isEmpty ? null : comment!.trim(),
+    });
+    return ReviewDto.fromJson(Map<String, dynamic>.from(r.data));
+  }
+}
+
+/* ------------------------- Appointment details UI ------------------------ */
+
 class AppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId;
   const AppointmentDetailsScreen({super.key, required this.appointmentId});
@@ -31,15 +92,26 @@ class AppointmentDetailsScreen extends StatefulWidget {
 
 class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   final _svc = AppointmentService();
+  final _reviews = ReviewApi();
   final Dio _dio = ApiService.client;
 
   late Future<AppointmentDetail> _future;
+  Future<ReviewDto?>? _reviewFuture;
+
   bool _busyCancel = false;
 
   @override
   void initState() {
     super.initState();
     _future = _svc.getById(widget.appointmentId);
+    _reviewFuture = _reviews.getByAppointment(widget.appointmentId);
+  }
+
+  Future<void> _reloadReview() async {
+    final f = _reviews.getByAppointment(widget.appointmentId);
+    if (!mounted) return;
+    setState(() => _reviewFuture = f);
+    await f;
   }
 
   Future<void> _cancel(AppointmentDetail a) async {
@@ -291,7 +363,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     ));
   }
 
-  // ---- Brand helpers ----
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
@@ -308,6 +379,38 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       case 'RESCHEDULED':
       default:
         return _Brand.accent;
+    }
+  }
+
+  Future<void> _leaveReviewFlow(AppointmentDetail a) async {
+    final res = await showModalBottomSheet<_ReviewFormResult>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _ReviewSheet(),
+    );
+    if (res == null) return;
+
+    try {
+      await _reviews.create(
+        appointmentId: a.id,
+        rating: res.rating,
+        comment: res.comment,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Review submitted')));
+      await _reloadReview();
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final body = e.response?.data?.toString() ?? e.message ?? '$e';
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed ($code): $body')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
     }
   }
 
@@ -338,10 +441,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           final canCancel = status == 'BOOKED' || status == 'CONFIRMED';
           final statusColor = _statusColor(status);
 
+          final isCompleted = status == 'COMPLETED' || status == 'FINISHED';
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Service + Provider (tap provider)
+              // Service + Provider
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -375,7 +480,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Date & time + status
+              // Date/time + status
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -418,7 +523,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               if ((a.providerAddress ?? '').isNotEmpty)
                 const SizedBox(height: 12),
 
-              // Worker (tap worker)
+              // Worker
               if ((a.workerName ?? '').isNotEmpty)
                 Card(
                   elevation: 0,
@@ -445,6 +550,81 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     subtitle: const Text('Staff'),
                   ),
                 ),
+
+              const SizedBox(height: 16),
+
+              // -------------------- Review Section --------------------
+              FutureBuilder<ReviewDto?>(
+                future: _reviewFuture,
+                builder: (context, rs) {
+                  if (rs.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final review = rs.data;
+
+                  if (review != null) {
+                    // show existing review
+                    final stars = List.generate(
+                      5,
+                      (i) => Icon(
+                        i < review.rating ? Icons.star : Icons.star_border,
+                        color: const Color(0xFFFFB703),
+                        size: 20,
+                      ),
+                    );
+                    return Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: _Brand.border, width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              ...stars,
+                              const SizedBox(width: 8),
+                              Text(
+                                DateFormat('d MMM yyyy, HH:mm')
+                                    .format(review.createdAt),
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ]),
+                            const SizedBox(height: 8),
+                            if ((review.comment ?? '').isNotEmpty)
+                              Text(
+                                review.comment!,
+                                style: const TextStyle(fontSize: 15),
+                              )
+                            else
+                              const Text('No comment',
+                                  style: TextStyle(color: Colors.black54)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  // No review yet → show button only if appointment is completed
+                  if (!isCompleted) return const SizedBox.shrink();
+
+                  return SizedBox(
+                    height: 44,
+                    child: FilledButton.icon(
+                      onPressed: () => _leaveReviewFlow(a),
+                      icon: const Icon(Icons.rate_review_outlined),
+                      label: const Text('Leave a review'),
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
               const SizedBox(height: 20),
 
@@ -587,6 +767,93 @@ class _PricePill extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(fontWeight: FontWeight.w800, color: _Brand.ink),
+      ),
+    );
+  }
+}
+
+/* --------------------------- Review bottom sheet ------------------------ */
+
+class _ReviewFormResult {
+  final int rating;
+  final String? comment;
+  _ReviewFormResult(this.rating, this.comment);
+}
+
+class _ReviewSheet extends StatefulWidget {
+  @override
+  State<_ReviewSheet> createState() => _ReviewSheetState();
+}
+
+class _ReviewSheetState extends State<_ReviewSheet> {
+  int _rating = 5;
+  final _ctrl = TextEditingController();
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vw = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          constraints: BoxConstraints(maxWidth: vw),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Leave a review',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) {
+                  final filled = i < _rating;
+                  return IconButton(
+                    onPressed: () => setState(() => _rating = i + 1),
+                    icon: Icon(
+                      filled ? Icons.star : Icons.star_border,
+                      color: const Color(0xFFFFB703),
+                      size: 28,
+                    ),
+                  );
+                }),
+              ),
+              TextField(
+                controller: _ctrl,
+                minLines: 2,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  hintText: 'Add a comment (optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 44,
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _submitting
+                      ? null
+                      : () {
+                          setState(() => _submitting = true);
+                          Navigator.pop(
+                              context, _ReviewFormResult(_rating, _ctrl.text));
+                        },
+                  child: Text(_submitting ? 'Submitting…' : 'Submit'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

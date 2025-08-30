@@ -101,6 +101,75 @@ class _WorkerScreenState extends State<WorkerScreen> {
     return '${m}m';
   }
 
+  // ---- Status helpers (accept enum or string) ----
+  String _statusText(dynamic s) {
+    final v = (s is Enum) ? s.name : (s?.toString() ?? '');
+    switch (v.toUpperCase()) {
+      case 'AVAILABLE':
+        return 'Available';
+      case 'UNAVAILABLE':
+        return 'Unavailable';
+      case 'ON_BREAK':
+        return 'On break';
+      case 'ON_LEAVE':
+        return 'On leave';
+      default:
+        return '—';
+    }
+  }
+
+  Color _statusColor(dynamic s) {
+    final v = (s is Enum) ? s.name : (s?.toString() ?? '');
+    switch (v.toUpperCase()) {
+      case 'AVAILABLE':
+        return const Color(0xFF12B76A);
+      case 'ON_BREAK':
+        return const Color(0xFFF59E0B);
+      case 'ON_LEAVE':
+        return const Color(0xFF7C3AED);
+      case 'UNAVAILABLE':
+      default:
+        return const Color(0xFF667085);
+    }
+  }
+
+  Widget _statusChip(dynamic status) {
+    final c = _statusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: c.withOpacity(.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: c.withOpacity(.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 10, color: c),
+          const SizedBox(width: 6),
+          Text(_statusText(status),
+              style: TextStyle(color: c, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  // ---- Rating helpers ----
+  Widget _starsRow(double rating, {double size = 16}) {
+    final full = rating.floor();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        5,
+        (i) => Icon(
+          i < full ? Icons.star : Icons.star_border,
+          color: const Color(0xFFFFB703),
+          size: size,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -111,6 +180,16 @@ class _WorkerScreenState extends State<WorkerScreen> {
     );
     final canBook = (widget.providerId ?? '').isNotEmpty;
 
+    final workerName =
+        _worker?.name ?? widget.workerNameFallback ?? t.first_name ?? 'Worker';
+    final avatarUrl = _worker?.avatarUrl?.trim();
+    final rating = (_worker?.avgRating == null)
+        ? null
+        : (_worker!.avgRating is num
+            ? (_worker!.avgRating as num).toDouble()
+            : double.tryParse(_worker!.avgRating.toString()));
+    final status = _worker?.status; // enum or string—handled by helpers
+
     return Scaffold(
       backgroundColor: _Brand.surfaceSoft,
       appBar: AppBar(
@@ -118,7 +197,7 @@ class _WorkerScreenState extends State<WorkerScreen> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         title: Text(
-          _worker?.name ?? widget.workerNameFallback ?? 'Worker',
+          workerName,
           style:
               const TextStyle(color: _Brand.ink, fontWeight: FontWeight.w800),
         ),
@@ -154,6 +233,7 @@ class _WorkerScreenState extends State<WorkerScreen> {
                         ),
                         padding: const EdgeInsets.all(14),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Avatar with subtle ring
                             Container(
@@ -164,33 +244,64 @@ class _WorkerScreenState extends State<WorkerScreen> {
                                     Border.all(color: _Brand.border, width: 2),
                               ),
                               child: CircleAvatar(
-                                radius: 28,
-                                backgroundImage: (_worker?.avatarUrl != null)
-                                    ? NetworkImage(_worker!.avatarUrl!)
-                                    : null,
-                                child: (_worker?.avatarUrl == null)
+                                radius: 30,
+                                backgroundImage:
+                                    (avatarUrl != null && avatarUrl.isNotEmpty)
+                                        ? NetworkImage(avatarUrl)
+                                        : null,
+                                child: (avatarUrl == null || avatarUrl.isEmpty)
                                     ? const Icon(Icons.person,
-                                        color: _Brand.subtle)
+                                        color: _Brand.subtle, size: 28)
                                     : null,
                               ),
                             ),
                             const SizedBox(width: 14),
+                            // Name + status + rating + contacts
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    _worker?.name ??
-                                        (widget.workerNameFallback ?? 'Worker'),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      color: _Brand.ink,
-                                      fontSize: 18,
-                                    ),
+                                  // name + status chip
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          workerName,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            color: _Brand.ink,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _statusChip(status),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
+                                  // rating row
+                                  Row(
+                                    children: [
+                                      if (rating != null) ...[
+                                        _starsRow(rating),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          rating.toStringAsFixed(1),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ] else
+                                        const Text('No rating yet',
+                                            style: TextStyle(
+                                                color: _Brand.subtle)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // contacts (optional)
                                   if ((_worker?.phone ?? '').isNotEmpty)
                                     Text(_worker!.phone!,
                                         style: const TextStyle(
