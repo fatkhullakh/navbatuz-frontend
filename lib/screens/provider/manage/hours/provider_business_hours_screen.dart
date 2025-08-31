@@ -6,8 +6,20 @@ import 'package:intl/intl.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/api_service.dart';
 
-/// ---------------- DTOs & API ----------------
+/// ---------------- Brand ----------------
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const primarySoft = Color(0xFFBDDDFC);
+  static const ink = Color(0xFF384959);
+  static const subtle = Color(0xFF7C8B9B);
+  static const border = Color(0xFFE6ECF2);
+  static const bg = Color(0xFFF6F8FC);
+  static const okBg = Color(0xFFE7FBF1);
+  static const okText = Color(0xFF0F9D58);
+  static const muted = Color(0xFFF3F4F6);
+}
 
+/// ---------------- DTOs & API ----------------
 class BusinessHourDto {
   final String day; // MONDAY..SUNDAY
   final String start; // "HH:mm"
@@ -23,12 +35,10 @@ class BusinessHourDto {
 
   Map<String, dynamic> toJson() => {
         'day': day,
-        // backend LocalTime friendly
         'startTime': _normalizeOut(start),
         'endTime': _normalizeOut(end),
       };
 
-  /// Accepts "HH:mm[:ss[.SSS]]" -> "HH:mm"
   static String _normalizeIn(String? v) {
     if (v == null || v.isEmpty) return '09:00';
     final p = v.split(':');
@@ -37,7 +47,6 @@ class BusinessHourDto {
     return '$hh:$mm';
   }
 
-  /// "HH:mm" -> "HH:mm:00"
   static String _normalizeOut(String v) {
     final p = v.split(':');
     final hh = (p.isNotEmpty ? p[0] : '00').padLeft(2, '0');
@@ -59,13 +68,14 @@ class ProviderBusinessHoursApi {
   }
 
   Future<void> save(String providerId, List<BusinessHourDto> hours) async {
-    await _dio.put('/providers/$providerId/business-hours',
-        data: hours.map((e) => e.toJson()).toList());
+    await _dio.put(
+      '/providers/$providerId/business-hours',
+      data: hours.map((e) => e.toJson()).toList(),
+    );
   }
 }
 
 /// ---------------- UI ----------------
-
 class ProviderBusinessHoursScreen extends StatefulWidget {
   final String providerId;
   const ProviderBusinessHoursScreen({super.key, required this.providerId});
@@ -78,8 +88,6 @@ class ProviderBusinessHoursScreen extends StatefulWidget {
 class _ProviderBusinessHoursScreenState
     extends State<ProviderBusinessHoursScreen> {
   final _api = ProviderBusinessHoursApi();
-
-  // minute step for wheels
   static const int kMinuteStep = 15;
 
   final List<_DayRow> _rows = const [
@@ -106,13 +114,12 @@ class _ProviderBusinessHoursScreenState
     _err = '';
     try {
       final server = await _api.fetch(widget.providerId);
-      // default state
+
       for (final r in _rows) {
         r.closed = true;
         r.start = '09:00';
         r.end = '18:00';
       }
-      // apply server
       for (final dto in server) {
         final row = _rows.firstWhere(
           (x) => x.day == dto.day,
@@ -250,17 +257,6 @@ class _ProviderBusinessHoursScreenState
     setState(() {});
   }
 
-  // void _monToFri() {
-  //   final mon = _rows.firstWhere((r) => r.day == 'MONDAY');
-  //   for (final r in _rows) {
-  //     if (r.day == 'SATURDAY' || r.day == 'SUNDAY') continue;
-  //     r.closed = mon.closed;
-  //     r.start = mon.start;
-  //     r.end = mon.end;
-  //   }
-  //   setState(() {});
-  // }
-
   void _monToFri() {
     for (final d in _rows) {
       final idx = _dayIndex(d.day);
@@ -275,13 +271,21 @@ class _ProviderBusinessHoursScreenState
     setState(() {});
   }
 
-  // ---- Time wheel bottom sheet (24h) ----
+  void _set247() {
+    for (final d in _rows) {
+      d.closed = false;
+      d.start = '00:00';
+      d.end = '23:59';
+    }
+    setState(() {});
+  }
+
+  // ---- Time wheel bottom sheet ----
   Future<(String, String)?> _showTimeRangeWheel({
     required String start,
     required String end,
     required AppLocalizations t,
   }) async {
-    // convert "HH:mm" -> DateTime today
     DateTime toDate(String v) {
       final p = v.split(':');
       final h = int.tryParse(p[0]) ?? 0;
@@ -298,14 +302,17 @@ class _ProviderBusinessHoursScreenState
       isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
       builder: (ctx) {
         return SafeArea(
           top: false,
           child: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(ctx).viewInsets.bottom + 12,
-              left: 12,
-              right: 12,
+              left: 16,
+              right: 16,
               top: 8,
             ),
             child: Column(
@@ -313,69 +320,57 @@ class _ProviderBusinessHoursScreenState
               children: [
                 Text(
                   t.timeRange ?? 'Time range',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-
-                // wheels
-                SizedBox(
-                  height: 220,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _CupertinoTimeWheel(
-                          label: t.start ?? 'Start',
-                          initial: s,
-                          minuteInterval: kMinuteStep,
-                          onChanged: (dt) => s = dt,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _CupertinoTimeWheel(
-                          label: t.end ?? 'End',
-                          initial: e,
-                          minuteInterval: kMinuteStep,
-                          onChanged: (dt) => e = dt,
-                        ),
-                      ),
-                    ],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: _Brand.ink,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // presets
-                // Wrap(
-                //   spacing: 8,
-                //   runSpacing: 8,
-                //   children: [
-                //     ActionChip(
-                //       label: const Text('09:00–18:00'),
-                //       onPressed: () {
-                //         final now = DateTime.now();
-                //         s = DateTime(now.year, now.month, now.day, 9, 0);
-                //         e = DateTime(now.year, now.month, now.day, 18, 0);
-                //         Navigator.of(ctx).pop(('09:00', '18:00'));
-                //       },
-                //     ),
-                //     ActionChip(
-                //       label: const Text('10:00–20:00'),
-                //       onPressed: () {
-                //         final now = DateTime.now();
-                //         s = DateTime(now.year, now.month, now.day, 10, 0);
-                //         e = DateTime(now.year, now.month, now.day, 20, 0);
-                //         Navigator.of(ctx).pop(('10:00', '20:00'));
-                //       },
-                //     ),
-                //   ],
-                // ),
-
-                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: _Brand.border),
+                    borderRadius: BorderRadius.circular(14),
+                    color: _Brand.bg,
+                  ),
+                  child: SizedBox(
+                    height: 220,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _CupertinoTimeWheel(
+                            label: t.start ?? 'Start',
+                            initial: s,
+                            minuteInterval: kMinuteStep,
+                            onChanged: (dt) => s = dt,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CupertinoTimeWheel(
+                            label: t.end ?? 'End',
+                            initial: e,
+                            minuteInterval: kMinuteStep,
+                            onChanged: (dt) => e = dt,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: _Brand.border),
+                          foregroundColor: _Brand.ink,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         onPressed: () => Navigator.of(ctx).pop(null),
                         child: Text(t.action_cancel ?? 'Cancel'),
                       ),
@@ -383,6 +378,12 @@ class _ProviderBusinessHoursScreenState
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _Brand.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         onPressed: () {
                           final sStr =
                               '${s.hour.toString().padLeft(2, '0')}:${s.minute.toString().padLeft(2, '0')}';
@@ -391,8 +392,9 @@ class _ProviderBusinessHoursScreenState
                           if (_toMinutes(sStr) >= _toMinutes(eStr)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content:
-                                      Text(t.invalid ?? 'Invalid time range')),
+                                content:
+                                    Text(t.invalid ?? 'Invalid time range'),
+                              ),
                             );
                             return;
                           }
@@ -403,7 +405,7 @@ class _ProviderBusinessHoursScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
               ],
             ),
           ),
@@ -416,168 +418,347 @@ class _ProviderBusinessHoursScreenState
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(t.working_hours ?? 'Working hours')),
-      body: FutureBuilder<void>(
-        future: _future,
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (_err.isNotEmpty) {
-            return _ErrorBox(text: _err, onRetry: _refresh, t: t);
-          }
+    final themed = Theme.of(context).copyWith(
+      scaffoldBackgroundColor: _Brand.bg,
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(backgroundColor: _Brand.primary),
+      ),
+      switchTheme: SwitchThemeData(
+        trackColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected))
+            return _Brand.primarySoft;
+          return _Brand.muted;
+        }),
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) return _Brand.primary;
+          return _Brand.subtle;
+        }),
+      ),
+      snackBarTheme:
+          const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+    );
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            children: [
-              // Quick actions row
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(Icons.copy_all_rounded, size: 18),
-                    label: Text(t.copy_monday_to_all ?? 'Copy Monday to all'),
-                    onPressed: _copyMondayToAll,
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.calendar_view_week, size: 18),
-                    label: Text(t.mon_fri ?? 'Mon–Fri'),
-                    onPressed: _monToFri,
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.block, size: 18),
-                    label: Text(t.close_all ?? 'Close all'),
-                    onPressed: _closeAll,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+    return Theme(
+      data: themed,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(t.working_hours ?? 'Working hours'),
+          backgroundColor: Colors.white,
+          foregroundColor: _Brand.ink,
+          elevation: 0.5,
+        ),
+        body: FutureBuilder<void>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (_err.isNotEmpty) {
+              return _ErrorBox(text: _err, onRetry: _refresh, t: t);
+            }
 
-              ..._rows.map((r) {
-                final open = !r.closed;
-                final subtitle =
-                    open ? '${r.start} – ${r.end}' : (t.closed ?? 'Closed');
-
-                return Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(
-                      color: open
-                          ? const Color(0xFFD6F5E5)
-                          : const Color(0xFFF0F2F5),
-                    ),
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+              children: [
+                // Header summary card
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: _Brand.border),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    leading: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: open
-                          ? const Color(0xFFE7FBF1)
-                          : const Color(0xFFF3F4F6),
-                      child: Text(
-                        _weekdayShort(r.day),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color:
-                              open ? const Color(0xFF0F9D58) : Colors.black54,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: _Brand.primarySoft,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.schedule, color: _Brand.ink),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          t.working_hours_subtitle ??
+                              'Set your weekly opening hours',
+                          style: const TextStyle(color: _Brand.subtle),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Quick actions
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: _Brand.border),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _QuickActionChip(
+                        icon: Icons.copy_all_rounded,
+                        label: t.copy_monday_to_all ?? 'Copy Monday to all',
+                        onTap: _copyMondayToAll,
+                      ),
+                      _QuickActionChip(
+                        icon: Icons.calendar_view_week,
+                        label: t.mon_fri ?? 'Mon–Fri (9–18)',
+                        onTap: _monToFri,
+                      ),
+                      // _QuickActionChip(
+                      //   icon: Icons.av_timer_outlined,
+                      //   label: t.mon_fri ?? '24/7',
+                      //   onTap: _set247,
+                      // ),
+                      _QuickActionChip(
+                        icon: Icons.block,
+                        label: t.close_all ?? 'Close all',
+                        onTap: _closeAll,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Day rows
+                ..._rows.map((r) {
+                  final open = !r.closed;
+                  final statusBg = open ? _Brand.okBg : _Brand.muted;
+                  final statusFg = open ? _Brand.okText : Colors.black54;
+
+                  return Card(
+                    elevation: 0,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side:
+                          BorderSide(color: open ? _Brand.okBg : _Brand.border),
                     ),
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _weekdayFull(context, r.day),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: open
-                                ? const Color(0xFFE7FBF1)
-                                : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            open
-                                ? (t.working_hours ?? 'Open')
-                                : (t.closed ?? 'Closed'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: open
-                                  ? const Color(0xFF0F9D58)
-                                  : Colors.black54,
-                              fontWeight: FontWeight.w700,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: statusBg,
+                            child: Text(
+                              _weekdayShort(r.day),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: statusFg,
+                              ),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: open ? Colors.black87 : Colors.black54,
-                          fontWeight:
-                              open ? FontWeight.w600 : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: !r.closed,
-                          onChanged: (v) => setState(() => r.closed = !v),
-                        ),
-                        IconButton(
-                          icon: const Icon(CupertinoIcons.time),
-                          tooltip: t.select_time ?? 'Select time',
-                          onPressed: r.closed
-                              ? null
-                              : () async {
-                                  final res = await _showTimeRangeWheel(
-                                    start: r.start,
-                                    end: r.end,
-                                    t: t,
-                                  );
-                                  if (res == null) return;
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _weekdayFull(context, r.day),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          color: _Brand.ink,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: statusBg,
+                                        borderRadius:
+                                            BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        open
+                                            ? (t.working_hours ?? 'Open')
+                                            : (t.closed ?? 'Closed'),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: statusFg,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                // time chips
+                                Row(
+                                  children: [
+                                    _TimeBadge(text: r.start),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 6),
+                                      child: Text('—',
+                                          style: TextStyle(
+                                              color: _Brand.subtle,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                    _TimeBadge(text: r.end),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: !r.closed,
+                                onChanged: (v) {
                                   setState(() {
-                                    r.start = res.$1;
-                                    r.end = res.$2;
+                                    r.closed = !v;
+                                    if (v &&
+                                        (r.start.isEmpty || r.end.isEmpty)) {
+                                      r.start = '09:00';
+                                      r.end = '18:00';
+                                    }
                                   });
                                 },
-                        ),
-                      ],
+                              ),
+                              const SizedBox(width: 4),
+                              IconButton.filledTonal(
+                                onPressed: r.closed
+                                    ? null
+                                    : () async {
+                                        final res = await _showTimeRangeWheel(
+                                          start: r.start,
+                                          end: r.end,
+                                          t: t,
+                                        );
+                                        if (res == null) return;
+                                        setState(() {
+                                          r.start = res.$1;
+                                          r.end = res.$2;
+                                        });
+                                      },
+                                icon: const Icon(CupertinoIcons.time, size: 18),
+                                tooltip: t.select_time ?? 'Select time',
+                                style: IconButton.styleFrom(
+                                  disabledBackgroundColor: _Brand.muted,
+                                  foregroundColor: _Brand.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                }),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: SizedBox(
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _Brand.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                );
-              }),
-
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 48,
-                child: FilledButton(
-                  onPressed: _saving ? null : () => _save(t),
-                  child: _saving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(t.action_save ?? 'Save'),
                 ),
+                onPressed:
+                    _saving ? null : () => _save(AppLocalizations.of(context)!),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      )
+                    : Text(AppLocalizations.of(context)!.action_save ?? 'Save'),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ------- Bits -------
+class _QuickActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _QuickActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: _Brand.border),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: _Brand.ink),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: _Brand.ink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeBadge extends StatelessWidget {
+  final String text;
+  const _TimeBadge({required this.text});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: _Brand.muted,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _Brand.border),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: _Brand.ink,
+        ),
       ),
     );
   }
@@ -614,7 +795,11 @@ class _CupertinoTimeWheelState extends State<_CupertinoTimeWheel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        Text(widget.label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: _Brand.ink,
+            )),
         const SizedBox(height: 6),
         Expanded(
           child: CupertinoTheme(
@@ -662,6 +847,10 @@ class _ErrorBox extends StatelessWidget {
               Text(text, textAlign: TextAlign.center),
               const SizedBox(height: 12),
               OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: _Brand.border),
+                  foregroundColor: _Brand.ink,
+                ),
                 onPressed: () => onRetry(),
                 child: Text(t.action_retry ?? 'Retry'),
               ),

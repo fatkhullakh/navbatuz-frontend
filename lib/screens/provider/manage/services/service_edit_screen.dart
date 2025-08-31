@@ -1,11 +1,71 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/media/upload_service.dart';
 import '../../../../services/services/provider_public_service.dart';
+
+/* ================= Brand ================= */
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const primarySoft = Color(0xFFBDDDFC);
+  static const ink = Color(0xFF384959);
+  static const subtle = Color(0xFF7C8B9B);
+  static const border = Color(0xFFE6ECF2);
+  static const surface = Color(0xFFF6F8FC);
+}
+
+/* ============== Currency helpers (UZS now) ============== */
+
+String _currencySuffixFor(Locale loc, AppLocalizations t) {
+  final lang = (loc.languageCode).toLowerCase();
+  switch (lang) {
+    case 'uz':
+      return t.currency_sum ?? "so'm";
+    case 'ru':
+      return t.currency_sum ?? 'сум';
+    default:
+      return t.currency_sum ?? 'sum';
+  }
+}
+
+/// group digits with non-breaking spaces: 120 000
+String _groupDigits(String raw) {
+  final cleaned = raw.replaceAll(RegExp(r'[^0-9]'), '');
+  if (cleaned.isEmpty) return '';
+  final sb = StringBuffer();
+  final n = cleaned.length;
+  for (var i = 0; i < n; i++) {
+    sb.write(cleaned[i]);
+    final left = n - i - 1;
+    if (left > 0 && left % 3 == 0) sb.write('\u202F'); // narrow no-break space
+  }
+  return sb.toString();
+}
+
+num? _parseGroupedToNum(String s) {
+  final digits = s.replaceAll(RegExp(r'[^0-9]'), '');
+  if (digits.isEmpty) return null;
+  return int.tryParse(digits);
+}
+
+class ThousandsSpaceInputFormatter extends TextInputFormatter {
+  const ThousandsSpaceInputFormatter();
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final grouped = _groupDigits(newValue.text);
+    return TextEditingValue(
+      text: grouped,
+      selection: TextSelection.collapsed(offset: grouped.length),
+    );
+  }
+}
+
+/* ================= DTO & API ================= */
 
 class _ServiceDto {
   String? id;
@@ -18,7 +78,7 @@ class _ServiceDto {
   bool deleted;
   String providerId;
   List<String> workerIds;
-  String? imageUrl; // writes this (server may return logoUrl)
+  String? imageUrl;
 
   _ServiceDto({
     this.id,
@@ -63,7 +123,7 @@ class _ServiceDto {
         workerIds: ((j['workerIds'] as List?) ?? const [])
             .map((e) => e.toString())
             .toList(),
-        imageUrl: (j['imageUrl'] ?? j['logoUrl'])?.toString(), // READ either
+        imageUrl: (j['imageUrl'] ?? j['logoUrl'])?.toString(),
       );
 }
 
@@ -93,6 +153,8 @@ class _ServiceApi {
     await _dio.put('/services/$id/image', data: {'url': url});
   }
 }
+
+/* ================= Screen ================= */
 
 class ProviderServiceEditScreen extends StatefulWidget {
   final String providerId;
@@ -144,7 +206,7 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
       final s = await _api.getById(widget.serviceId!);
       _dto = s;
       _name.text = s.name;
-      _price.text = (s.price == null) ? '' : s.price.toString();
+      _price.text = s.price == null ? '' : _groupDigits('${s.price!.toInt()}');
       _desc.text = s.description ?? '';
       _category = s.category;
       _active = s.isActive;
@@ -209,23 +271,46 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (_) => SafeArea(
         child: Padding(
           padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 8),
+            left: 12,
+            right: 12,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 6),
-              Text(t.service_duration ?? 'Duration',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              for (final m in options)
-                ListTile(
-                  title: Text(_prettyDuration(m, t)),
-                  onTap: () => Navigator.of(context).pop(m),
+              Text(
+                t.service_duration ?? 'Duration',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: _Brand.ink,
                 ),
+              ),
               const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: options
+                    .map((m) => ChoiceChip(
+                          selected: _durationMin == m,
+                          onSelected: (_) => Navigator.of(context).pop(m),
+                          label: Text(_prettyDuration(m, t)),
+                          selectedColor: _Brand.primarySoft,
+                          labelStyle: TextStyle(
+                              color: _durationMin == m
+                                  ? _Brand.ink
+                                  : Colors.black87),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -253,8 +338,7 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
       dto.name = _name.text.trim();
       dto.description = _desc.text.trim().isEmpty ? null : _desc.text.trim();
       dto.category = _category;
-      dto.price =
-          _price.text.trim().isEmpty ? null : num.tryParse(_price.text.trim());
+      dto.price = _parseGroupedToNum(_price.text.trim());
       dto.durationIso = _minutesToIso(_durationMin);
       dto.isActive = _active;
       dto.deleted = _deleted;
@@ -303,11 +387,13 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.image_updated ?? 'Image updated')));
-    } catch (e) {
+        SnackBar(content: Text(t.image_updated ?? 'Image updated')),
+      );
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.error_upload_image ?? 'Upload failed')));
+        SnackBar(content: Text(t.error_upload_image ?? 'Upload failed')),
+      );
     }
   }
 
@@ -321,11 +407,13 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.image_removed ?? 'Image removed')));
+        SnackBar(content: Text(t.image_removed ?? 'Image removed')),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.error_remove_image ?? 'Remove failed')));
+        SnackBar(content: Text(t.error_remove_image ?? 'Remove failed')),
+      );
     }
   }
 
@@ -343,6 +431,8 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
+            style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFD92D20)),
             child: Text(t.action_delete ?? 'Delete'),
           ),
         ],
@@ -365,6 +455,7 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final isEdit = widget.serviceId != null;
+    final currencyWord = _currencySuffixFor(Localizations.localeOf(context), t);
 
     String? coverUrl() {
       final raw = (_imageUrl ?? '').trim();
@@ -374,11 +465,19 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
       return u.isEmpty ? null : u;
     }
 
+    InputBorder _fieldBorder([Color? c]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: c ?? _Brand.border),
+        );
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(_name.text.isEmpty
-            ? (isEdit ? '-' : (t.service_create ?? 'Create service'))
-            : _name.text),
+        title: Text(
+          _name.text.isEmpty
+              ? (isEdit ? '-' : (t.service_create ?? 'Create service'))
+              : _name.text,
+        ),
         actions: [
           if (isEdit && (_dto?.id != null))
             IconButton(
@@ -402,7 +501,7 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
                 OutlinedButton(
                   onPressed: () {
                     setState(() {
-                      _bootstrap = _load(); // setState sync, no async here
+                      _bootstrap = _load();
                     });
                   },
                   child: Text(t.action_retry ?? 'Retry'),
@@ -414,157 +513,220 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
           final url = coverUrl();
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 120),
             children: [
-              Text(t.main_details_required ?? 'Main details',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _name,
-                decoration:
-                    InputDecoration(labelText: t.service_name ?? 'Name'),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _price,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration:
-                          InputDecoration(labelText: t.price ?? 'Price'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _pickDuration(t),
-                      borderRadius: BorderRadius.circular(12),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                            labelText: t.service_duration ?? 'Duration'),
-                        child: Text(_prettyDuration(_durationMin, t)),
+              _SectionCard(
+                title: t.main_details_required ?? 'Main details',
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _name,
+                      decoration: InputDecoration(
+                        labelText: t.service_name ?? 'Name',
+                        filled: true,
+                        fillColor: _Brand.surface,
+                        border: _fieldBorder(),
+                        enabledBorder: _fieldBorder(),
+                        focusedBorder: _fieldBorder(_Brand.primary),
                       ),
+                      onChanged: (_) => setState(() {}),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _desc,
-                minLines: 2,
-                maxLines: 6,
-                decoration: InputDecoration(
-                    labelText: t.service_description ?? 'Description'),
-              ),
-              const SizedBox(height: 12),
-              Text(t.photos ?? 'Photos',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  if (url != null)
-                    Stack(
+                    const SizedBox(height: 10),
+                    Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            url,
-                            width: 92,
-                            height: 92,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 92,
-                              height: 92,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF2F4F7),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.broken_image_outlined),
+                        Expanded(
+                          child: TextField(
+                            controller: _price,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9\s\u00A0\u202F]')),
+                              const ThousandsSpaceInputFormatter(),
+                            ],
+                            decoration: InputDecoration(
+                              labelText:
+                                  '${t.price ?? 'Price'} ($currencyWord)',
+                              hintText: '120 000',
+                              filled: true,
+                              fillColor: _Brand.surface,
+                              border: _fieldBorder(),
+                              enabledBorder: _fieldBorder(),
+                              focusedBorder: _fieldBorder(_Brand.primary),
                             ),
                           ),
                         ),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () => _removeImage(t),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.55),
-                                shape: BoxShape.circle,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _pickDuration(t),
+                            borderRadius: BorderRadius.circular(12),
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: t.service_duration ?? 'Duration',
+                                filled: true,
+                                fillColor: _Brand.surface,
+                                border: _fieldBorder(),
+                                enabledBorder: _fieldBorder(),
+                                focusedBorder: _fieldBorder(_Brand.primary),
                               ),
-                              padding: const EdgeInsets.all(4),
-                              child: const Icon(Icons.close,
-                                  color: Colors.white, size: 16),
+                              child: Text(_prettyDuration(_durationMin, t)),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  if (url != null) const SizedBox(width: 10),
-                  InkWell(
-                    onTap: () => _pickImage(t),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 92,
-                      height: 92,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF6F8FC),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE6ECF2)),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.add_a_photo_outlined),
-                          const SizedBox(height: 4),
-                          Text(t.add_photo ?? 'Add photo',
-                              style: const TextStyle(fontSize: 12)),
-                        ],
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _desc,
+                      minLines: 3,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                        labelText: t.service_description ?? 'Description',
+                        filled: true,
+                        fillColor: _Brand.surface,
+                        border: _fieldBorder(),
+                        enabledBorder: _fieldBorder(),
+                        focusedBorder: _fieldBorder(_Brand.primary),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (_allWorkers.isNotEmpty) ...[
-                Text(t.staff_members ?? 'Staff members',
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _allWorkers.map((w) {
-                    final selected = _selectedWorkerIds.contains(w.id);
-                    return FilterChip(
-                      selected: selected,
-                      label: Text(w.name),
-                      onSelected: (value) {
-                        setState(() {
-                          if (value) {
-                            _selectedWorkerIds.add(w.id);
-                          } else {
-                            _selectedWorkerIds.remove(w.id);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
+                  ],
                 ),
-                const SizedBox(height: 16),
-              ],
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(t.active ?? 'Active'),
-                  Switch(
-                    value: _active,
-                    onChanged: (v) => setState(() => _active = v),
+              ),
+              const SizedBox(height: 12),
+              _SectionCard(
+                title: t.photos ?? 'Photos',
+                child: Row(
+                  children: [
+                    if (url != null)
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              url,
+                              width: 96,
+                              height: 96,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: 96,
+                                height: 96,
+                                decoration: BoxDecoration(
+                                  color: _Brand.surface,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: _Brand.border),
+                                ),
+                                child: const Icon(Icons.broken_image_outlined),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () => _removeImage(t),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(.55),
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (url != null) const SizedBox(width: 10),
+                    InkWell(
+                      onTap: () => _pickImage(t),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          color: _Brand.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _Brand.border),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_a_photo_outlined,
+                                color: _Brand.ink),
+                            const SizedBox(height: 4),
+                            Text(
+                              t.add_photo ?? 'Add photo',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: _Brand.subtle,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_allWorkers.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _SectionCard(
+                  title: t.staff_members ?? 'Staff members',
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _allWorkers.map((w) {
+                      final selected = _selectedWorkerIds.contains(w.id);
+                      return FilterChip(
+                        selected: selected,
+                        label: Text(w.name),
+                        onSelected: (value) {
+                          setState(() {
+                            if (value) {
+                              _selectedWorkerIds.add(w.id);
+                            } else {
+                              _selectedWorkerIds.remove(w.id);
+                            }
+                          });
+                        },
+                        selectedColor: _Brand.primarySoft,
+                        side: const BorderSide(color: _Brand.border),
+                        labelStyle: TextStyle(
+                          color: selected ? _Brand.ink : Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ],
+                ),
+              ],
+              const SizedBox(height: 12),
+              _SectionCard(
+                title: t.active ?? 'Active',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _active
+                          ? (t.status_active ?? 'Active')
+                          : (t.status_inactive ?? 'Inactive'),
+                      style: TextStyle(
+                        color: _active
+                            ? const Color(0xFF12B76A)
+                            : const Color(0xFF6B7280),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Switch(
+                      value: _active,
+                      activeColor: Colors.white,
+                      activeTrackColor: _Brand.primary,
+                      onChanged: (v) => setState(() => _active = v),
+                    ),
+                  ],
+                ),
               ),
             ],
           );
@@ -575,18 +737,70 @@ class _ProviderServiceEditScreenState extends State<ProviderServiceEditScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: SizedBox(
-            height: 48,
-            child: ElevatedButton(
+            height: 50,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _Brand.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
               onPressed:
                   _saving ? null : () => _save(AppLocalizations.of(context)!),
-              child: _saving
+              icon: _saving
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(AppLocalizations.of(context)!.action_save ?? 'Save'),
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(
+                AppLocalizations.of(context)!.action_save ?? 'Save',
+                style:
+                    const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ================= Small UI helpers ================= */
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+  const _SectionCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: _Brand.border),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: const TextStyle(
+                    color: _Brand.ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14)),
+            const SizedBox(height: 10),
+            child,
+          ],
         ),
       ),
     );

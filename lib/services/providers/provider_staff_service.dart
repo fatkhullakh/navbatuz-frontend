@@ -1,5 +1,6 @@
+// lib/services/providers/provider_staff_service.dart
 import 'package:dio/dio.dart';
-import '../../services/api_service.dart';
+import '../api_service.dart';
 
 enum WorkerStatus { AVAILABLE, UNAVAILABLE, ON_BREAK, ON_LEAVE }
 
@@ -121,10 +122,10 @@ class ProviderStaffService {
     return list;
   }
 
-  // ✅ NEW: add named param to the simpler method and delegate to the ext method
+  // Simple delegate with optional active flag
   Future<List<StaffMember>> getProviderStaff(
     String providerId, {
-    bool? activeOnly, // <— now supported
+    bool? activeOnly,
   }) {
     return getProviderStaffExt(providerId, activeOnly: activeOnly);
   }
@@ -170,14 +171,11 @@ class ProviderStaffService {
     return StaffMember.fromWorkerJson(m);
   }
 
-  /// Soft-delete (remove from team) — kept for backward compatibility.
-  /// Now uses dedicated endpoint if available.
+  /// Soft-deactivate (remove from team)
   Future<void> deactivate(String workerId) async {
-    // Preferred: dedicated endpoint
     await _dio.put('/workers/$workerId/deactivate');
   }
 
-  /// New alias if you want explicit naming.
   Future<void> deactivateWorker(String workerId) => deactivate(workerId);
 
   /// Reactivate worker and get updated model.
@@ -187,7 +185,7 @@ class ProviderStaffService {
     return StaffMember.fromWorkerJson(m);
   }
 
-  // availability (planned)
+  // ---- availability: planned
   Future<List<PlannedDay>> getPlanned(String workerId) async {
     final r = await _dio.get('/workers/public/availability/planned/$workerId');
     final list = (r.data as List? ?? []);
@@ -201,7 +199,7 @@ class ProviderStaffService {
     );
   }
 
-  // exceptions (actual availability)
+  // ---- availability: actual
   Future<List<ActualItem>> getActual(
       String workerId, DateTime from, DateTime to) async {
     String f = _d(from), t = _d(to);
@@ -230,7 +228,7 @@ class ProviderStaffService {
     await _dio.delete('/workers/availability/actual/$workerId/$availabilityId');
   }
 
-  // breaks
+  // ---- breaks
   Future<List<BreakItem>> getBreaks(String workerId, DateTime day) async {
     final r = await _dio.get('/workers/public/availability/break/$workerId',
         queryParameters: {'from': _d(day), 'to': _d(day)});
@@ -269,7 +267,6 @@ class ProviderStaffService {
         .toList();
   }
 
-  /// New: list with optional active flag (null -> all)
   Future<List<ReceptionistMember>> getReceptionists(
     String providerId, {
     bool? active,
@@ -315,7 +312,6 @@ class ProviderStaffService {
     return ReceptionistMember.fromJson(Map<String, dynamic>.from(r.data));
   }
 
-  /// Keep existing void methods for compatibility
   Future<void> deactivateReceptionist(String providerId, String id) async {
     await _dio.put('/providers/$providerId/receptionists/$id/deactivate');
   }
@@ -324,7 +320,6 @@ class ProviderStaffService {
     await _dio.put('/providers/$providerId/receptionists/$id/activate');
   }
 
-  /// New: returning variants so callers can refresh UI state immediately
   Future<ReceptionistMember> deactivateReceptionistReturn(
       String providerId, String id) async {
     final r =
@@ -411,12 +406,63 @@ class StaffMember {
 
   /// Works for both list (WorkerResponse) and details (WorkerDetailsDto).
   factory StaffMember.fromWorkerJson(Map<String, dynamic> m) {
-    String? str(dynamic v) => v?.toString().trim();
+    String? str(dynamic v) =>
+        v?.toString().trim().isEmpty == true ? null : v?.toString().trim();
     double? toD(dynamic v) {
       if (v == null) return null;
       if (v is num) return v.toDouble();
       return double.tryParse(v.toString());
     }
+
+    // Recursively search for first non-empty avatar-like field
+    String? _findAvatarUrl(dynamic node) {
+      if (node == null) return null;
+
+      if (node is Map) {
+        // common direct keys
+        const flatKeys = [
+          'avatarUrl',
+          'photoUrl',
+          'imageUrl',
+          'avatar',
+          'profilePhoto',
+          'avatar_path',
+          'avatarURL',
+          'picture',
+          'photo',
+        ];
+        for (final k in flatKeys) {
+          final v = node[k];
+          if (v != null && v.toString().trim().isNotEmpty) {
+            return v.toString().trim();
+          }
+        }
+
+        // nested places it might hide in
+        const nestedKeys = ['user', 'profile', 'account', 'owner', 'data'];
+        for (final k in nestedKeys) {
+          final v = node[k];
+          final found = _findAvatarUrl(v);
+          if (found != null && found.isNotEmpty) return found;
+        }
+
+        // some backends return { avatar: { url: "..." } }
+        final avatarObj = node['avatar'];
+        if (avatarObj is Map) {
+          final urlLike = avatarObj['url'] ?? avatarObj['href'];
+          if (urlLike != null && urlLike.toString().trim().isNotEmpty) {
+            return urlLike.toString().trim();
+          }
+        }
+      }
+
+      return null;
+    }
+
+    final rawAvatar = _findAvatarUrl(m);
+    final normalizedAvatar = rawAvatar == null
+        ? null
+        : (ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar);
 
     return StaffMember(
       id: str(m['id']) ?? '',
@@ -425,7 +471,7 @@ class StaffMember {
       gender: str(m['gender']),
       phoneNumber: str(m['phoneNumber']),
       email: str(m['email']),
-      avatarUrl: str(m['avatarUrl']),
+      avatarUrl: normalizedAvatar,
       role: str(m['workerType']) ?? str(m['role']),
       status: statusFromString(str(m['status'])),
       avgRating: toD(m['avgRating']),

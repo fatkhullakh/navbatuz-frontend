@@ -6,6 +6,18 @@ import '../../../../services/api_service.dart';
 import '../../../../services/providers/provider_staff_service.dart';
 import 'provider_receptionist_edit_screen.dart';
 
+/// ---- Brand palette to match other screens ----
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const ink = Color(0xFF384959);
+  static const subtle = Color(0xFF7C8B9B);
+  static const border = Color(0xFFE6ECF2);
+  static const bg = Color(0xFFF6F8FC);
+
+  static const ok = Color(0xFF12B76A);
+  static const danger = Color(0xFFB42318);
+}
+
 class ProviderReceptionistDetailsScreen extends StatefulWidget {
   final String providerId;
   final ReceptionistMember initial;
@@ -50,12 +62,17 @@ class _ProviderReceptionistDetailsScreenState
       final updated = await _svc.activateReceptionistReturn(
         widget.providerId,
         _m.id,
-      ); // <-- returning variant
+      );
       setState(() => _m = updated);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Receptionist reactivated')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.receptionist_reactivated ??
+                'Receptionist reactivated',
+          ),
+        ),
       );
       Navigator.pop(context, true);
     } on DioException catch (e) {
@@ -71,18 +88,22 @@ class _ProviderReceptionistDetailsScreenState
   }
 
   Future<void> _removeFromTeam() async {
+    final t = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Remove receptionist?'),
-        content: const Text('This will deactivate the receptionist.'),
+        title: Text(t.remove_receptionist_q ?? 'Remove receptionist?'),
+        content: Text(t.remove_receptionist_desc ??
+            'This will deactivate the receptionist.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(_, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(_, false),
+            child: Text(t.action_cancel ?? 'Cancel'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(_, true),
-              child: const Text('Remove')),
+            onPressed: () => Navigator.pop(_, true),
+            child: Text(t.action_remove ?? 'Remove'),
+          ),
         ],
       ),
     );
@@ -92,8 +113,9 @@ class _ProviderReceptionistDetailsScreenState
     try {
       await _svc.deactivateReceptionist(widget.providerId, _m.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Removed from team')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.removed_from_team ?? 'Removed from team')),
+      );
       Navigator.pop(context, true);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
@@ -120,149 +142,163 @@ class _ProviderReceptionistDetailsScreenState
     String prettyGender(String? g) {
       switch ((g ?? '').toUpperCase()) {
         case 'MALE':
-          return 'Male';
+          return t.gender_male ?? 'Male';
         case 'FEMALE':
-          return 'Female';
+          return t.gender_female ?? 'Female';
         case 'OTHER':
-          return 'Other';
+          return t.gender_other ?? 'Other';
         default:
           return '—';
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_m.displayName),
-        actions: [
-          IconButton(
-            tooltip: 'Edit',
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () async {
-              final updated = await Navigator.push<ReceptionistMember?>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProviderReceptionistEditScreen(
-                    providerId: widget.providerId,
-                    initial: _m,
-                  ),
-                ),
-              );
-              if (updated != null) {
-                setState(() => _m = updated);
-              } else {
-                _hydrate();
-              }
-            },
-          ),
-          const SizedBox(width: 4),
-        ],
+    final theme = Theme.of(context).copyWith(
+      scaffoldBackgroundColor: _Brand.bg,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.white,
+        foregroundColor: _Brand.ink,
+        elevation: 0.5,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 36,
-                backgroundColor: const Color(0xFFF2F4F7),
-                backgroundImage:
-                    normalized == null ? null : NetworkImage(normalized),
-                child: normalized == null
-                    ? const Icon(Icons.support_agent_outlined, size: 36)
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_m.displayName,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: (_m.isActive
-                                ? const Color(0xFF12B76A)
-                                : const Color(0xFFB42318))
-                            .withOpacity(.12),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        _m.isActive ? 'Active' : 'Inactive',
-                        style: TextStyle(
-                          color: _m.isActive
-                              ? const Color(0xFF12B76A)
-                              : const Color(0xFFB42318),
-                          fontWeight: FontWeight.w600,
+      snackBarTheme:
+          const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+    );
+
+    return Theme(
+      data: theme,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_m.displayName),
+          actions: [
+            IconButton(
+              tooltip: t.action_edit ?? 'Edit',
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () async {
+                final updated = await Navigator.push<ReceptionistMember?>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProviderReceptionistEditScreen(
+                      providerId: widget.providerId,
+                      initial: _m,
+                    ),
+                  ),
+                );
+                if (updated != null) {
+                  setState(() => _m = updated);
+                } else {
+                  _hydrate();
+                }
+              },
+            ),
+            const SizedBox(width: 4),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 36,
+                  backgroundColor: const Color(0xFFF2F4F7),
+                  backgroundImage:
+                      normalized == null ? null : NetworkImage(normalized),
+                  child: normalized == null
+                      ? const Icon(Icons.support_agent_outlined, size: 36)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_m.displayName,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: (_m.isActive ? _Brand.ok : _Brand.danger)
+                              .withOpacity(.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          _m.isActive
+                              ? (t.active ?? 'Active')
+                              : (t.inactive ?? 'Inactive'),
+                          style: TextStyle(
+                            color: _m.isActive ? _Brand.ok : _Brand.danger,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _InfoTile(
-            leading: Icons.store_mall_directory_outlined,
-            title: pretty(_m.providerName),
-            subtitle: 'Provider',
-          ),
-          const _InfoTile(
-            leading: Icons.badge_outlined,
-            title: 'Receptionist',
-            subtitle: 'Role',
-          ),
-          _InfoTile(
-            leading: Icons.wc_outlined,
-            title: prettyGender(_m.gender),
-            subtitle: 'Gender',
-          ),
-          _InfoTile(
-            leading: Icons.call_outlined,
-            title: pretty(_m.phoneNumber),
-            subtitle: t.phone ?? 'Phone',
-          ),
-          _InfoTile(
-            leading: Icons.alternate_email_outlined,
-            title: pretty(_m.email),
-            subtitle: t.email ?? 'Email',
-          ),
-          if ((_m.hireDate ?? '').isNotEmpty)
+              ],
+            ),
+            const SizedBox(height: 16),
             _InfoTile(
-              leading: Icons.calendar_month_outlined,
-              title: pretty(_m.hireDate),
-              subtitle: 'Hire date',
+              leading: Icons.store_mall_directory_outlined,
+              title: pretty(_m.providerName),
+              subtitle: t.provider ?? 'Provider',
             ),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 8),
-          if (_m.isActive)
-            SizedBox(
-              height: 48,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.person_off_outlined, color: Colors.red),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
+            _InfoTile(
+              leading: Icons.badge_outlined,
+              title: t.receptionist ?? 'Receptionist',
+              subtitle: t.role ?? 'Role',
+            ),
+            _InfoTile(
+              leading: Icons.wc_outlined,
+              title: prettyGender(_m.gender),
+              subtitle: t.gender ?? 'Gender',
+            ),
+            _InfoTile(
+              leading: Icons.call_outlined,
+              title: pretty(_m.phoneNumber),
+              subtitle: t.phone ?? 'Phone',
+            ),
+            _InfoTile(
+              leading: Icons.alternate_email_outlined,
+              title: pretty(_m.email),
+              subtitle: t.email ?? 'Email',
+            ),
+            if ((_m.hireDate ?? '').isNotEmpty)
+              _InfoTile(
+                leading: Icons.calendar_month_outlined,
+                title: pretty(_m.hireDate),
+                subtitle: t.hire_date ?? 'Hire date',
+              ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            if (_m.isActive)
+              SizedBox(
+                height: 48,
+                child: OutlinedButton.icon(
+                  icon:
+                      const Icon(Icons.person_off_outlined, color: Colors.red),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                  onPressed: _loading ? null : _removeFromTeam,
+                  label: Text(t.remove_from_team ?? 'Remove from team'),
                 ),
-                onPressed: _loading ? null : _removeFromTeam,
-                label: const Text('Remove from team'),
+              )
+            else
+              SizedBox(
+                height: 48,
+                child: FilledButton.icon(
+                  onPressed: _loading ? null : _reactivate,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: Text(
+                      t.reactivate_receptionist ?? 'Reactivate receptionist'),
+                ),
               ),
-            )
-          else
-            SizedBox(
-              height: 48,
-              child: FilledButton.icon(
-                onPressed: _loading ? null : _reactivate,
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: const Text('Reactivate receptionist'),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -273,20 +309,30 @@ class _InfoTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget? trailing;
-  const _InfoTile(
-      {required this.leading,
-      required this.title,
-      required this.subtitle,
-      this.trailing});
+  const _InfoTile({
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: _Brand.border),
+      ),
       child: ListTile(
-        leading: Icon(leading),
-        title: Text(title),
-        subtitle: Text(subtitle),
+        leading: Icon(leading, color: _Brand.ink),
+        title: Text(
+          title,
+          style:
+              const TextStyle(fontWeight: FontWeight.w700, color: _Brand.ink),
+        ),
+        subtitle: Text(subtitle, style: const TextStyle(color: _Brand.subtle)),
         trailing: trailing,
       ),
     );

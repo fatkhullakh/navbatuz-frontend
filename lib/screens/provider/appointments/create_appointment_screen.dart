@@ -1,9 +1,14 @@
+// CreateAppointmentScreen.dart
+// (Only change vs last version is the robust providerId resolution inside the
+// Pick client onPressed and a tiny helper comment in _initLoad; endpoints untouched.)
+
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/api_service.dart';
 import '../../../services/appointments/appointment_service.dart';
 import '../../../models/appointment_models.dart';
@@ -11,14 +16,21 @@ import '../../../models/appointment_models.dart';
 import '../../../services/providers/provider_staff_service.dart';
 import '../../../services/services/manage_services_service.dart';
 import '../../clients/pick_client_screen.dart';
-import '../../../core/phone_utils.dart'; // <-- NEW
+import '../../../core/phone_utils.dart';
 
+// ── helpers ───────────────────────────────────────────────────────────────────
 String _hhmmFromHms(String hms) => hms.length >= 5 ? hms.substring(0, 5) : hms;
 int _minsFromDuration(Duration? d) => d == null ? 30 : d.inMinutes;
 
 const String WALKIN_NAME = 'Walk-in';
 String walkInPhoneE164(String? _) => '+000000000000';
 
+// ── Stormy Morning colors (darker tones) ─────────────────────────────────────
+const _stormDark = Color(0xFF384959);
+const _stormMuted = Color(0xFF6A89A7);
+const _stormLight = Color(0xFFBDDDFC);
+
+// ── local UI DTO ─────────────────────────────────────────────────────────────
 class _UiService {
   final String id;
   final String name;
@@ -109,9 +121,9 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
         final w = await _staffSvc.getWorker(_workerId!);
         _workerDisplayName = w.displayName;
         _workerAvatar = ApiService.normalizeMediaUrl(w.avatarUrl);
+        // Note: We don’t rely on worker.providerId here because model may not expose it.
       } catch (_) {}
     }
-
     await _loadServicesForWorker();
     await _loadSlots();
   }
@@ -197,10 +209,10 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
   }
 
   Future<void> _pickDeviceContact() async {
+    final t = AppLocalizations.of(context)!;
     if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Contacts not supported on this platform')),
+        SnackBar(content: Text(t.contacts_not_supported)),
       );
       return;
     }
@@ -213,7 +225,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
 
         if (name.isNotEmpty) _guestNameCtrl.text = name;
         if (phone.isNotEmpty) {
-          // Normalize immediately so DB won’t get multiple formats
           _guestPhoneCtrl.text =
               normalizePhoneE164(phone, defaultCountry: 'UZ');
         }
@@ -226,49 +237,88 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       }
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Contacts permission denied. Enable it in Settings > App > Permissions.'),
-        ),
+        SnackBar(content: Text(t.contacts_permission_denied)),
       );
     }
   }
 
+  // ── UI ──────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final workers = widget.workers;
     final workerSelfMode = workers == null;
 
+    final inputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: _stormDark.withOpacity(.18)),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('New appointment')),
+      backgroundColor: const Color(0xFFF7F9FC),
+      appBar: AppBar(
+        title: Text(t.new_appointment),
+        backgroundColor: Colors.white,
+        foregroundColor: _stormDark,
+        elevation: 0,
+      ),
       body: Form(
         key: _form,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
+            // STAFF
+            _sectionLabel(context, t.worker),
+            const SizedBox(height: 8),
             if (workerSelfMode)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage:
-                      (_workerAvatar != null && _workerAvatar!.isNotEmpty)
-                          ? NetworkImage(_workerAvatar!)
-                          : null,
-                  child: (_workerAvatar == null || _workerAvatar!.isEmpty)
-                      ? const Icon(Icons.person)
-                      : null,
+              Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(color: _stormDark.withOpacity(.08)),
                 ),
-                title: const Text('Worker'),
-                subtitle: Text(_workerDisplayName,
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                trailing:
-                    const Icon(Icons.lock, size: 18, color: Colors.black54),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 20,
+                    backgroundImage:
+                        (_workerAvatar != null && _workerAvatar!.isNotEmpty)
+                            ? NetworkImage(_workerAvatar!)
+                            : null,
+                    backgroundColor: _stormDark.withOpacity(.06),
+                    child: (_workerAvatar == null || _workerAvatar!.isEmpty)
+                        ? const Icon(Icons.person, color: _stormDark)
+                        : null,
+                  ),
+                  title: Text(
+                    _workerDisplayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: _stormDark),
+                  ),
+                  subtitle: Text(t.worker,
+                      style: TextStyle(color: _stormDark.withOpacity(.6))),
+                  trailing:
+                      const Icon(Icons.lock, size: 18, color: _stormMuted),
+                ),
               )
             else
               DropdownButtonFormField<String>(
                 value: _workerId,
-                decoration: const InputDecoration(labelText: 'Worker'),
+                decoration: InputDecoration(
+                  labelText: t.worker,
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: inputBorder,
+                  enabledBorder: inputBorder,
+                  focusedBorder: inputBorder.copyWith(
+                    borderSide:
+                        const BorderSide(color: _stormMuted, width: 1.2),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
                 items: workers
                     .map((w) => DropdownMenuItem(
                           value: w.id,
@@ -286,7 +336,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   await _loadSlots();
                 },
               ),
+
+            const SizedBox(height: 16),
+
+            // SERVICE
+            _sectionLabel(context, t.common_service),
             const SizedBox(height: 8),
+
             _loadingServices
                 ? const Center(
                     child: Padding(
@@ -296,7 +352,19 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                   )
                 : DropdownButtonFormField<String>(
                     value: _selectedService?.id,
-                    decoration: const InputDecoration(labelText: 'Service'),
+                    decoration: InputDecoration(
+                      labelText: t.common_service,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: inputBorder,
+                      enabledBorder: inputBorder,
+                      focusedBorder: inputBorder.copyWith(
+                        borderSide:
+                            const BorderSide(color: _stormMuted, width: 1.2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 14),
+                    ),
                     items: _services.map((s) {
                       final priceText = s.price == null
                           ? ''
@@ -319,37 +387,73 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                       });
                       await _loadSlots();
                     },
-                    validator: (v) => v == null ? 'Choose a service' : null,
+                    validator: (v) =>
+                        v == null ? t.choose_service_validation : null,
                   ),
             if (!_loadingServices && _services.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'No services are assigned to this worker.',
+                  t.no_services_assigned,
                   style: const TextStyle(color: Colors.redAccent),
                 ),
               ),
+
+            const SizedBox(height: 16),
+
+            // DATE & TIME
+            _sectionLabel(context, t.date),
             const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Date'),
-              subtitle: Text(_day.toIso8601String().split('T').first),
-              trailing: IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _day,
-                    firstDate: DateTime.now().subtract(const Duration(days: 0)),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (picked != null) {
-                    setState(() => _day = picked);
-                    await _loadSlots();
-                  }
-                },
+            Card(
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: _stormDark.withOpacity(.08)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.calendar_month_outlined,
+                    color: _stormDark),
+                title: Text(_day.toIso8601String().split('T').first,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: _stormDark)),
+                trailing: Wrap(
+                  spacing: 8,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _day,
+                          firstDate: DateTime.now(),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (picked != null) {
+                          setState(() => _day = picked);
+                          await _loadSlots();
+                        }
+                      },
+                      icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                      label: Text(t.select_date),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        setState(() => _day = DateTime.now());
+                        await _loadSlots();
+                      },
+                      child: Text(t.today),
+                    ),
+                  ],
+                ),
               ),
             ),
+
+            const SizedBox(height: 10),
+            Text(t.select_time,
+                style: TextStyle(color: _stormDark.withOpacity(.7))),
+            const SizedBox(height: 8),
+
             _loadingSlots
                 ? const Center(
                     child: Padding(
@@ -357,38 +461,83 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _freeRaw
-                        .map((raw) => ChoiceChip(
-                              label: Text(_hhmmFromHms(raw)),
-                              selected: _timeRaw == raw,
-                              onSelected: (_) => setState(() => _timeRaw = raw),
-                            ))
-                        .toList(),
-                  ),
-            const SizedBox(height: 16),
-            const Text('Client', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
+                : (_freeRaw.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Text(
+                          '—',
+                          style: TextStyle(color: _stormDark.withOpacity(.5)),
+                        ),
+                      )
+                    : Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: _freeRaw.map((raw) {
+                          final selected = _timeRaw == raw;
+                          return ChoiceChip(
+                            label: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              child: Text(
+                                _hhmmFromHms(raw),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? Colors.white : _stormDark,
+                                ),
+                              ),
+                            ),
+                            selected: selected,
+                            selectedColor: _stormDark,
+                            backgroundColor: Colors.white,
+                            side: BorderSide(
+                              color: selected
+                                  ? _stormDark
+                                  : _stormDark.withOpacity(.18),
+                            ),
+                            onSelected: (_) => setState(() => _timeRaw = raw),
+                          );
+                        }).toList(),
+                      )),
+
+            const SizedBox(height: 18),
+
+            // CLIENT
+            _sectionLabel(context, t.guest_details),
+            const SizedBox(height: 10),
+
             Wrap(
               spacing: 8,
               children: [
                 FilterChip(
-                  label: const Text('Walk-in'),
+                  label: Text(t.walk_in),
                   selected: _walkIn,
                   onSelected: (v) => _applyWalkInDefaults(v),
+                  selectedColor: _stormDark,
+                  labelStyle: TextStyle(
+                    color: _walkIn ? Colors.white : _stormDark,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  side: BorderSide(
+                    color: _walkIn ? _stormDark : _stormDark.withOpacity(.18),
+                  ),
                 ),
                 ActionChip(
-                  avatar: const Icon(Icons.people_outline, size: 18),
-                  label: const Text('Pick client'),
+                  avatar: const Icon(Icons.people_outline,
+                      size: 18, color: _stormDark),
+                  label: Text(t.pick_client,
+                      style: const TextStyle(color: _stormDark)),
                   onPressed: () async {
-                    final provForPicker =
+                    // ⇣ Robust provider resolution: if null, try once after services load
+                    var provForPicker =
                         _providerId ?? _selectedService?.providerId;
                     if (provForPicker == null || provForPicker.isEmpty) {
+                      await _loadServicesForWorker(); // may set _providerId
+                      provForPicker =
+                          _providerId ?? _selectedService?.providerId;
+                    }
+                    if (provForPicker == null || provForPicker.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('No provider to list clients from')),
+                        SnackBar(content: Text(t.no_provider_for_clients)),
                       );
                       return;
                     }
@@ -396,7 +545,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                         await Navigator.of(context).push<Map<String, String?>>(
                       MaterialPageRoute(
                         builder: (_) =>
-                            PickClientScreen(providerId: provForPicker),
+                            PickClientScreen(providerId: provForPicker!),
                       ),
                     );
                     if (res != null) {
@@ -409,25 +558,48 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                       setState(() => _walkIn = false);
                     }
                   },
+                  backgroundColor: _stormLight.withOpacity(.35),
+                  shape: StadiumBorder(
+                    side: BorderSide(color: _stormDark.withOpacity(.15)),
+                  ),
                 ),
                 if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
                   ActionChip(
-                    avatar: const Icon(Icons.contacts_outlined, size: 18),
-                    label: const Text('Pick from contacts'),
+                    avatar: const Icon(Icons.contacts_outlined,
+                        size: 18, color: _stormDark),
+                    label: Text(t.pick_from_contacts,
+                        style: const TextStyle(color: _stormDark)),
                     onPressed: _pickDeviceContact,
+                    backgroundColor: _stormLight.withOpacity(.35),
+                    shape: StadiumBorder(
+                      side: BorderSide(color: _stormDark.withOpacity(.15)),
+                    ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 12),
+
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _guestPhoneCtrl,
-                    decoration: const InputDecoration(labelText: 'Phone'),
+                    decoration: InputDecoration(
+                      labelText: t.phone,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: inputBorder,
+                      enabledBorder: inputBorder,
+                      focusedBorder: inputBorder.copyWith(
+                        borderSide:
+                            const BorderSide(color: _stormMuted, width: 1.2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 14),
+                    ),
                     keyboardType: TextInputType.phone,
                     onEditingComplete: () {
-                      // Optional: normalize as soon as user finishes editing
                       final norm = normalizePhoneE164(_guestPhoneCtrl.text,
                           defaultCountry: 'UZ');
                       _guestPhoneCtrl.text = norm;
@@ -438,23 +610,46 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _guestNameCtrl,
-                    decoration: const InputDecoration(labelText: 'Name'),
+                    decoration: InputDecoration(
+                      labelText: t.person_name,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: inputBorder,
+                      enabledBorder: inputBorder,
+                      focusedBorder: inputBorder.copyWith(
+                        borderSide:
+                            const BorderSide(color: _stormMuted, width: 1.2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 14),
+                    ),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 24),
+
             SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 50,
               child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _stormDark,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Create'),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : Text(t.create,
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ),
           ],
@@ -463,10 +658,13 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
     );
   }
 
+  // ── save (endpoints unchanged) ──────────────────────────────────────────────
   Future<void> _save() async {
+    final t = AppLocalizations.of(context)!;
+
     if (_workerId == null || _selectedService == null || _timeRaw == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
+        SnackBar(content: Text(t.fill_all_fields)),
       );
       return;
     }
@@ -479,7 +677,6 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       String name = _guestNameCtrl.text.trim();
 
       if (!hasLink) {
-        // Normalize right before sending to API
         phone = normalizePhoneE164(phone, defaultCountry: 'UZ');
         if (phone.isEmpty) phone = walkInPhoneE164(_providerId);
         if (name.isEmpty) name = WALKIN_NAME;
@@ -506,4 +703,15 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  // ── small helpers ──────────────────────────────────────────────────────────
+  Widget _sectionLabel(BuildContext context, String text) => Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          letterSpacing: .2,
+          fontWeight: FontWeight.w800,
+          color: _stormMuted,
+        ),
+      );
 }

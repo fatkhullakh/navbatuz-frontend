@@ -1,4 +1,4 @@
-package com.example.frontend  // <<< MUST match the folder path
+package com.example.frontend
 
 import android.app.Activity
 import android.content.Intent
@@ -23,6 +23,15 @@ class MainActivity : FlutterActivity() {
     private var pendingPickAfterPermission = false
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        // ✅ Set Yandex MapKit API key BEFORE plugins attach, using reflection (no compile-time import).
+        try {
+            val clazz = Class.forName("com.yandex.mapkit.MapKitFactory")
+            val method = clazz.getMethod("setApiKey", String::class.java)
+            method.invoke(null, getString(R.string.yandex_maps_api_key))
+        } catch (_: Throwable) {
+            // If plugin not on classpath at this moment, ignore; it will be when plugin loads
+        }
+
         super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
@@ -51,9 +60,7 @@ class MainActivity : FlutterActivity() {
         } else {
             pendingPickAfterPermission = true
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.READ_CONTACTS),
-                REQ_PERM
+                this, arrayOf(android.Manifest.permission.READ_CONTACTS), REQ_PERM
             )
         }
     }
@@ -64,9 +71,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQ_PERM) {
@@ -109,7 +114,6 @@ class MainActivity : FlutterActivity() {
                 if (it.moveToFirst()) {
                     val id = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
                     name = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME)) ?: ""
-
                     val hasPhone = it.getInt(it.getColumnIndexOrThrow(ContactsContract.Contacts.HAS_PHONE_NUMBER))
                     if (hasPhone > 0) {
                         val pCur = contentResolver.query(

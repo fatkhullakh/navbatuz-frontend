@@ -120,7 +120,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get provider_tab_reviews => 'Отзывы';
 
   @override
-  String get provider_tab_details => 'Детали';
+  String get provider_tab_details => 'Управление';
 
   @override
   String get provider_about => 'О заведении';
@@ -418,7 +418,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get remove_from_favorites => 'Убрать из избранного';
 
   @override
-  String get error_generic => 'Что-то пошло не так. Повторите попытку.';
+  String get error_generic => 'Провайдер не выбран';
 
   @override
   String get provider_change_logo => 'Изменить логотип';
@@ -661,7 +661,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get action_delete => 'Удалить';
 
   @override
-  String get action_cancel => 'Отменить';
+  String get action_cancel => 'Отмена';
 
   @override
   String get confirm_delete_title => 'Удалить услугу?';
@@ -736,7 +736,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get contact => 'Контакты';
 
   @override
-  String get email => 'Email';
+  String get email => 'Электронная почта';
 
   @override
   String get phone => 'Телефон';
@@ -1183,4 +1183,538 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get status_no_show => 'Не пришёл';
+
+  @override
+  String get status_label => 'Статус';
+
+  @override
+  String get status_booked => 'Запланировано';
+
+  @override
+  String get status_completed => 'Завершено';
+
+  @override
+  String get status_cancelled => 'Отменено';
+
+  @override
+  String get status_rescheduled => 'Перенесено';
+
+  @override
+  String get action_mark_no_show => 'Отметить как неявку';
+
+  @override
+  String get action_undo_no_show => 'Отменить неявку';
+
+  @override
+  String get toast_marked_no_show => 'Отмечено как неявка';
+
+  @override
+  String get toast_undo_no_show => 'Неявка отменена';
+
+  @override
+  String get appointment_no_actions => 'Действия недоступны для этого статуса.';
+
+  @override
+  String get walk_in => 'Без записи';
+
+  @override
+  String get pick_client => 'Выбрать клиента';
+
+  @override
+  String get pick_from_contacts => 'Из контактов';
+
+  @override
+  String get no_services_assigned => 'К этому сотруднику не привязаны услуги.';
+
+  @override
+  String get contacts_not_supported => 'Контакты не поддерживаются на этой платформе';
+
+  @override
+  String get contacts_permission_denied => 'Доступ к контактам запрещён. Разрешите его в Настройках приложения.';
+
+  @override
+  String get no_provider_for_clients => 'Нет салона, из которого можно выбрать клиента';
+
+  @override
+  String get choose_service_validation => 'Выберите услугу';
+
+  @override
+  String get breaksTitle => 'Перерывы: добавить / управлять';
+
+  @override
+  String get workerLabel => 'Сотрудник';
+
+  @override
+  String get dateLabel => 'Дата';
+
+  @override
+  String get todayButton => 'Сегодня';
+
+  @override
+  String get timeStartLabel => 'Начало';
+
+  @override
+  String get timeEndLabel => 'Конец';
+
+  @override
+  String get saveBreakBtn => 'Сохранить перерыв';
+
+  @override
+  String get savingEllipsis => 'Сохранение…';
+
+  @override
+  String get existingBreaksTitle => 'Перерывы на день';
+
+  @override
+  String get noBreaksForDay => 'На эту дату перерывов нет.';
+
+  @override
+  String get breakSaved => 'Перерыв сохранён';
+
+  @override
+  String get breakDeleted => 'Перерыв удалён';
+
+  @override
+  String breakSaveFailed(String error) {
+    return 'Не удалось сохранить: $error';
+  }
+
+  @override
+  String breakDeleteFailed(String error) {
+    return 'Не удалось удалить: $error';
+  }
+
+  @override
+  String get breakRequiredFields => 'Выберите сотрудника, начало и конец';
+
+  @override
+  String get breakEndAfterStart => 'Время окончания должно быть позже начала';
+
+  @override
+  String get pickTime5mTitle => 'Выбор времени (шаг 5 мин)';
+
+  @override
+  String get commonCancel => 'Отмена';
+
+  @override
+  String get commonOk => 'ОК';
+
+  @override
+  String get deleteAction => 'Удалить';
+
+  @override
+  String get owner_worker_profile => 'Ваш профиль сотрудника';
+
+  @override
+  String get me_label => 'Я';
+
+  @override
+  String get status_inactive => 'Неактивна';
+
+  @override
+  String get my_availability => 'Моё расписание';
+
+  @override
+  String get my_services => 'Мои услуги';
+
+  @override
+  String get work_as_staff_title => 'Работать как сотрудник';
+
+  @override
+  String get worker_type_label => 'Тип сотрудника';
+
+  @override
+  String get initial_status_label => 'Начальный статус';
+
+  @override
+  String get enable_me_as_worker => 'Активировать меня как сотрудника';
+
+  @override
+  String get enabling_ellipsis => 'Активация…';
+
+  @override
+  String get reenable_me => 'Включить заново';
+
+  @override
+  String get reenabling_ellipsis => 'Включаем…';
+
+  @override
+  String get removed_from_team_hint => 'Сейчас вы удалены из команды.';
+
+  @override
+  String get enable_hint_after => 'После активации вы сможете задать часы работы и услуги.';
+
+  @override
+  String get owner_enabled_as_worker => 'Вы активированы как сотрудник';
+
+  @override
+  String get worker_profile_reenabled => 'Профиль сотрудника снова активирован';
+
+  @override
+  String http_error(String msg) {
+    return '$msg';
+  }
+
+  @override
+  String get worker_status_available => 'Доступен';
+
+  @override
+  String get worker_status_unavailable => 'Недоступен';
+
+  @override
+  String get worker_status_on_break => 'Перерыв';
+
+  @override
+  String get worker_status_on_leave => 'В отпуске';
+
+  @override
+  String get action_edit => 'Редактировать';
+
+  @override
+  String get deleted_ok => 'Удалено';
+
+  @override
+  String get activated_ok => 'Активирована';
+
+  @override
+  String get deactivated_ok => 'Деактивирована';
+
+  @override
+  String failed_with_reason(String reason) {
+    return '$reason';
+  }
+
+  @override
+  String get missing_service_id => 'Отсутствует ID услуги';
+
+  @override
+  String get filter_active_only => 'Только активные';
+
+  @override
+  String get no_services_yet => 'Пока нет услуг';
+
+  @override
+  String services_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# услуг',
+      many: '# услуг',
+      few: '# услуги',
+      one: '# услуга',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get status_active => 'Активна';
+
+  @override
+  String duration_hm(String h, String m) {
+    return '$hч $mм';
+  }
+
+  @override
+  String duration_h(String h) {
+    return '$hч';
+  }
+
+  @override
+  String duration_m(String m) {
+    return '$mм';
+  }
+
+  @override
+  String get currency_sum => 'сум';
+
+  @override
+  String get unit_service_singular => 'услуга';
+
+  @override
+  String get unit_service_plural => 'услуг';
+
+  @override
+  String get more => 'Ещё';
+
+  @override
+  String get category_clinic => 'Клиника';
+
+  @override
+  String get category_barbershop => 'Барбершоп';
+
+  @override
+  String get category_beauty_salon => 'Салон красоты';
+
+  @override
+  String get category_spa => 'СПА';
+
+  @override
+  String get category_dental => 'Стоматология';
+
+  @override
+  String get category_gym => 'Тренажёрный зал';
+
+  @override
+  String get category_tattoo => 'Тату-студия';
+
+  @override
+  String get category_nail_salon => 'Ногтевой салон';
+
+  @override
+  String get category_massage => 'Массаж';
+
+  @override
+  String get category_other => 'Другое';
+
+  @override
+  String get location_pinned => 'Местоположение закреплено';
+
+  @override
+  String get pick_on_map_first => 'Пожалуйста, отметьте местоположение на карте';
+
+  @override
+  String get address => 'Адрес';
+
+  @override
+  String get map_pin => 'Метка на карте';
+
+  @override
+  String get pick_on_map => 'Выбрать на карте';
+
+  @override
+  String get available => 'Доступен';
+
+  @override
+  String get on_break => 'На перерыве';
+
+  @override
+  String get on_leave => 'В отпуске';
+
+  @override
+  String get unavailable => 'Недоступен';
+
+  @override
+  String get show_inactive_workers => 'Показать неактивных работников';
+
+  @override
+  String get show_inactive_receptionists => 'Показать неактивных администраторов';
+
+  @override
+  String get receptionist => 'Администратор';
+
+  @override
+  String get add_staff => 'Добавить персонал';
+
+  @override
+  String get add_worker => 'Добавить работника';
+
+  @override
+  String get add_receptionist => 'Добавить администратора';
+
+  @override
+  String get status => 'Статус';
+
+  @override
+  String get remove_worker_q => 'Удалить сотрудника?';
+
+  @override
+  String get remove_worker_desc => 'Сотрудник будет удалён из команды (учётная запись не удаляется).';
+
+  @override
+  String get remove => 'Удалить';
+
+  @override
+  String get removed_from_team => 'Удалён из команды';
+
+  @override
+  String get worker_activated => 'Сотрудник активирован';
+
+  @override
+  String get male => 'Мужчина';
+
+  @override
+  String get female => 'Женщина';
+
+  @override
+  String get other => 'Другое';
+
+  @override
+  String get change_status => 'Изменить статус';
+
+  @override
+  String get details => 'Детали';
+
+  @override
+  String get provider => 'Организация';
+
+  @override
+  String get role => 'Роль';
+
+  @override
+  String get manage => 'Управлять';
+
+  @override
+  String get danger_zone => 'Опасная зона';
+
+  @override
+  String get remove_from_team => 'Удалить из команды';
+
+  @override
+  String get reactivate_worker => 'Восстановить сотрудника';
+
+  @override
+  String get edit_worker => 'Редактировать сотрудника';
+
+  @override
+  String get identity => 'Личные данные';
+
+  @override
+  String get gender_male => 'Мужчина';
+
+  @override
+  String get gender_female => 'Женщина';
+
+  @override
+  String get gender_other => 'Другое';
+
+  @override
+  String get phone_hint => 'Введите номер телефона';
+
+  @override
+  String get email_hint => 'Введите адрес электронной почты';
+
+  @override
+  String get role_worker_type => 'Тип сотрудника';
+
+  @override
+  String get role_barber => 'Барбер';
+
+  @override
+  String get role_hairdresser => 'Парикмахер';
+
+  @override
+  String get role_dentist => 'Стоматолог';
+
+  @override
+  String get role_doctor => 'Доктор';
+
+  @override
+  String get role_nurser => 'Медсестра';
+
+  @override
+  String get role_spa_therapist => 'Спа-терапевт';
+
+  @override
+  String get role_masseuse => 'Массажист';
+
+  @override
+  String get role_nail_technician => 'Мастер маникюра';
+
+  @override
+  String get role_cosmetologist => 'Косметолог';
+
+  @override
+  String get role_tattoo_artist => 'Тату-мастер';
+
+  @override
+  String get role_personal_trainer => 'Персональный тренер';
+
+  @override
+  String get role_makeup_artist => 'Визажист';
+
+  @override
+  String get role_physiotherapist => 'Физиотерапевт';
+
+  @override
+  String get role_general => 'Общий';
+
+  @override
+  String get role_other => 'Другое';
+
+  @override
+  String get hire_date => 'Дата найма';
+
+  @override
+  String get name => 'Имя';
+
+  @override
+  String get edit_receptionist => 'Редактировать администратора';
+
+  @override
+  String get reactivate_receptionist => 'Восстановить администратора';
+
+  @override
+  String get receptionist_reactivated => 'Администратор восстановлен';
+
+  @override
+  String get remove_receptionist_q => 'Удалить администратора?';
+
+  @override
+  String get remove_receptionist_desc => 'Администратор будет удалён из команды (учётная запись не удаляется).';
+
+  @override
+  String get only_active => 'Только активные';
+
+  @override
+  String get only_assigned => 'Только назначенные';
+
+  @override
+  String get service_inactive => 'Неактивная услуга';
+
+  @override
+  String selected_n(int n) {
+    return 'Selected: $n';
+  }
+
+  @override
+  String get assign_visible => 'Назначить видимые';
+
+  @override
+  String get remove_visible => 'Удалить видимые';
+
+  @override
+  String get added => 'Добавлено';
+
+  @override
+  String get removed => 'Удалено';
+
+  @override
+  String added_n_services(int n) {
+    return 'Added $n services';
+  }
+
+  @override
+  String removed_n_services(int n) {
+    return 'Removed $n services';
+  }
+
+  @override
+  String get no_services_found => 'Услуги не найдены';
+
+  @override
+  String get no_services_found_caption => 'Попробуйте изменить фильтры или поисковый запрос.';
+
+  @override
+  String get current_password => 'Текущий пароль';
+
+  @override
+  String get current_password_hint => 'Введите текущий пароль';
+
+  @override
+  String get current_password_required => 'Требуется текущий пароль';
+
+  @override
+  String get current_password_incorrect => 'Неверный текущий пароль';
+
+  @override
+  String get new_password => 'Новый пароль';
+
+  @override
+  String get new_password_hint => 'Введите новый пароль';
+
+  @override
+  String get confirm_new_password => 'Подтвердите новый пароль';
+
+  @override
+  String get confirm_new_password_hint => 'Повторно введите новый пароль';
 }

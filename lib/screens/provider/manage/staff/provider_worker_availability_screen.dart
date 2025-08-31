@@ -5,6 +5,15 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/api_service.dart';
 
+/// ---- Brand palette (same family as other screens) ----
+class _Brand {
+  static const primary = Color(0xFF6A89A7);
+  static const ink = Color(0xFF384959);
+  static const subtle = Color(0xFF7C8B9B);
+  static const border = Color(0xFFE6ECF2);
+  static const bg = Color(0xFFF6F8FC);
+}
+
 class ProviderWorkerAvailabilityScreen extends StatefulWidget {
   final String workerId;
   final String workerName;
@@ -33,17 +42,23 @@ class _ProviderWorkerAvailabilityScreenState
 
     await showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
       builder: (ctx) => SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 8),
-            Text(t.select_time ?? 'Select time',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              t.select_time ?? 'Select time',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             Expanded(
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.time,
                 use24hFormat: true,
-                minuteInterval: 5, // <-- 5-min steps
+                minuteInterval: 5, // 5-min steps
                 initialDateTime: temp,
                 onDateTimeChanged: (d) => temp = d,
               ),
@@ -74,9 +89,10 @@ class _ProviderWorkerAvailabilityScreenState
       : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   TimeOfDay _parseLocalTime(String s) {
+    // Accept HH:mm or HH:mm:ss
     final p = s.split(':');
     final h = int.tryParse(p[0]) ?? 0;
-    final m = int.tryParse(p.elementAt(1)) ?? 0;
+    final m = int.tryParse(p.length > 1 ? p[1] : '0') ?? 0;
     return TimeOfDay(hour: h, minute: m);
   }
 
@@ -89,15 +105,15 @@ class _ProviderWorkerAvailabilityScreenState
   }
 
   // ---------- WEEK (planned) ----------
-  final List<_DayModel> _week = [
-    _DayModel('MONDAY'),
-    _DayModel('TUESDAY'),
-    _DayModel('WEDNESDAY'),
-    _DayModel('THURSDAY'),
-    _DayModel('FRIDAY'),
-    _DayModel('SATURDAY'),
-    _DayModel('SUNDAY'),
-  ].map((e) => _DayModel(e.day)).toList();
+  final List<_DayModel> _week = const [
+    'MONDAY',
+    'TUESDAY',
+    'WEDNESDAY',
+    'THURSDAY',
+    'FRIDAY',
+    'SATURDAY',
+    'SUNDAY',
+  ].map((d) => _DayModel(d)).toList();
 
   bool _loadingWeek = false;
   bool _savingWeek = false;
@@ -119,12 +135,14 @@ class _ProviderWorkerAvailabilityScreenState
         d.bufferMin = 0;
       }
       for (final m in list) {
-        final day = m['day']?.toString() ?? '';
-        final target =
-            _week.firstWhere((e) => e.day == day, orElse: () => _week.first);
+        final day = (m['day'] ?? '').toString();
+        final target = _week.firstWhere(
+          (e) => e.day == day,
+          orElse: () => _week.first,
+        );
         target.working = true;
-        target.start = _parseLocalTime(m['startTime'].toString());
-        target.end = _parseLocalTime(m['endTime'].toString());
+        target.start = _parseLocalTime('${m['startTime']}');
+        target.end = _parseLocalTime('${m['endTime']}');
         target.bufferMin =
             _durationToMinutes(m['bufferBetweenAppointments']?.toString());
       }
@@ -168,9 +186,9 @@ class _ProviderWorkerAvailabilityScreenState
     final t = AppLocalizations.of(context)!;
     final mon = _week.firstWhere((d) => d.day == 'MONDAY');
     if (!mon.working || mon.start == null || mon.end == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(t.not_set ?? 'Not set'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.not_set ?? 'Not set')),
+      );
       return;
     }
     for (final d in _week) {
@@ -182,11 +200,15 @@ class _ProviderWorkerAvailabilityScreenState
       d.bufferMin = mon.bufferMin;
     }
     setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(onlyWeekdays
-          ? (t.copied_mon_fri ?? 'Copied Monday to Mon–Fri')
-          : (t.copied_mon_all ?? 'Copied Monday to all days')),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          onlyWeekdays
+              ? (t.copied_mon_fri ?? 'Copied Monday to Mon–Fri')
+              : (t.copied_mon_all ?? 'Copied Monday to all days'),
+        ),
+      ),
+    );
   }
 
   // ---------- EXCEPTIONS (actual) ----------
@@ -203,8 +225,9 @@ class _ProviderWorkerAvailabilityScreenState
       final d = DateUtils.dateOnly(_exDate);
       final date = _ymd(d);
       final r = await _dio.get(
-          '/workers/public/availability/actual/${widget.workerId}',
-          queryParameters: {'from': date, 'to': date});
+        '/workers/public/availability/actual/${widget.workerId}',
+        queryParameters: {'from': date, 'to': date},
+      );
       final list = (r.data as List? ?? []);
       if (list.isEmpty) {
         _exId = null;
@@ -214,8 +237,8 @@ class _ProviderWorkerAvailabilityScreenState
       } else {
         final m = (list.first as Map).cast<String, dynamic>();
         _exId = (m['id'] as num?)?.toInt();
-        _exStart = _parseLocalTime(m['startTime'].toString());
-        _exEnd = _parseLocalTime(m['endTime'].toString());
+        _exStart = _parseLocalTime('${m['startTime']}');
+        _exEnd = _parseLocalTime('${m['endTime']}');
         _exBufferMin =
             _durationToMinutes(m['bufferBetweenAppointments']?.toString());
       }
@@ -242,8 +265,10 @@ class _ProviderWorkerAvailabilityScreenState
         'endTime': _fmt(_exEnd),
         'bufferBetweenAppointments': _durationIso(_exBufferMin),
       };
-      await _dio.post('/workers/availability/actual/${widget.workerId}',
-          data: body);
+      await _dio.post(
+        '/workers/availability/actual/${widget.workerId}',
+        data: body,
+      );
       await _fetchExceptionForDay();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -292,15 +317,16 @@ class _ProviderWorkerAvailabilityScreenState
       final d = DateUtils.dateOnly(_brDate);
       final date = _ymd(d);
       final r = await _dio.get(
-          '/workers/public/availability/break/${widget.workerId}',
-          queryParameters: {'from': date, 'to': date});
+        '/workers/public/availability/break/${widget.workerId}',
+        queryParameters: {'from': date, 'to': date},
+      );
       final list = (r.data as List? ?? []);
       _breaks = list.map((e) {
         final m = (e as Map).cast<String, dynamic>();
         return _BreakItem(
           id: (m['id'] as num?)?.toInt(),
-          start: _parseLocalTime(m['startTime'].toString()),
-          end: _parseLocalTime(m['endTime'].toString()),
+          start: _parseLocalTime('${m['startTime']}'),
+          end: _parseLocalTime('${m['endTime']}'),
         );
       }).toList();
       setState(() {});
@@ -325,8 +351,10 @@ class _ProviderWorkerAvailabilityScreenState
         'startTime': _fmt(_newBrStart),
         'endTime': _fmt(_newBrEnd),
       };
-      await _dio.post('/workers/availability/break/${widget.workerId}',
-          data: body);
+      await _dio.post(
+        '/workers/availability/break/${widget.workerId}',
+        data: body,
+      );
       _newBrStart = null;
       _newBrEnd = null;
       await _fetchBreaksForDay();
@@ -362,43 +390,98 @@ class _ProviderWorkerAvailabilityScreenState
   @override
   void initState() {
     super.initState();
+    _tabs.addListener(() => setState(() {})); // update FAB on tab change
     _fetchWeek();
     _fetchExceptionForDay();
     _fetchBreaksForDay();
   }
 
   @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.working_hours ?? 'Working hours'),
-        bottom: TabBar(
+
+    final theme = Theme.of(context).copyWith(
+      scaffoldBackgroundColor: _Brand.bg,
+      tabBarTheme: TabBarThemeData(
+        labelColor: _Brand.ink,
+        unselectedLabelColor: _Brand.subtle,
+        indicator: const UnderlineTabIndicator(
+          borderSide: BorderSide(color: _Brand.primary, width: 3),
+          insets: EdgeInsets.zero,
+        ),
+        labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        hintStyle: const TextStyle(color: _Brand.subtle),
+        prefixIconColor: _Brand.subtle,
+        suffixIconColor: _Brand.subtle,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _Brand.primary, width: 1.4),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    return Theme(
+      data: theme,
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0.5,
+          backgroundColor: Colors.white,
+          foregroundColor: _Brand.ink,
+          title: Text(t.working_hours ?? 'Working hours'),
+          bottom: TabBar(
+            controller: _tabs,
+            tabs: [
+              Tab(text: t.tab_week ?? 'Week'),
+              Tab(text: t.tab_exceptions ?? 'Exceptions'),
+              Tab(text: t.tab_breaks ?? 'Breaks'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabs,
-          tabs: [
-            Tab(text: t.tab_week ?? 'Week'),
-            Tab(text: t.tab_exceptions ?? 'Exceptions'),
-            Tab(text: t.tab_breaks ?? 'Breaks'),
+          children: [
+            _buildWeekTab(),
+            _buildExceptionsTab(),
+            _buildBreaksTab(),
           ],
         ),
+        floatingActionButton: _tabs.index == 0
+            ? FloatingActionButton.extended(
+                backgroundColor: _Brand.primary,
+                foregroundColor: Colors.white,
+                onPressed: _savingWeek ? null : _saveWeek,
+                icon: const Icon(Icons.save_outlined),
+                label: Text(
+                  _savingWeek
+                      ? (t.saving ?? 'Saving…')
+                      : (t.action_save ?? 'Save'),
+                ),
+              )
+            : null,
       ),
-      body: TabBarView(
-        controller: _tabs,
-        children: [
-          _buildWeekTab(),
-          _buildExceptionsTab(),
-          _buildBreaksTab(),
-        ],
-      ),
-      floatingActionButton: _tabs.index == 0
-          ? FloatingActionButton.extended(
-              onPressed: _savingWeek ? null : _saveWeek,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(_savingWeek
-                  ? (t.saving ?? 'Saving…')
-                  : (t.action_save ?? 'Save')),
-            )
-          : null,
     );
   }
 
@@ -413,6 +496,7 @@ class _ProviderWorkerAvailabilityScreenState
         // copy helpers
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
             OutlinedButton.icon(
               icon: const Icon(Icons.content_copy),
@@ -431,6 +515,10 @@ class _ProviderWorkerAvailabilityScreenState
           Card(
             elevation: 0,
             margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: const BorderSide(color: _Brand.border),
+            ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
               child: Column(
@@ -438,7 +526,13 @@ class _ProviderWorkerAvailabilityScreenState
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(_dayLabel(d.day, t)),
+                    title: Text(
+                      _dayLabel(d.day, t),
+                      style: const TextStyle(
+                        color: _Brand.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     value: d.working,
                     onChanged: (v) => setState(() => d.working = v),
                   ),
@@ -450,8 +544,9 @@ class _ProviderWorkerAvailabilityScreenState
                             label: t.start ?? 'Start',
                             value: _fmt(d.start),
                             onTap: () async {
-                              final next = await _pickTime24(d.start ??
-                                  const TimeOfDay(hour: 9, minute: 0));
+                              final next = await _pickTime24(
+                                d.start ?? const TimeOfDay(hour: 9, minute: 0),
+                              );
                               if (next != null) setState(() => d.start = next);
                             },
                           ),
@@ -462,8 +557,9 @@ class _ProviderWorkerAvailabilityScreenState
                             label: t.end ?? 'End',
                             value: _fmt(d.end),
                             onTap: () async {
-                              final next = await _pickTime24(d.end ??
-                                  const TimeOfDay(hour: 18, minute: 0));
+                              final next = await _pickTime24(
+                                d.end ?? const TimeOfDay(hour: 18, minute: 0),
+                              );
                               if (next != null) setState(() => d.end = next);
                             },
                           ),
@@ -493,10 +589,13 @@ class _ProviderWorkerAvailabilityScreenState
       children: [
         Row(
           children: [
-            Text(_ymd(_exDate),
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              _ymd(_exDate),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
             const Spacer(),
             IconButton(
+              tooltip: t.pickDate ?? 'Pick date',
               icon: const Icon(Icons.calendar_today_outlined),
               onPressed: () async {
                 final picked = await showDatePicker(
@@ -512,13 +611,18 @@ class _ProviderWorkerAvailabilityScreenState
               },
             ),
             IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _fetchExceptionForDay),
+              tooltip: t.action_refresh ?? 'Refresh',
+              icon: const Icon(Icons.refresh),
+              onPressed: _fetchExceptionForDay,
+            ),
           ],
         ),
         const SizedBox(height: 8),
-        Text(t.tab_exceptions ?? 'Exceptions',
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          t.tab_exceptions ?? 'Exceptions',
+          style:
+              const TextStyle(fontWeight: FontWeight.w700, color: _Brand.ink),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -528,7 +632,8 @@ class _ProviderWorkerAvailabilityScreenState
                 value: _fmt(_exStart),
                 onTap: () async {
                   final t0 = await _pickTime24(
-                      _exStart ?? const TimeOfDay(hour: 9, minute: 0));
+                    _exStart ?? const TimeOfDay(hour: 9, minute: 0),
+                  );
                   if (t0 != null) setState(() => _exStart = t0);
                 },
               ),
@@ -540,7 +645,8 @@ class _ProviderWorkerAvailabilityScreenState
                 value: _fmt(_exEnd),
                 onTap: () async {
                   final t1 = await _pickTime24(
-                      _exEnd ?? const TimeOfDay(hour: 18, minute: 0));
+                    _exEnd ?? const TimeOfDay(hour: 18, minute: 0),
+                  );
                   if (t1 != null) setState(() => _exEnd = t1);
                 },
               ),
@@ -559,9 +665,9 @@ class _ProviderWorkerAvailabilityScreenState
           child: FilledButton.icon(
             onPressed: _loadingEx ? null : _saveException,
             icon: const Icon(Icons.save_outlined),
-            label: Text(_loadingEx
-                ? (t.saving ?? 'Saving…')
-                : (t.action_save ?? 'Save')),
+            label: Text(
+              _loadingEx ? (t.saving ?? 'Saving…') : (t.action_save ?? 'Save'),
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -586,10 +692,13 @@ class _ProviderWorkerAvailabilityScreenState
       children: [
         Row(
           children: [
-            Text(_ymd(_brDate),
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              _ymd(_brDate),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
             const Spacer(),
             IconButton(
+              tooltip: t.pickDate ?? 'Pick date',
               icon: const Icon(Icons.calendar_today_outlined),
               onPressed: () async {
                 final picked = await showDatePicker(
@@ -605,36 +714,59 @@ class _ProviderWorkerAvailabilityScreenState
               },
             ),
             IconButton(
-                icon: const Icon(Icons.refresh), onPressed: _fetchBreaksForDay),
+              tooltip: t.action_refresh ?? 'Refresh',
+              icon: const Icon(Icons.refresh),
+              onPressed: _fetchBreaksForDay,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         if (_loadingBr)
           const Center(
-              child: Padding(
-            padding: EdgeInsets.all(12.0),
-            child: CircularProgressIndicator(),
-          ))
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
         else if (_breaks.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(t.no_breaks_day ?? 'No breaks for this day.'),
+            child: Text(
+              t.no_breaks_day ?? 'No breaks for this day.',
+              style: const TextStyle(color: _Brand.subtle),
+            ),
           )
         else
-          ..._breaks.map((b) => Card(
-                elevation: 0,
-                child: ListTile(
-                  leading: const Icon(Icons.timer_outlined),
-                  title: Text('${_fmt(b.start)} — ${_fmt(b.end)}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: b.id == null ? null : () => _deleteBreak(b.id!),
+          ..._breaks.map(
+            (b) => Card(
+              elevation: 0,
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: _Brand.border),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.timer_outlined, color: _Brand.subtle),
+                title: Text(
+                  '${_fmt(b.start)} — ${_fmt(b.end)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: _Brand.ink,
                   ),
                 ),
-              )),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: b.id == null ? null : () => _deleteBreak(b.id!),
+                ),
+              ),
+            ),
+          ),
         const Divider(height: 24),
-        Text(t.add_break ?? 'Add break',
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          t.add_break ?? 'Add break',
+          style:
+              const TextStyle(fontWeight: FontWeight.w700, color: _Brand.ink),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -644,7 +776,8 @@ class _ProviderWorkerAvailabilityScreenState
                 value: _fmt(_newBrStart),
                 onTap: () async {
                   final t0 = await _pickTime24(
-                      _newBrStart ?? const TimeOfDay(hour: 13, minute: 0));
+                    _newBrStart ?? const TimeOfDay(hour: 13, minute: 0),
+                  );
                   if (t0 != null) setState(() => _newBrStart = t0);
                 },
               ),
@@ -656,7 +789,8 @@ class _ProviderWorkerAvailabilityScreenState
                 value: _fmt(_newBrEnd),
                 onTap: () async {
                   final t1 = await _pickTime24(
-                      _newBrEnd ?? const TimeOfDay(hour: 14, minute: 0));
+                    _newBrEnd ?? const TimeOfDay(hour: 14, minute: 0),
+                  );
                   if (t1 != null) setState(() => _newBrEnd = t1);
                 },
               ),
@@ -669,9 +803,11 @@ class _ProviderWorkerAvailabilityScreenState
           child: FilledButton.icon(
             onPressed: _loadingBr ? null : _addBreak,
             icon: const Icon(Icons.add),
-            label: Text(_loadingBr
-                ? (t.saving ?? 'Saving…')
-                : (t.add_break ?? 'Add break')),
+            label: Text(
+              _loadingBr
+                  ? (t.saving ?? 'Saving…')
+                  : (t.add_break ?? 'Add break'),
+            ),
           ),
         ),
       ],
@@ -709,6 +845,7 @@ class _DayModel {
   TimeOfDay? start;
   TimeOfDay? end;
   int bufferMin = 0;
+
   _DayModel(this.day);
 }
 
@@ -723,20 +860,27 @@ class _TimeField extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _TimeField(
-      {required this.label, required this.value, required this.onTap});
+  const _TimeField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
           suffixIcon: const Icon(Icons.access_time),
         ),
-        child: Text(value),
+        child: Text(
+          value,
+          style:
+              const TextStyle(color: _Brand.ink, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
@@ -746,8 +890,11 @@ class _BufferDropdown extends StatelessWidget {
   final String label;
   final int value;
   final ValueChanged<int> onChanged;
-  const _BufferDropdown(
-      {required this.label, required this.value, required this.onChanged});
+  const _BufferDropdown({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -755,17 +902,18 @@ class _BufferDropdown extends StatelessWidget {
     return InputDecorator(
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           isExpanded: true,
           value: options.contains(value) ? value : 0,
           items: options
-              .map((m) => DropdownMenuItem<int>(
-                    value: m,
-                    child: Text(m.toString()),
-                  ))
+              .map(
+                (m) => DropdownMenuItem<int>(
+                  value: m,
+                  child: Text(m.toString()),
+                ),
+              )
               .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);

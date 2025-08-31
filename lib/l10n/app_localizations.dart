@@ -322,7 +322,7 @@ abstract class AppLocalizations {
   /// No description provided for @provider_tab_details.
   ///
   /// In en, this message translates to:
-  /// **'Details'**
+  /// **'Manage'**
   String get provider_tab_details;
 
   /// No description provided for @provider_about.
@@ -910,7 +910,7 @@ abstract class AppLocalizations {
   /// No description provided for @error_generic.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong. Please try again.'**
+  /// **'Provider is not selected'**
   String get error_generic;
 
   /// No description provided for @provider_change_logo.
@@ -1210,7 +1210,7 @@ abstract class AppLocalizations {
   /// No description provided for @services_title.
   ///
   /// In en, this message translates to:
-  /// **'Services & Combo Services'**
+  /// **'Services'**
   String get services_title;
 
   /// No description provided for @action_refresh.
@@ -2436,6 +2436,1014 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No-show'**
   String get status_no_show;
+
+  /// No description provided for @status_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status_label;
+
+  /// No description provided for @status_booked.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get status_booked;
+
+  /// No description provided for @status_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get status_completed;
+
+  /// No description provided for @status_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get status_cancelled;
+
+  /// No description provided for @status_rescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled'**
+  String get status_rescheduled;
+
+  /// No description provided for @action_mark_no_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark no-show'**
+  String get action_mark_no_show;
+
+  /// No description provided for @action_undo_no_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo no-show'**
+  String get action_undo_no_show;
+
+  /// No description provided for @toast_marked_no_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as no-show'**
+  String get toast_marked_no_show;
+
+  /// No description provided for @toast_undo_no_show.
+  ///
+  /// In en, this message translates to:
+  /// **'No-show undone'**
+  String get toast_undo_no_show;
+
+  /// No description provided for @appointment_no_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'No actions available for this status.'**
+  String get appointment_no_actions;
+
+  /// No description provided for @walk_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk-in'**
+  String get walk_in;
+
+  /// No description provided for @pick_client.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick client'**
+  String get pick_client;
+
+  /// No description provided for @pick_from_contacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from contacts'**
+  String get pick_from_contacts;
+
+  /// No description provided for @no_services_assigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No services are assigned to this worker.'**
+  String get no_services_assigned;
+
+  /// No description provided for @contacts_not_supported.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts not supported on this platform'**
+  String get contacts_not_supported;
+
+  /// No description provided for @contacts_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts permission denied. Enable it in Settings > App > Permissions.'**
+  String get contacts_permission_denied;
+
+  /// No description provided for @no_provider_for_clients.
+  ///
+  /// In en, this message translates to:
+  /// **'No provider to list clients from'**
+  String get no_provider_for_clients;
+
+  /// No description provided for @choose_service_validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service'**
+  String get choose_service_validation;
+
+  /// No description provided for @breaksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add / Manage breaks'**
+  String get breaksTitle;
+
+  /// No description provided for @workerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get workerLabel;
+
+  /// No description provided for @dateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get dateLabel;
+
+  /// No description provided for @todayButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayButton;
+
+  /// No description provided for @timeStartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get timeStartLabel;
+
+  /// No description provided for @timeEndLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get timeEndLabel;
+
+  /// No description provided for @saveBreakBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Save break'**
+  String get saveBreakBtn;
+
+  /// No description provided for @savingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingEllipsis;
+
+  /// No description provided for @existingBreaksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing breaks'**
+  String get existingBreaksTitle;
+
+  /// No description provided for @noBreaksForDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No breaks for this day.'**
+  String get noBreaksForDay;
+
+  /// No description provided for @breakSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Break saved'**
+  String get breakSaved;
+
+  /// No description provided for @breakDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Break deleted'**
+  String get breakDeleted;
+
+  /// No description provided for @breakSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String breakSaveFailed(String error);
+
+  /// No description provided for @breakDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String breakDeleteFailed(String error);
+
+  /// No description provided for @breakRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose worker, start and end time'**
+  String get breakRequiredFields;
+
+  /// No description provided for @breakEndAfterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time'**
+  String get breakEndAfterStart;
+
+  /// No description provided for @pickTime5mTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick time (5-min)'**
+  String get pickTime5mTitle;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAction;
+
+  /// No description provided for @owner_worker_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your worker profile'**
+  String get owner_worker_profile;
+
+  /// No description provided for @me_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get me_label;
+
+  /// No description provided for @status_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get status_inactive;
+
+  /// No description provided for @my_availability.
+  ///
+  /// In en, this message translates to:
+  /// **'My availability'**
+  String get my_availability;
+
+  /// No description provided for @my_services.
+  ///
+  /// In en, this message translates to:
+  /// **'My services'**
+  String get my_services;
+
+  /// No description provided for @work_as_staff_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Work as staff'**
+  String get work_as_staff_title;
+
+  /// No description provided for @worker_type_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker type'**
+  String get worker_type_label;
+
+  /// No description provided for @initial_status_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial status'**
+  String get initial_status_label;
+
+  /// No description provided for @enable_me_as_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable me as a worker'**
+  String get enable_me_as_worker;
+
+  /// No description provided for @enabling_ellipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabling…'**
+  String get enabling_ellipsis;
+
+  /// No description provided for @reenable_me.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enable me'**
+  String get reenable_me;
+
+  /// No description provided for @reenabling_ellipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enabling…'**
+  String get reenabling_ellipsis;
+
+  /// No description provided for @removed_from_team_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently removed from the team.'**
+  String get removed_from_team_hint;
+
+  /// No description provided for @enable_hint_after.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll be able to set your hours and assign services to yourself after enabling.'**
+  String get enable_hint_after;
+
+  /// No description provided for @owner_enabled_as_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now enabled as a worker'**
+  String get owner_enabled_as_worker;
+
+  /// No description provided for @worker_profile_reenabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker profile re-enabled'**
+  String get worker_profile_reenabled;
+
+  /// No description provided for @http_error.
+  ///
+  /// In en, this message translates to:
+  /// **'{msg}'**
+  String http_error(String msg);
+
+  /// No description provided for @worker_status_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get worker_status_available;
+
+  /// No description provided for @worker_status_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get worker_status_unavailable;
+
+  /// No description provided for @worker_status_on_break.
+  ///
+  /// In en, this message translates to:
+  /// **'On break'**
+  String get worker_status_on_break;
+
+  /// No description provided for @worker_status_on_leave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get worker_status_on_leave;
+
+  /// No description provided for @action_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get action_edit;
+
+  /// No description provided for @deleted_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get deleted_ok;
+
+  /// No description provided for @activated_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Activated'**
+  String get activated_ok;
+
+  /// No description provided for @deactivated_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated'**
+  String get deactivated_ok;
+
+  /// No description provided for @failed_with_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason}'**
+  String failed_with_reason(String reason);
+
+  /// No description provided for @missing_service_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing service id'**
+  String get missing_service_id;
+
+  /// No description provided for @filter_active_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Active only'**
+  String get filter_active_only;
+
+  /// No description provided for @no_services_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get no_services_yet;
+
+  /// No description provided for @services_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {# service} other {# services}}'**
+  String services_count(int count);
+
+  /// No description provided for @status_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get status_active;
+
+  /// No description provided for @duration_hm.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h {m}m'**
+  String duration_hm(String h, String m);
+
+  /// No description provided for @duration_h.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h'**
+  String duration_h(String h);
+
+  /// No description provided for @duration_m.
+  ///
+  /// In en, this message translates to:
+  /// **'{m}m'**
+  String duration_m(String m);
+
+  /// No description provided for @currency_sum.
+  ///
+  /// In en, this message translates to:
+  /// **'sum'**
+  String get currency_sum;
+
+  /// No description provided for @unit_service_singular.
+  ///
+  /// In en, this message translates to:
+  /// **'service'**
+  String get unit_service_singular;
+
+  /// No description provided for @unit_service_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'services'**
+  String get unit_service_plural;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @category_clinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get category_clinic;
+
+  /// No description provided for @category_barbershop.
+  ///
+  /// In en, this message translates to:
+  /// **'Barbershop'**
+  String get category_barbershop;
+
+  /// No description provided for @category_beauty_salon.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty salon'**
+  String get category_beauty_salon;
+
+  /// No description provided for @category_spa.
+  ///
+  /// In en, this message translates to:
+  /// **'Spa'**
+  String get category_spa;
+
+  /// No description provided for @category_dental.
+  ///
+  /// In en, this message translates to:
+  /// **'Dental'**
+  String get category_dental;
+
+  /// No description provided for @category_gym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym / Fitness'**
+  String get category_gym;
+
+  /// No description provided for @category_tattoo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tattoo studio'**
+  String get category_tattoo;
+
+  /// No description provided for @category_nail_salon.
+  ///
+  /// In en, this message translates to:
+  /// **'Nail salon'**
+  String get category_nail_salon;
+
+  /// No description provided for @category_massage.
+  ///
+  /// In en, this message translates to:
+  /// **'Massage'**
+  String get category_massage;
+
+  /// No description provided for @category_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get category_other;
+
+  /// Snackbar after user selects a location on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Location pinned'**
+  String get location_pinned;
+
+  /// Snackbar asking user to select a location before saving
+  ///
+  /// In en, this message translates to:
+  /// **'Please pin location on the map'**
+  String get pick_on_map_first;
+
+  /// Section title for address inputs
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// Section title for the map picker / coordinates
+  ///
+  /// In en, this message translates to:
+  /// **'Map pin'**
+  String get map_pin;
+
+  /// Button label to open the map picker
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on map'**
+  String get pick_on_map;
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @on_break.
+  ///
+  /// In en, this message translates to:
+  /// **'On break'**
+  String get on_break;
+
+  /// No description provided for @on_leave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get on_leave;
+
+  /// No description provided for @unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get unavailable;
+
+  /// No description provided for @show_inactive_workers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inactive workers'**
+  String get show_inactive_workers;
+
+  /// No description provided for @show_inactive_receptionists.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inactive receptionists'**
+  String get show_inactive_receptionists;
+
+  /// No description provided for @receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Receptionist'**
+  String get receptionist;
+
+  /// No description provided for @add_staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get add_staff;
+
+  /// No description provided for @add_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Add worker'**
+  String get add_worker;
+
+  /// No description provided for @add_receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add receptionist'**
+  String get add_receptionist;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @remove_worker_q.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove worker?'**
+  String get remove_worker_q;
+
+  /// No description provided for @remove_worker_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The worker will be removed from the team (their account will not be deleted).'**
+  String get remove_worker_desc;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @removed_from_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from team'**
+  String get removed_from_team;
+
+  /// No description provided for @worker_activated.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker activated'**
+  String get worker_activated;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @change_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Change status'**
+  String get change_status;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get provider;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @danger_zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get danger_zone;
+
+  /// No description provided for @remove_from_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from team'**
+  String get remove_from_team;
+
+  /// No description provided for @reactivate_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate worker'**
+  String get reactivate_worker;
+
+  /// No description provided for @edit_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit worker'**
+  String get edit_worker;
+
+  /// No description provided for @identity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get identity;
+
+  /// No description provided for @gender_male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get gender_male;
+
+  /// No description provided for @gender_female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get gender_female;
+
+  /// No description provided for @gender_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get gender_other;
+
+  /// No description provided for @phone_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter phone number'**
+  String get phone_hint;
+
+  /// No description provided for @email_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email address'**
+  String get email_hint;
+
+  /// No description provided for @role_worker_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker type'**
+  String get role_worker_type;
+
+  /// No description provided for @role_barber.
+  ///
+  /// In en, this message translates to:
+  /// **'Barber'**
+  String get role_barber;
+
+  /// No description provided for @role_hairdresser.
+  ///
+  /// In en, this message translates to:
+  /// **'Hairdresser'**
+  String get role_hairdresser;
+
+  /// No description provided for @role_dentist.
+  ///
+  /// In en, this message translates to:
+  /// **'Dentist'**
+  String get role_dentist;
+
+  /// No description provided for @role_doctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor'**
+  String get role_doctor;
+
+  /// No description provided for @role_nurser.
+  ///
+  /// In en, this message translates to:
+  /// **'Nurse'**
+  String get role_nurser;
+
+  /// No description provided for @role_spa_therapist.
+  ///
+  /// In en, this message translates to:
+  /// **'Spa therapist'**
+  String get role_spa_therapist;
+
+  /// No description provided for @role_masseuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Masseuse'**
+  String get role_masseuse;
+
+  /// No description provided for @role_nail_technician.
+  ///
+  /// In en, this message translates to:
+  /// **'Nail technician'**
+  String get role_nail_technician;
+
+  /// No description provided for @role_cosmetologist.
+  ///
+  /// In en, this message translates to:
+  /// **'Cosmetologist'**
+  String get role_cosmetologist;
+
+  /// No description provided for @role_tattoo_artist.
+  ///
+  /// In en, this message translates to:
+  /// **'Tattoo artist'**
+  String get role_tattoo_artist;
+
+  /// No description provided for @role_personal_trainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal trainer'**
+  String get role_personal_trainer;
+
+  /// No description provided for @role_makeup_artist.
+  ///
+  /// In en, this message translates to:
+  /// **'Makeup artist'**
+  String get role_makeup_artist;
+
+  /// No description provided for @role_physiotherapist.
+  ///
+  /// In en, this message translates to:
+  /// **'Physiotherapist'**
+  String get role_physiotherapist;
+
+  /// No description provided for @role_general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get role_general;
+
+  /// No description provided for @role_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get role_other;
+
+  /// No description provided for @hire_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Hire date'**
+  String get hire_date;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @edit_receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit receptionist'**
+  String get edit_receptionist;
+
+  /// No description provided for @reactivate_receptionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate receptionist'**
+  String get reactivate_receptionist;
+
+  /// No description provided for @receptionist_reactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Receptionist reactivated'**
+  String get receptionist_reactivated;
+
+  /// No description provided for @remove_receptionist_q.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove receptionist?'**
+  String get remove_receptionist_q;
+
+  /// No description provided for @remove_receptionist_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The receptionist will be removed from the team (their account will not be deleted).'**
+  String get remove_receptionist_desc;
+
+  /// No description provided for @only_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Only active'**
+  String get only_active;
+
+  /// No description provided for @only_assigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Only assigned'**
+  String get only_assigned;
+
+  /// No description provided for @service_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive service'**
+  String get service_inactive;
+
+  /// No description provided for @selected_n.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {n}'**
+  String selected_n(int n);
+
+  /// No description provided for @assign_visible.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign visible'**
+  String get assign_visible;
+
+  /// No description provided for @remove_visible.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove visible'**
+  String get remove_visible;
+
+  /// No description provided for @added.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get added;
+
+  /// No description provided for @removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get removed;
+
+  /// No description provided for @added_n_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {n} services'**
+  String added_n_services(int n);
+
+  /// No description provided for @removed_n_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {n} services'**
+  String removed_n_services(int n);
+
+  /// No description provided for @no_services_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No services found'**
+  String get no_services_found;
+
+  /// No description provided for @no_services_found_caption.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your filters or search query.'**
+  String get no_services_found_caption;
+
+  /// No description provided for @current_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get current_password;
+
+  /// No description provided for @current_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current password'**
+  String get current_password_hint;
+
+  /// No description provided for @current_password_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is required'**
+  String get current_password_required;
+
+  /// No description provided for @current_password_incorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is incorrect'**
+  String get current_password_incorrect;
+
+  /// No description provided for @new_password.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get new_password;
+
+  /// No description provided for @new_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get new_password_hint;
+
+  /// No description provided for @confirm_new_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirm_new_password;
+
+  /// No description provided for @confirm_new_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter new password'**
+  String get confirm_new_password_hint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
