@@ -1,6 +1,8 @@
+// lib/screens/provider/appointments/staff_appointments_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/api_service.dart';
 import '../../../services/appointments/appointment_service.dart';
 import '../../../models/appointment_models.dart';
@@ -8,6 +10,12 @@ import '../../../services/providers/provider_staff_service.dart';
 import 'create_appointment_screen.dart';
 import 'create_break_screen.dart';
 import 'staff_appointment_details_screen.dart';
+
+// ---- Stormy morning palette
+const kStormMuted = Color(0xFF6A89A7); // slate blue-gray
+const kStormSoft = Color(0xFFBDDDFC); // pale blue
+const kStormPrim = Color(0xFF88BDF2); // sky blue
+const kStormDark = Color(0xFF384959); // deep slate
 
 // ========== Local model for breaks ==========
 class _BreakSlot {
@@ -51,10 +59,10 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final hourPaint = Paint()
-      ..color = Colors.black12.withOpacity(.25)
+      ..color = kStormDark.withOpacity(.15)
       ..strokeWidth = 1;
     final qPaint = Paint()
-      ..color = Colors.black12.withOpacity(.12)
+      ..color = kStormDark.withOpacity(.07)
       ..strokeWidth = 1;
 
     final w = size.width - gutter;
@@ -107,7 +115,6 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
   static const double _gutterWidth = 64;
   static const double _columnWidth = 260;
 
-  /// >>> Tweak this to align hour labels with the grid line <<<
   /// Negative = move text UP; positive = move text DOWN.
   static const double _HOUR_LABEL_NUDGE = -9.5;
 
@@ -137,7 +144,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     super.initState();
     _stripStart = DateTime.now().subtract(const Duration(days: 365));
 
-    // Keep worker header horizontally in sync with calendar scroll
+    // keep worker header horizontally in sync with calendar scroll
     _calHScrollCtl.addListener(() {
       if (_chipHScrollCtl.hasClients) {
         final off = _calHScrollCtl.offset
@@ -203,7 +210,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
   Future<void> _loadWorkerRosterIfNeeded(String workerId) async {
     if (_workers.any((w) => w.id == workerId)) return;
 
-    // Try to hydrate from /workers/me (your payload sample matches fromWorkerJson)
+    // hydrate from /workers/me if possible
     try {
       final r = await _dio.get('/workers/me');
       if (r.data is Map) {
@@ -215,7 +222,6 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
       // ignore and fall back
     }
 
-    // Last resort: a safe stub so UI doesn't crash
     _workers = [StaffMember.stub(workerId)];
   }
 
@@ -223,7 +229,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     final list = await _appt.getWorkerDay(workerId, _selectedDay);
     _agenda[workerId] = list;
 
-    // Opportunistic cache (if your backend enriches DTO with serviceName)
+    // opportunistic cache
     for (final a in list) {
       if ((a as dynamic).serviceName != null) {
         _serviceNameCache[a.serviceId] = (a as dynamic).serviceName as String;
@@ -280,7 +286,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     }
   }
 
-  // Color mapping (includes NO_SHOW)
+  // Color mapping
   Color _statusColor(AppointmentStatus s) {
     switch (s) {
       case AppointmentStatus.BOOKED:
@@ -290,7 +296,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
       case AppointmentStatus.COMPLETED:
         return const Color(0xFF155EEF);
       case AppointmentStatus.NO_SHOW:
-        return const Color(0xFFB54708); // amber-ish
+        return const Color(0xFFB54708);
       case AppointmentStatus.CANCELLED:
         return const Color(0xFFD92D20);
     }
@@ -298,10 +304,11 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final isToday = _isSameDay(_selectedDay, DateTime.now());
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Записи'),
+        title: Text(t.appointments_title),
         actions: [
           if (!isToday)
             TextButton(
@@ -315,30 +322,26 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   _scrollCalendarToNow();
                 });
               },
-              child: const Text('Today'),
+              child: Text(t.today),
             ),
           IconButton(
             tooltip:
-                _mode == StaffViewMode.list ? 'Calendar view' : 'List view',
+                _mode == StaffViewMode.list ? t.calendar_view : t.list_view,
             onPressed: () {
               final goCalendar = _mode == StaffViewMode.list;
               setState(() => _mode =
                   goCalendar ? StaffViewMode.calendar : StaffViewMode.list);
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (_mode == StaffViewMode.calendar) {
-                  if (_isSameDay(_selectedDay, DateTime.now())) {
-                    _scrollCalendarToNow();
-                  } else {
-                    _scrollCalendarToHour(9);
-                  }
+                  _isSameDay(_selectedDay, DateTime.now())
+                      ? _scrollCalendarToNow()
+                      : _scrollCalendarToHour(9);
                 }
               });
             },
-            icon: Icon(
-              _mode == StaffViewMode.list
-                  ? Icons.calendar_month
-                  : Icons.view_list,
-            ),
+            icon: Icon(_mode == StaffViewMode.list
+                ? Icons.calendar_month
+                : Icons.view_list),
           ),
         ],
       ),
@@ -361,22 +364,40 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showFabActions,
-        child: const Icon(Icons.add),
+      floatingActionButton: Theme(
+        data: Theme.of(context).copyWith(
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: kStormDark,
+            foregroundColor: Colors.white,
+          ),
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: _showFabActions,
+          icon: const Icon(Icons.add),
+          label: Text(t.new_appointment),
+        ),
       ),
     );
   }
 
-  // ---- date strip
+  // ---- date strip (darker styling + “Today” highlight + bigger text + raised)
   Widget _buildDateStrip() {
-    const double itemW = 72;
-    final primary = Theme.of(context).colorScheme.primary;
-    final selectedBg = primary.withOpacity(.14);
-    final selectedFg = primary;
+    const double itemW = 78;
+    final t = AppLocalizations.of(context)!;
+
+    final today = DateTime.now();
+    final wds = <String>[
+      t.weekday_mon_short,
+      t.weekday_tue_short,
+      t.weekday_wed_short,
+      t.weekday_thu_short,
+      t.weekday_fri_short,
+      t.weekday_sat_short,
+      t.weekday_sun_short,
+    ];
 
     return SizedBox(
-      height: 72,
+      height: 66,
       child: ListView.builder(
         controller: _stripCtl,
         scrollDirection: Axis.horizontal,
@@ -385,34 +406,64 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
         itemBuilder: (_, i) {
           final d = _stripStart.add(Duration(days: i));
           final isSel = _isSameDay(d, _selectedDay);
-          const wds = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          final isToday = _isSameDay(d, today);
+
+          final chipBg =
+              isSel ? kStormDark : (isToday ? kStormSoft : Colors.white);
+          final chipSide = isSel
+              ? kStormDark
+              : (isToday ? kStormDark : kStormMuted.withOpacity(.45));
+          final topColor = isSel
+              ? Colors.white
+              : (isToday ? kStormDark : kStormDark.withOpacity(.70));
+          final numColor =
+              isSel ? Colors.white : (isToday ? kStormDark : kStormDark);
+
           return SizedBox(
             width: itemW,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: ChoiceChip(
-                label: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      wds[d.weekday - 1],
-                      style: TextStyle(
-                        color: isSel ? selectedFg : null,
-                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${d.day}',
-                      style: TextStyle(
-                        color: isSel ? selectedFg : null,
-                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity:
+                    const VisualDensity(horizontal: -2, vertical: -2),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                backgroundColor: Colors.white,
+                selectedColor: chipBg,
                 selected: isSel,
-                selectedColor: selectedBg,
+                side: BorderSide(color: chipSide, width: isToday ? 1.4 : 1),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                label: Transform.translate(
+                  offset: const Offset(0, -3), // shift content higher
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        wds[(d.weekday + 6) % 7],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSel
+                              ? FontWeight.w900
+                              : (isToday ? FontWeight.w800 : FontWeight.w600),
+                          color: topColor,
+                          letterSpacing: .1,
+                        ),
+                      ),
+                      const SizedBox(height: 0),
+                      Text(
+                        '${d.day}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: isSel
+                              ? FontWeight.w900
+                              : (isToday ? FontWeight.w800 : FontWeight.w700),
+                          color: numColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 onSelected: (_) async {
                   setState(() => _selectedDay = d);
                   for (final id in _selectedWorkerIds) {
@@ -420,11 +471,9 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   }
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (_mode == StaffViewMode.calendar) {
-                      if (_isSameDay(d, DateTime.now())) {
-                        _scrollCalendarToNow();
-                      } else {
-                        _scrollCalendarToHour(9);
-                      }
+                      _isSameDay(d, DateTime.now())
+                          ? _scrollCalendarToNow()
+                          : _scrollCalendarToHour(9);
                     }
                   });
                 },
@@ -437,7 +486,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
   }
 
   void _scrollDateStripToSelected() {
-    const double itemW = 72;
+    const double itemW = 78;
     final idx = _daysBetween(_stripStart, _selectedDay);
     final target = (idx - 3) * itemW;
     if (_stripCtl.hasClients) {
@@ -455,7 +504,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     return [...sel, ...rest];
   }
 
-  // ---- Worker chips (LIST)
+  // ---- Worker chips (LIST) — darker selected chip
   Widget _buildListWorkerChips() {
     final ordered = _orderedWorkers();
     return SizedBox(
@@ -468,14 +517,22 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: FilterChip(
-              avatar: const Icon(Icons.person_outline, size: 18),
+              avatar: Icon(Icons.person_outline,
+                  size: 18,
+                  color: sel ? Colors.white : kStormDark.withOpacity(.85)),
               label: Text(
                 w.displayName,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontWeight: sel ? FontWeight.w700 : FontWeight.w500),
+                  fontWeight: sel ? FontWeight.w800 : FontWeight.w600,
+                  color: sel ? Colors.white : kStormDark,
+                ),
               ),
               selected: sel,
+              selectedColor: kStormDark,
+              backgroundColor: Colors.white,
+              side: BorderSide(
+                  color: sel ? kStormDark : kStormMuted.withOpacity(.45)),
               onSelected: (v) async {
                 setState(() {
                   if (v) {
@@ -493,7 +550,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     );
   }
 
-  // ---- Worker chips header (CALENDAR) – show ALL workers; unselected are dimmed
+  // ---- Worker chips header (CALENDAR) – all workers; unselected dimmed
   Widget _buildCalendarWorkerHeader() {
     final ordered = _orderedWorkers();
     return SizedBox(
@@ -504,7 +561,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            SizedBox(width: _gutterWidth),
+            const SizedBox(width: _gutterWidth),
             ...ordered.map((w) {
               final sel = _selectedWorkerIds.contains(w.id);
               return SizedBox(
@@ -515,15 +572,24 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   child: Opacity(
                     opacity: sel ? 1.0 : 0.35,
                     child: FilterChip(
-                      avatar: const Icon(Icons.person_outline, size: 16),
+                      avatar: Icon(Icons.person_outline,
+                          size: 16,
+                          color:
+                              sel ? Colors.white : kStormDark.withOpacity(.85)),
                       label: Text(
                         w.displayName,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontWeight:
-                                sel ? FontWeight.w700 : FontWeight.w500),
+                          fontWeight: sel ? FontWeight.w800 : FontWeight.w600,
+                          color: sel ? Colors.white : kStormDark,
+                        ),
                       ),
                       selected: sel,
+                      selectedColor: kStormDark,
+                      backgroundColor: Colors.white,
+                      side: BorderSide(
+                          color:
+                              sel ? kStormDark : kStormMuted.withOpacity(.45)),
                       onSelected: (v) async {
                         setState(() {
                           if (v) {
@@ -545,13 +611,14 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     );
   }
 
-  // ---- List mode
+  // ---- List mode (cards recolored; subtitle = customer name)
   Widget _buildList() {
     final ids = widget.workerId != null
         ? [widget.workerId!]
         : _selectedWorkerIds.toList();
     if (ids.isEmpty) {
-      return const Center(child: Text('No workers selected'));
+      return Center(
+          child: Text(AppLocalizations.of(context)!.no_workers_selected));
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
@@ -568,35 +635,45 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
           ..sort((a, b) => a.start.compareTo(b.start));
 
         return Card(
+          color: Colors.white,
           margin: const EdgeInsets.symmetric(vertical: 8),
           elevation: 0,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: kStormDark.withOpacity(.08)),
+            borderRadius: BorderRadius.circular(14),
+          ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(member.displayName,
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700)),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: kStormDark)),
                 const SizedBox(height: 8),
                 if (appts.isEmpty && brks.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text('No items'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(AppLocalizations.of(context)!.no_appointments,
+                        style: TextStyle(color: kStormDark.withOpacity(.6))),
                   ),
                 ...appts.map((a) {
                   final statusColor = _statusColor(a.status);
-                  final serviceName =
-                      _serviceNameCache[a.serviceId] ?? 'Service';
-                  final customerLabel = a.guestMask != null
-                      ? 'Guest ${a.guestMask}'
-                      : (a.customerId != null ? 'Customer' : 'Guest');
+                  final serviceName = _serviceNameCache[a.serviceId] ?? '—';
+                  final customer = (a.customerName?.trim().isNotEmpty ?? false)
+                      ? a.customerName!.trim()
+                      : (a.customerId != null ? 'ID ${a.customerId}' : '—');
+
+                  final canCancel = a.status == AppointmentStatus.BOOKED;
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     elevation: 0,
+                    color: statusColor.withOpacity(.08),
                     shape: RoundedRectangleBorder(
-                      side: BorderSide(color: statusColor.withOpacity(.25)),
+                      side: BorderSide(color: statusColor.withOpacity(.35)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
@@ -609,55 +686,65 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       },
                       leading: CircleAvatar(
                         radius: 18,
-                        backgroundColor: statusColor.withOpacity(.12),
-                        child: Icon(Icons.event, color: statusColor, size: 18),
+                        backgroundColor: kStormDark.withOpacity(.10),
+                        child: Icon(Icons.event, color: kStormDark, size: 18),
                       ),
                       title: Text('${a.start}–${a.end} • $serviceName',
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text(
-                        a.status == AppointmentStatus.NO_SHOW
-                            ? 'No-show'
-                            : customerLabel,
+                        customer,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: kStormDark.withOpacity(.8)),
                       ),
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (v) async {
-                          if (v == 'cancel') {
-                            try {
-                              await _appt.cancel(a.id);
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                            await _loadWorkerDay(id);
-                          }
-                        },
-                        itemBuilder: (_) => const [
-                          PopupMenuItem(
-                            value: 'cancel',
-                            child: Text('Cancel',
-                                style: TextStyle(color: Color(0xFFD92D20))),
-                          ),
-                        ],
-                      ),
+                      trailing: canCancel
+                          ? PopupMenuButton<String>(
+                              onSelected: (v) async {
+                                if (v == 'cancel') {
+                                  try {
+                                    await _appt.cancel(a.id);
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
+                                      );
+                                    }
+                                  }
+                                  await _loadWorkerDay(id);
+                                }
+                              },
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'cancel',
+                                  child: Text(
+                                    AppLocalizations.of(context)!
+                                        .appointment_action_cancel,
+                                    style: const TextStyle(
+                                        color: Color(0xFFD92D20)),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : null,
                     ),
                   );
                 }),
                 ...brks.map((b) => Card(
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       elevation: 0,
-                      color: Colors.grey.withOpacity(.12),
+                      color: kStormMuted.withOpacity(.10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.grey.withOpacity(.25)),
+                        side: BorderSide(color: kStormMuted.withOpacity(.25)),
                       ),
                       child: ListTile(
-                        leading: const Icon(Icons.free_breakfast_outlined),
-                        title: Text('Break ${b.start}–${b.end}'),
+                        leading: Icon(Icons.free_breakfast_outlined,
+                            color: kStormDark),
+                        title: Text(
+                            '${AppLocalizations.of(context)!.breaks_title} ${b.start}–${b.end}'),
                       ),
                     )),
               ],
@@ -670,14 +757,13 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
 
   // ---- Calendar mode — ALL workers; unselected columns dimmed
   Widget _buildCalendar() {
-    final all = _orderedWorkers();
     final selectedSet = _selectedWorkerIds;
 
     const totalHours = _dayEndHour - _dayStartHour;
     final totalHeight = totalHours * _hourHeight;
     final pxPerMinute = _hourHeight / 60.0;
 
-    // Hour gutter (adjust label alignment with _HOUR_LABEL_NUDGE)
+    // Hour gutter
     Widget timeGutter() => SizedBox(
           width: _gutterWidth,
           height: totalHeight,
@@ -693,29 +779,30 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                       top: _HOUR_LABEL_NUDGE,
                       right: 8,
                       child: Text('${h.toString().padLeft(2, '0')}:00',
-                          style: const TextStyle(fontSize: 12)),
+                          style: TextStyle(
+                              fontSize: 12, color: kStormDark.withOpacity(.8))),
                     ),
                     Positioned(
-                      top: _hourHeight * .25 - 8,
-                      right: 8,
-                      child: const Text('15',
-                          style:
-                              TextStyle(fontSize: 10, color: Colors.black54)),
-                    ),
+                        top: _hourHeight * .25 - 8,
+                        right: 8,
+                        child: Text('15',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: kStormDark.withOpacity(.5)))),
                     Positioned(
-                      top: _hourHeight * .50 - 8,
-                      right: 8,
-                      child: const Text('30',
-                          style:
-                              TextStyle(fontSize: 10, color: Colors.black54)),
-                    ),
+                        top: _hourHeight * .50 - 8,
+                        right: 8,
+                        child: Text('30',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: kStormDark.withOpacity(.5)))),
                     Positioned(
-                      top: _hourHeight * .75 - 8,
-                      right: 8,
-                      child: const Text('45',
-                          style:
-                              TextStyle(fontSize: 10, color: Colors.black54)),
-                    ),
+                        top: _hourHeight * .75 - 8,
+                        right: 8,
+                        child: Text('45',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: kStormDark.withOpacity(.5)))),
                   ],
                 ),
               );
@@ -758,14 +845,16 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   height: height,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(.18),
+                      color: kStormMuted.withOpacity(.12),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.withOpacity(.35)),
+                      border: Border.all(color: kStormMuted.withOpacity(.30)),
                     ),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     alignment: Alignment.topLeft,
-                    child: const Text('Break', style: TextStyle(fontSize: 11)),
+                    child: Text(AppLocalizations.of(context)!.breaks_title,
+                        style: TextStyle(
+                            fontSize: 11, color: kStormDark.withOpacity(.9))),
                   ),
                 );
               }),
@@ -785,12 +874,10 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                     ((endMin - startMin) * pxPerMinute).clamp(24.0, 10000.0);
 
                 final statusColor = _statusColor(a.status);
-                final svc = _serviceNameCache[a.serviceId] ?? 'Service';
-                final cust = a.status == AppointmentStatus.NO_SHOW
-                    ? 'No-show'
-                    : (a.guestMask != null
-                        ? 'Guest ${a.guestMask}'
-                        : (a.customerId != null ? 'Customer' : 'Guest'));
+                final svc = _serviceNameCache[a.serviceId] ?? '—';
+                final customer = (a.customerName?.trim().isNotEmpty ?? false)
+                    ? a.customerName!.trim()
+                    : (a.customerId != null ? 'ID ${a.customerId}' : '—');
 
                 final tight = height < 56;
                 final veryTight = height < 40;
@@ -803,9 +890,8 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                   child: InkWell(
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => StaffAppointmentDetailsScreen(
-                          appointmentId: a.id,
-                        ),
+                        builder: (_) =>
+                            StaffAppointmentDetailsScreen(appointmentId: a.id),
                       ));
                     },
                     child: ClipRRect(
@@ -828,8 +914,8 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                           ),
                         ),
                         child: DefaultTextStyle(
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.black87),
+                          style:
+                              const TextStyle(fontSize: 12, color: kStormDark),
                           child: veryTight
                               ? Text('${a.start}–${a.end}',
                                   maxLines: 1, overflow: TextOverflow.ellipsis)
@@ -838,7 +924,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                                   children: [
                                     Text('${a.start} – ${a.end}',
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.w700),
+                                            fontWeight: FontWeight.w800),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis),
                                     if (!tight) const SizedBox(height: 2),
@@ -846,7 +932,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                                         maxLines: tight ? 1 : 2,
                                         overflow: TextOverflow.ellipsis),
                                     if (!tight)
-                                      Text(cust,
+                                      Text(customer,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis),
                                   ],
@@ -898,26 +984,39 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                 ),
               ],
             ),
-            // Grid lines overlay
+            // Grid overlay
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
                   painter: _GridPainter(
-                    _gutterWidth,
-                    _hourHeight,
-                    _dayStartHour,
-                    _dayEndHour,
-                  ),
+                      _gutterWidth, _hourHeight, _dayStartHour, _dayEndHour),
                 ),
               ),
             ),
-            // "Now" indicator
+            // "Now" indicator (darker)
             if (nowTop != null)
               Positioned(
                 top: nowTop,
-                left: _gutterWidth,
-                right: 0,
-                child: Container(height: 2, color: const Color(0xFFD92D20)),
+                left: _gutterWidth - 6,
+                right: 8,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: kStormDark,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                              color: kStormDark.withOpacity(.35), blurRadius: 6)
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(child: Container(height: 2, color: kStormDark)),
+                  ],
+                ),
               ),
           ],
         ),
@@ -937,35 +1036,34 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
     final now = DateTime.now();
     final target = (now.hour * 60 + now.minute) * (_hourHeight / 60.0) - 200;
     if (_calVScrollCtl.hasClients) {
-      _calVScrollCtl.jumpTo(
-        target.clamp(0.0, _calVScrollCtl.position.maxScrollExtent),
-      );
+      _calVScrollCtl
+          .jumpTo(target.clamp(0.0, _calVScrollCtl.position.maxScrollExtent));
     }
   }
 
   void _scrollCalendarToHour(int hour) {
     final target = (hour * 60) * (_hourHeight / 60.0) - 100;
     if (_calVScrollCtl.hasClients) {
-      _calVScrollCtl.jumpTo(
-        target.clamp(0.0, _calVScrollCtl.position.maxScrollExtent),
-      );
+      _calVScrollCtl
+          .jumpTo(target.clamp(0.0, _calVScrollCtl.position.maxScrollExtent));
     }
   }
 
   Future<void> _showFabActions() async {
+    final t = AppLocalizations.of(context)!;
     final action = await showModalBottomSheet<String>(
       context: context,
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             _FabAction(
                 icon: Icons.event_available,
-                label: 'Add appointment',
+                label: t.new_appointment,
                 value: 'appt'),
             _FabAction(
-                icon: Icons.free_breakfast, label: 'Add break', value: 'break'),
-            SizedBox(height: 8),
+                icon: Icons.free_breakfast, label: t.add_break, value: 'break'),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -985,7 +1083,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
       if (created == true) {
         final ids = widget.workerId != null
             ? [widget.workerId!]
-            : _workers.map((w) => w.id).toList(); // reload all shown workers
+            : _workers.map((w) => w.id).toList();
         for (final id in ids) {
           await _loadWorkerDay(id);
         }
@@ -1000,7 +1098,6 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
           date: _selectedDay,
         ),
       ));
-      // refresh after break changes
       final ids = _workers.map((w) => w.id).toList();
       for (final id in ids) {
         await _loadWorkerDay(id);
@@ -1019,8 +1116,10 @@ class _FabAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
+      leading: Icon(icon, color: kStormDark),
+      title: Text(label,
+          style:
+              const TextStyle(fontWeight: FontWeight.w700, color: kStormDark)),
       onTap: () => Navigator.pop(context, value),
     );
   }

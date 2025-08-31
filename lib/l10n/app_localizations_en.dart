@@ -120,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_tab_reviews => 'Reviews';
 
   @override
-  String get provider_tab_details => 'Details';
+  String get provider_tab_details => 'Manage';
 
   @override
   String get provider_about => 'About';
@@ -418,7 +418,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remove_from_favorites => 'Remove from favorites';
 
   @override
-  String get error_generic => 'Something went wrong. Please try again.';
+  String get error_generic => 'Provider is not selected';
 
   @override
   String get provider_change_logo => 'Change logo';
@@ -568,7 +568,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_hours_hint => 'Weekly grid editor and exceptions';
 
   @override
-  String get services_title => 'Services & Combo Services';
+  String get services_title => 'Services';
 
   @override
   String get action_refresh => 'Refresh';
@@ -1183,4 +1183,536 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get status_no_show => 'No-show';
+
+  @override
+  String get status_label => 'Status';
+
+  @override
+  String get status_booked => 'Booked';
+
+  @override
+  String get status_completed => 'Completed';
+
+  @override
+  String get status_cancelled => 'Canceled';
+
+  @override
+  String get status_rescheduled => 'Rescheduled';
+
+  @override
+  String get action_mark_no_show => 'Mark no-show';
+
+  @override
+  String get action_undo_no_show => 'Undo no-show';
+
+  @override
+  String get toast_marked_no_show => 'Marked as no-show';
+
+  @override
+  String get toast_undo_no_show => 'No-show undone';
+
+  @override
+  String get appointment_no_actions => 'No actions available for this status.';
+
+  @override
+  String get walk_in => 'Walk-in';
+
+  @override
+  String get pick_client => 'Pick client';
+
+  @override
+  String get pick_from_contacts => 'Pick from contacts';
+
+  @override
+  String get no_services_assigned => 'No services are assigned to this worker.';
+
+  @override
+  String get contacts_not_supported => 'Contacts not supported on this platform';
+
+  @override
+  String get contacts_permission_denied => 'Contacts permission denied. Enable it in Settings > App > Permissions.';
+
+  @override
+  String get no_provider_for_clients => 'No provider to list clients from';
+
+  @override
+  String get choose_service_validation => 'Choose a service';
+
+  @override
+  String get breaksTitle => 'Add / Manage breaks';
+
+  @override
+  String get workerLabel => 'Worker';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get todayButton => 'Today';
+
+  @override
+  String get timeStartLabel => 'Start';
+
+  @override
+  String get timeEndLabel => 'End';
+
+  @override
+  String get saveBreakBtn => 'Save break';
+
+  @override
+  String get savingEllipsis => 'Saving…';
+
+  @override
+  String get existingBreaksTitle => 'Existing breaks';
+
+  @override
+  String get noBreaksForDay => 'No breaks for this day.';
+
+  @override
+  String get breakSaved => 'Break saved';
+
+  @override
+  String get breakDeleted => 'Break deleted';
+
+  @override
+  String breakSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String breakDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get breakRequiredFields => 'Choose worker, start and end time';
+
+  @override
+  String get breakEndAfterStart => 'End time must be after start time';
+
+  @override
+  String get pickTime5mTitle => 'Pick time (5-min)';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get owner_worker_profile => 'Your worker profile';
+
+  @override
+  String get me_label => 'Me';
+
+  @override
+  String get status_inactive => 'Inactive';
+
+  @override
+  String get my_availability => 'My availability';
+
+  @override
+  String get my_services => 'My services';
+
+  @override
+  String get work_as_staff_title => 'Work as staff';
+
+  @override
+  String get worker_type_label => 'Worker type';
+
+  @override
+  String get initial_status_label => 'Initial status';
+
+  @override
+  String get enable_me_as_worker => 'Enable me as a worker';
+
+  @override
+  String get enabling_ellipsis => 'Enabling…';
+
+  @override
+  String get reenable_me => 'Re-enable me';
+
+  @override
+  String get reenabling_ellipsis => 'Re-enabling…';
+
+  @override
+  String get removed_from_team_hint => 'You are currently removed from the team.';
+
+  @override
+  String get enable_hint_after => 'You’ll be able to set your hours and assign services to yourself after enabling.';
+
+  @override
+  String get owner_enabled_as_worker => 'You are now enabled as a worker';
+
+  @override
+  String get worker_profile_reenabled => 'Worker profile re-enabled';
+
+  @override
+  String http_error(String msg) {
+    return '$msg';
+  }
+
+  @override
+  String get worker_status_available => 'Available';
+
+  @override
+  String get worker_status_unavailable => 'Unavailable';
+
+  @override
+  String get worker_status_on_break => 'On break';
+
+  @override
+  String get worker_status_on_leave => 'On leave';
+
+  @override
+  String get action_edit => 'Edit';
+
+  @override
+  String get deleted_ok => 'Deleted';
+
+  @override
+  String get activated_ok => 'Activated';
+
+  @override
+  String get deactivated_ok => 'Deactivated';
+
+  @override
+  String failed_with_reason(String reason) {
+    return '$reason';
+  }
+
+  @override
+  String get missing_service_id => 'Missing service id';
+
+  @override
+  String get filter_active_only => 'Active only';
+
+  @override
+  String get no_services_yet => 'No services yet';
+
+  @override
+  String services_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# services',
+      one: '# service',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get status_active => 'Active';
+
+  @override
+  String duration_hm(String h, String m) {
+    return '${h}h ${m}m';
+  }
+
+  @override
+  String duration_h(String h) {
+    return '${h}h';
+  }
+
+  @override
+  String duration_m(String m) {
+    return '${m}m';
+  }
+
+  @override
+  String get currency_sum => 'sum';
+
+  @override
+  String get unit_service_singular => 'service';
+
+  @override
+  String get unit_service_plural => 'services';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get category_clinic => 'Clinic';
+
+  @override
+  String get category_barbershop => 'Barbershop';
+
+  @override
+  String get category_beauty_salon => 'Beauty salon';
+
+  @override
+  String get category_spa => 'Spa';
+
+  @override
+  String get category_dental => 'Dental';
+
+  @override
+  String get category_gym => 'Gym / Fitness';
+
+  @override
+  String get category_tattoo => 'Tattoo studio';
+
+  @override
+  String get category_nail_salon => 'Nail salon';
+
+  @override
+  String get category_massage => 'Massage';
+
+  @override
+  String get category_other => 'Other';
+
+  @override
+  String get location_pinned => 'Location pinned';
+
+  @override
+  String get pick_on_map_first => 'Please pin location on the map';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get map_pin => 'Map pin';
+
+  @override
+  String get pick_on_map => 'Pick on map';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get on_break => 'On break';
+
+  @override
+  String get on_leave => 'On leave';
+
+  @override
+  String get unavailable => 'Unavailable';
+
+  @override
+  String get show_inactive_workers => 'Show inactive workers';
+
+  @override
+  String get show_inactive_receptionists => 'Show inactive receptionists';
+
+  @override
+  String get receptionist => 'Receptionist';
+
+  @override
+  String get add_staff => 'Add staff';
+
+  @override
+  String get add_worker => 'Add worker';
+
+  @override
+  String get add_receptionist => 'Add receptionist';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get remove_worker_q => 'Remove worker?';
+
+  @override
+  String get remove_worker_desc => 'The worker will be removed from the team (their account will not be deleted).';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get removed_from_team => 'Removed from team';
+
+  @override
+  String get worker_activated => 'Worker activated';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get change_status => 'Change status';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get provider => 'Provider';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get danger_zone => 'Danger zone';
+
+  @override
+  String get remove_from_team => 'Remove from team';
+
+  @override
+  String get reactivate_worker => 'Reactivate worker';
+
+  @override
+  String get edit_worker => 'Edit worker';
+
+  @override
+  String get identity => 'Identity';
+
+  @override
+  String get gender_male => 'Male';
+
+  @override
+  String get gender_female => 'Female';
+
+  @override
+  String get gender_other => 'Other';
+
+  @override
+  String get phone_hint => 'Enter phone number';
+
+  @override
+  String get email_hint => 'Enter email address';
+
+  @override
+  String get role_worker_type => 'Worker type';
+
+  @override
+  String get role_barber => 'Barber';
+
+  @override
+  String get role_hairdresser => 'Hairdresser';
+
+  @override
+  String get role_dentist => 'Dentist';
+
+  @override
+  String get role_doctor => 'Doctor';
+
+  @override
+  String get role_nurser => 'Nurse';
+
+  @override
+  String get role_spa_therapist => 'Spa therapist';
+
+  @override
+  String get role_masseuse => 'Masseuse';
+
+  @override
+  String get role_nail_technician => 'Nail technician';
+
+  @override
+  String get role_cosmetologist => 'Cosmetologist';
+
+  @override
+  String get role_tattoo_artist => 'Tattoo artist';
+
+  @override
+  String get role_personal_trainer => 'Personal trainer';
+
+  @override
+  String get role_makeup_artist => 'Makeup artist';
+
+  @override
+  String get role_physiotherapist => 'Physiotherapist';
+
+  @override
+  String get role_general => 'General';
+
+  @override
+  String get role_other => 'Other';
+
+  @override
+  String get hire_date => 'Hire date';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get edit_receptionist => 'Edit receptionist';
+
+  @override
+  String get reactivate_receptionist => 'Reactivate receptionist';
+
+  @override
+  String get receptionist_reactivated => 'Receptionist reactivated';
+
+  @override
+  String get remove_receptionist_q => 'Remove receptionist?';
+
+  @override
+  String get remove_receptionist_desc => 'The receptionist will be removed from the team (their account will not be deleted).';
+
+  @override
+  String get only_active => 'Only active';
+
+  @override
+  String get only_assigned => 'Only assigned';
+
+  @override
+  String get service_inactive => 'Inactive service';
+
+  @override
+  String selected_n(int n) {
+    return 'Selected: $n';
+  }
+
+  @override
+  String get assign_visible => 'Assign visible';
+
+  @override
+  String get remove_visible => 'Remove visible';
+
+  @override
+  String get added => 'Added';
+
+  @override
+  String get removed => 'Removed';
+
+  @override
+  String added_n_services(int n) {
+    return 'Added $n services';
+  }
+
+  @override
+  String removed_n_services(int n) {
+    return 'Removed $n services';
+  }
+
+  @override
+  String get no_services_found => 'No services found';
+
+  @override
+  String get no_services_found_caption => 'Try adjusting your filters or search query.';
+
+  @override
+  String get current_password => 'Current password';
+
+  @override
+  String get current_password_hint => 'Enter current password';
+
+  @override
+  String get current_password_required => 'Current password is required';
+
+  @override
+  String get current_password_incorrect => 'Current password is incorrect';
+
+  @override
+  String get new_password => 'New password';
+
+  @override
+  String get new_password_hint => 'Enter new password';
+
+  @override
+  String get confirm_new_password => 'Confirm new password';
+
+  @override
+  String get confirm_new_password_hint => 'Re-enter new password';
 }

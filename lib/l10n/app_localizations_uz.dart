@@ -120,7 +120,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get provider_tab_reviews => 'Sharhlar';
 
   @override
-  String get provider_tab_details => 'Tafsilotlar';
+  String get provider_tab_details => 'Boshqaruv';
 
   @override
   String get provider_about => 'Haqida';
@@ -418,7 +418,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get remove_from_favorites => 'Sevimlilardan olib tashlash';
 
   @override
-  String get error_generic => 'Nimadir xato ketdi. Iltimos, yana bir bor urinib ko‘ring.';
+  String get error_generic => 'Provider tanlanmagan';
 
   @override
   String get provider_change_logo => 'Logotipni o‘zgartirish';
@@ -664,7 +664,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get action_cancel => 'Bekor qilish';
 
   @override
-  String get confirm_delete_title => 'Xizmatni o‘chirasizmi?';
+  String get confirm_delete_title => 'Xizmatni o‘chirish?';
 
   @override
   String get confirm_delete_msg => 'Bu amalni bekor qilib bo‘lmaydi.';
@@ -673,7 +673,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get staff_members => 'Xodimlar';
 
   @override
-  String get action_add => 'Qoʻshish';
+  String get action_add => 'Qo‘shish';
 
   @override
   String get invalid => 'Noto‘g‘ri';
@@ -927,10 +927,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get inactive => 'Noaktiv';
 
   @override
-  String get action_remove => 'O‘chirish';
+  String get action_remove => 'Olib tashlash';
 
   @override
-  String get action_deactivate => 'O‘chirib qo‘yish';
+  String get action_deactivate => 'O‘chirish';
 
   @override
   String get action_activate => 'Faollashtirish';
@@ -984,7 +984,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get breaks_title => 'Tanaffuslar';
 
   @override
-  String get add_break => 'Tanaffus qoʻshish';
+  String get add_break => 'Tanaffus qo‘shish';
 
   @override
   String get select_date => 'Sana tanlang';
@@ -1104,7 +1104,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get language => 'Til';
 
   @override
-  String get appointments_title => 'Qabul vaqtlar';
+  String get appointments_title => 'Qabullar';
 
   @override
   String get no_workers_selected => 'Xodim tanlanmagan';
@@ -1183,4 +1183,536 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get status_no_show => 'Kelmagan';
+
+  @override
+  String get status_label => 'Holat';
+
+  @override
+  String get status_booked => 'Bron qilingan';
+
+  @override
+  String get status_completed => 'Yakunlandi';
+
+  @override
+  String get status_cancelled => 'Bekor qilindi';
+
+  @override
+  String get status_rescheduled => 'Qayta belgilandi';
+
+  @override
+  String get action_mark_no_show => 'Kelmagan deb belgilash';
+
+  @override
+  String get action_undo_no_show => 'Kelmagan belgisini olib tashlash';
+
+  @override
+  String get toast_marked_no_show => 'Kelmagan deb belgilandi';
+
+  @override
+  String get toast_undo_no_show => 'Kelmagan belgisi olib tashlandi';
+
+  @override
+  String get appointment_no_actions => 'Bu holat uchun amal yo‘q.';
+
+  @override
+  String get walk_in => 'Navbatda';
+
+  @override
+  String get pick_client => 'Mijozni tanlash';
+
+  @override
+  String get pick_from_contacts => 'Kontaktlardan tanlash';
+
+  @override
+  String get no_services_assigned => 'Bu xodimga hech qanday xizmat biriktirilmagan.';
+
+  @override
+  String get contacts_not_supported => 'Ushbu platformada kontaktlar qo‘llab-quvvatlanmaydi';
+
+  @override
+  String get contacts_permission_denied => 'Kontaktlarga ruxsat berilmagan. Ilova sozlamalaridan ruxsat bering.';
+
+  @override
+  String get no_provider_for_clients => 'Mijozlar ro‘yxati uchun xizmat ko‘rsatuvchi tanlanmagan';
+
+  @override
+  String get choose_service_validation => 'Xizmatni tanlang';
+
+  @override
+  String get breaksTitle => 'Tanaffuslar: qo‘shish / boshqarish';
+
+  @override
+  String get workerLabel => 'Hodim';
+
+  @override
+  String get dateLabel => 'Sana';
+
+  @override
+  String get todayButton => 'Bugun';
+
+  @override
+  String get timeStartLabel => 'Boshlanishi';
+
+  @override
+  String get timeEndLabel => 'Tugashi';
+
+  @override
+  String get saveBreakBtn => 'Tanaffusni saqlash';
+
+  @override
+  String get savingEllipsis => 'Saqlanmoqda…';
+
+  @override
+  String get existingBreaksTitle => 'Ushbu kundagi tanaffuslar';
+
+  @override
+  String get noBreaksForDay => 'Bu kunda tanaffus yo‘q.';
+
+  @override
+  String get breakSaved => 'Tanaffus saqlandi';
+
+  @override
+  String get breakDeleted => 'Tanaffus o‘chirildi';
+
+  @override
+  String breakSaveFailed(String error) {
+    return 'Saqlash muvaffaqiyatsiz: $error';
+  }
+
+  @override
+  String breakDeleteFailed(String error) {
+    return 'O‘chirish muvaffaqiyatsiz: $error';
+  }
+
+  @override
+  String get breakRequiredFields => 'Hodim, boshlanish va tugash vaqtlarini tanlang';
+
+  @override
+  String get breakEndAfterStart => 'Tugash vaqti boshlanishidan keyin bo‘lishi kerak';
+
+  @override
+  String get pickTime5mTitle => 'Vaqtni tanlash (5 daq.)';
+
+  @override
+  String get commonCancel => 'Bekor qilish';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get deleteAction => 'O‘chirish';
+
+  @override
+  String get owner_worker_profile => 'Sizning xodim profilingiz';
+
+  @override
+  String get me_label => 'Men';
+
+  @override
+  String get status_inactive => 'Nofaol';
+
+  @override
+  String get my_availability => 'Mening ish jadvalim';
+
+  @override
+  String get my_services => 'Mening xizmatlarim';
+
+  @override
+  String get work_as_staff_title => 'Xodim sifatida ishlash';
+
+  @override
+  String get worker_type_label => 'Xodim turi';
+
+  @override
+  String get initial_status_label => 'Boshlang‘ich holat';
+
+  @override
+  String get enable_me_as_worker => 'Meni xodim sifatida yoqish';
+
+  @override
+  String get enabling_ellipsis => 'Yoqilmoqda…';
+
+  @override
+  String get reenable_me => 'Qayta yoqish';
+
+  @override
+  String get reenabling_ellipsis => 'Qayta yoqilmoqda…';
+
+  @override
+  String get removed_from_team_hint => 'Hozirda siz jamoadan o‘chirilgansiz.';
+
+  @override
+  String get enable_hint_after => 'Faollashtirgandan so‘ng soatlaringiz va xizmatlaringizni o‘zingizga belgilaysiz.';
+
+  @override
+  String get owner_enabled_as_worker => 'Endi siz xodim sifatida faollashdingiz';
+
+  @override
+  String get worker_profile_reenabled => 'Xodim profili qayta yoqildi';
+
+  @override
+  String http_error(String msg) {
+    return '$msg';
+  }
+
+  @override
+  String get worker_status_available => 'Mavjud';
+
+  @override
+  String get worker_status_unavailable => 'Mavjud emas';
+
+  @override
+  String get worker_status_on_break => 'Tanaffusda';
+
+  @override
+  String get worker_status_on_leave => 'Ta’til';
+
+  @override
+  String get action_edit => 'Tahrirlash';
+
+  @override
+  String get deleted_ok => 'O‘chirildi';
+
+  @override
+  String get activated_ok => 'Faollashtirildi';
+
+  @override
+  String get deactivated_ok => 'Faolsizlantirildi';
+
+  @override
+  String failed_with_reason(String reason) {
+    return '$reason';
+  }
+
+  @override
+  String get missing_service_id => 'Xizmat ID topilmadi';
+
+  @override
+  String get filter_active_only => 'Faqat aktiv';
+
+  @override
+  String get no_services_yet => 'Hozircha xizmatlar yo‘q';
+
+  @override
+  String services_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# xizmat',
+      one: '# xizmat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get status_active => 'Aktiv';
+
+  @override
+  String duration_hm(String h, String m) {
+    return '${h}s ${m}d';
+  }
+
+  @override
+  String duration_h(String h) {
+    return '${h}s';
+  }
+
+  @override
+  String duration_m(String m) {
+    return '${m}d';
+  }
+
+  @override
+  String get currency_sum => 'so\'m';
+
+  @override
+  String get unit_service_singular => 'xizmat';
+
+  @override
+  String get unit_service_plural => 'xizmatlar';
+
+  @override
+  String get more => 'Ko‘proq';
+
+  @override
+  String get category_clinic => 'Klinika';
+
+  @override
+  String get category_barbershop => 'Barbershop';
+
+  @override
+  String get category_beauty_salon => 'Goʻzallik saloni';
+
+  @override
+  String get category_spa => 'SPA';
+
+  @override
+  String get category_dental => 'Stomatologiya';
+
+  @override
+  String get category_gym => 'Sport zali';
+
+  @override
+  String get category_tattoo => 'Tatuirovka studiyasi';
+
+  @override
+  String get category_nail_salon => 'Manikyur saloni';
+
+  @override
+  String get category_massage => 'Massaj';
+
+  @override
+  String get category_other => 'Boshqa';
+
+  @override
+  String get location_pinned => 'Joylashuv belgilandi';
+
+  @override
+  String get pick_on_map_first => 'Iltimos, xaritada joylashuvni belgilang';
+
+  @override
+  String get address => 'Manzil';
+
+  @override
+  String get map_pin => 'Xaritadagi belgi';
+
+  @override
+  String get pick_on_map => 'Xaritadan tanlash';
+
+  @override
+  String get available => 'Mavjud';
+
+  @override
+  String get on_break => 'Tanaffusda';
+
+  @override
+  String get on_leave => 'Taʼtilda';
+
+  @override
+  String get unavailable => 'Mavjud emas';
+
+  @override
+  String get show_inactive_workers => 'Nofaol ishchilarni ko‘rsatish';
+
+  @override
+  String get show_inactive_receptionists => 'Nofaol administratorlarni ko‘rsatish';
+
+  @override
+  String get receptionist => 'Administrator';
+
+  @override
+  String get add_staff => 'Xodim qo‘shish';
+
+  @override
+  String get add_worker => 'Ishchi qo‘shish';
+
+  @override
+  String get add_receptionist => 'Administrator qo‘shish';
+
+  @override
+  String get status => 'Holat';
+
+  @override
+  String get remove_worker_q => 'Xodimni olib tashlaysizmi?';
+
+  @override
+  String get remove_worker_desc => 'Xodim jamoadan olib tashlanadi (akkaunti o‘chirilmaydi).';
+
+  @override
+  String get remove => 'Olib tashlash';
+
+  @override
+  String get removed_from_team => 'Jamoadan olib tashlandi';
+
+  @override
+  String get worker_activated => 'Xodim faollashtirildi';
+
+  @override
+  String get male => 'Erkak';
+
+  @override
+  String get female => 'Ayol';
+
+  @override
+  String get other => 'Boshqa';
+
+  @override
+  String get change_status => 'Holatni o‘zgartirish';
+
+  @override
+  String get details => 'Tafsilotlar';
+
+  @override
+  String get provider => 'Tashkilot';
+
+  @override
+  String get role => 'Roli';
+
+  @override
+  String get manage => 'Boshqarish';
+
+  @override
+  String get danger_zone => 'Xavfli hudud';
+
+  @override
+  String get remove_from_team => 'Jamoadan olib tashlash';
+
+  @override
+  String get reactivate_worker => 'Xodimni qayta faollashtirish';
+
+  @override
+  String get edit_worker => 'Xodimni tahrirlash';
+
+  @override
+  String get identity => 'Shaxsiy maʼlumotlar';
+
+  @override
+  String get gender_male => 'Erkak';
+
+  @override
+  String get gender_female => 'Ayol';
+
+  @override
+  String get gender_other => 'Boshqa';
+
+  @override
+  String get phone_hint => 'Telefon raqamini kiriting';
+
+  @override
+  String get email_hint => 'Email manzilini kiriting';
+
+  @override
+  String get role_worker_type => 'Xodim turi';
+
+  @override
+  String get role_barber => 'Barber';
+
+  @override
+  String get role_hairdresser => 'Soch turmakchisi';
+
+  @override
+  String get role_dentist => 'Stomatolog';
+
+  @override
+  String get role_doctor => 'Shifokor';
+
+  @override
+  String get role_nurser => 'Hamshira';
+
+  @override
+  String get role_spa_therapist => 'Spa terapevt';
+
+  @override
+  String get role_masseuse => 'Massajchi';
+
+  @override
+  String get role_nail_technician => 'Manikyur ustasi';
+
+  @override
+  String get role_cosmetologist => 'Kosmetolog';
+
+  @override
+  String get role_tattoo_artist => 'Tatuirovka ustasi';
+
+  @override
+  String get role_personal_trainer => 'Shaxsiy murabbiy';
+
+  @override
+  String get role_makeup_artist => 'Vizajist';
+
+  @override
+  String get role_physiotherapist => 'Fizioterapevt';
+
+  @override
+  String get role_general => 'Umumiy';
+
+  @override
+  String get role_other => 'Boshqa';
+
+  @override
+  String get hire_date => 'Ishga qabul qilingan sana';
+
+  @override
+  String get name => 'Ism';
+
+  @override
+  String get edit_receptionist => 'Administratorni tahrirlash';
+
+  @override
+  String get reactivate_receptionist => 'Administratorni qayta faollashtirish';
+
+  @override
+  String get receptionist_reactivated => 'Administrator qayta faollashtirildi';
+
+  @override
+  String get remove_receptionist_q => 'Administrator olib tashlansinmi?';
+
+  @override
+  String get remove_receptionist_desc => 'Administrator jamoadan olib tashlanadi (akkaunti o‘chirilmaydi).';
+
+  @override
+  String get only_active => 'Faqat faol';
+
+  @override
+  String get only_assigned => 'Faqat biriktirilgan';
+
+  @override
+  String get service_inactive => 'Nofaol xizmat';
+
+  @override
+  String selected_n(int n) {
+    return 'Selected: $n';
+  }
+
+  @override
+  String get assign_visible => 'Ko‘rinadiganlarni biriktirish';
+
+  @override
+  String get remove_visible => 'Ko‘rinadiganlarni olib tashlash';
+
+  @override
+  String get added => 'Qo‘shildi';
+
+  @override
+  String get removed => 'Olib tashlandi';
+
+  @override
+  String added_n_services(int n) {
+    return 'Added $n services';
+  }
+
+  @override
+  String removed_n_services(int n) {
+    return 'Removed $n services';
+  }
+
+  @override
+  String get no_services_found => 'Hech qanday xizmat topilmadi';
+
+  @override
+  String get no_services_found_caption => 'Filtrlarni yoki qidiruvni o‘zgartirib ko‘ring.';
+
+  @override
+  String get current_password => 'Joriy parol';
+
+  @override
+  String get current_password_hint => 'Joriy parolni kiriting';
+
+  @override
+  String get current_password_required => 'Joriy parol talab qilinadi';
+
+  @override
+  String get current_password_incorrect => 'Joriy parol noto‘g‘ri';
+
+  @override
+  String get new_password => 'Yangi parol';
+
+  @override
+  String get new_password_hint => 'Yangi parolni kiriting';
+
+  @override
+  String get confirm_new_password => 'Yangi parolni tasdiqlang';
+
+  @override
+  String get confirm_new_password_hint => 'Yangi parolni qayta kiriting';
 }

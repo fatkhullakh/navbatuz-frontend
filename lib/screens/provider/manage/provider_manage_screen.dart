@@ -15,10 +15,14 @@ import 'staff/provider_staff_list_screen.dart';
 import 'hours/provider_business_hours_screen.dart';
 import '../manage/business_info/provider_settings_screen.dart';
 
+/// Stormy Morning palette
 class _Brand {
-  static const primary = Color(0xFF6A89A7);
-  static const accentSoft = Color(0xFFBDDDFC);
-  static const ink = Color(0xFF384959);
+  static const dark = Color(0xFF384959);
+  static const steel = Color(0xFF6A89A7);
+  static const sky = Color(0xFF88BDF2);
+  static const ice = Color(0xFFBDDDFC);
+
+  static const ink = dark;
   static const subtle = Color(0xFF7C8B9B);
   static const border = Color(0xFFE6ECF2);
 }
@@ -78,13 +82,12 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
     _isOwner = u.contains('OWNER');
     _isReceptionist = u.contains('RECEPTIONIST');
 
-    // only owners can be “owner-as-worker”
     if (_isOwner) {
       _loadMe();
     } else {
       setState(() {
         _roleResolved = true;
-        _checkingMe = false; // no need to check /workers/me
+        _checkingMe = false;
       });
     }
   }
@@ -128,7 +131,10 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Failed to check worker profile: ${e.message}')),
+              content: Text(
+                '${AppLocalizations.of(context)!.http_error(':')} ${e.message}',
+              ),
+            ),
           );
         }
         setState(() {
@@ -142,16 +148,14 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
   }
 
   void _needProvider(BuildContext ctx) {
+    final t = AppLocalizations.of(ctx)!;
     ScaffoldMessenger.of(ctx).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.of(ctx)!.error_generic ?? 'Provider is not selected',
-        ),
-      ),
+      SnackBar(content: Text(t.error_generic)),
     );
   }
 
   Future<void> _enableOwnerAsWorker() async {
+    final t = AppLocalizations.of(context)!;
     if (widget.providerId == null) {
       _needProvider(context);
       return;
@@ -161,7 +165,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       final body = {
         'workerType': _workerType,
         'status': _status,
-        'isActive': true,
+        'isActive': true
       };
       final r = await _dio
           .post('/providers/${widget.providerId}/owner-as-worker', data: body);
@@ -177,7 +181,6 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
               : double.tryParse('${m['avgRating']}');
           final rawAvatar = (m['avatarUrl'] ?? '').toString();
           _meAvatarUrl = ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar;
-
           final dynamic act = (m['active'] ?? m['isActive']);
           _meActive = act == true || act?.toString() == 'true';
         });
@@ -185,14 +188,14 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You are now enabled as a worker')),
+        SnackBar(content: Text(t.owner_enabled_as_worker)),
       );
     } on DioException catch (e) {
       if (!mounted) return;
       final code = e.response?.statusCode;
       final msg = e.response?.data?.toString() ?? e.message ?? e.toString();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('HTTP $code: $msg')),
+        SnackBar(content: Text(t.http_error('HTTP $code: $msg'))),
       );
     } finally {
       if (mounted) setState(() => _busyEnable = false);
@@ -200,6 +203,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
   }
 
   Future<void> _reactivateMe() async {
+    final t = AppLocalizations.of(context)!;
     if (_meWorkerId == null) return;
     setState(() => _busyReactivate = true);
     try {
@@ -207,14 +211,14 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
       await _loadMe();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Worker profile re-enabled')),
+        SnackBar(content: Text(t.worker_profile_reenabled)),
       );
     } on DioException catch (e) {
       if (!mounted) return;
       final code = e.response?.statusCode;
       final msg = e.response?.data?.toString() ?? e.message ?? e.toString();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('HTTP $code: $msg')),
+        SnackBar(content: Text(t.http_error('HTTP $code: $msg'))),
       );
     } finally {
       if (mounted) setState(() => _busyReactivate = false);
@@ -235,16 +239,17 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
     }
   }
 
-  String _statusText(String? s) {
+  String _statusText(BuildContext context, String? s) {
+    final t = AppLocalizations.of(context)!;
     switch ((s ?? '').toUpperCase()) {
       case 'AVAILABLE':
-        return 'Available';
+        return t.worker_status_available;
       case 'UNAVAILABLE':
-        return 'Unavailable';
+        return t.worker_status_unavailable;
       case 'ON_BREAK':
-        return 'On break';
+        return t.worker_status_on_break;
       case 'ON_LEAVE':
-        return 'On leave';
+        return t.worker_status_on_leave;
       default:
         return '—';
     }
@@ -255,17 +260,21 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.provider_tab_details ?? 'Manage')),
+      appBar: AppBar(
+        title: Text(t.provider_tab_details),
+        backgroundColor: _Brand.dark,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           if (_isOwner) {
             await _loadMe();
           } else {
-            // nothing to refresh for receptionist-specific top section
             setState(() {});
           }
         },
-        color: _Brand.primary,
+        color: _Brand.steel,
         child: ListView(
           children: [
             // ---------- OWNER-ONLY: owner-as-worker card(s) ----------
@@ -276,21 +285,29 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                 Card(
                   elevation: 0,
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: _Brand.steel.withOpacity(.25)),
+                  ),
+                  color: _Brand.ice.withOpacity(.5),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Your worker profile',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: _Brand.ink)),
+                        Text(
+                          t.owner_worker_profile,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: _Brand.ink,
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         Row(
                           children: [
                             CircleAvatar(
-                              radius: 24,
-                              backgroundColor: const Color(0xFFF2F4F7),
+                              radius: 26,
+                              backgroundColor: _Brand.sky.withOpacity(.25),
                               backgroundImage: (_meAvatarUrl == null ||
                                       _meAvatarUrl!.isEmpty)
                                   ? null
@@ -306,7 +323,10 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(_meName ?? 'Me',
+                                  Text(
+                                      _meName?.isNotEmpty == true
+                                          ? _meName!
+                                          : t.me_label,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -318,13 +338,13 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                                         WrapCrossAlignment.center,
                                     children: [
                                       _StatusChip(
-                                        text: _statusText(_meStatus),
+                                        text: _statusText(context, _meStatus),
                                         color: _statusColor(_meStatus),
                                       ),
                                       if (!_meActive)
-                                        const _StatusChip(
-                                          text: 'Inactive',
-                                          color: Color(0xFFB42318),
+                                        _StatusChip(
+                                          text: t.status_inactive,
+                                          color: const Color(0xFFB42318),
                                         ),
                                       if (_meAvgRating != null)
                                         Row(
@@ -352,8 +372,16 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                             runSpacing: 8,
                             children: [
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: _Brand.ink,
+                                  side: BorderSide(
+                                      color: _Brand.steel.withOpacity(.4)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                                 icon: const Icon(Icons.schedule),
-                                label: const Text('My availability'),
+                                label: Text(t.my_availability),
                                 onPressed: () {
                                   if (widget.providerId == null) {
                                     _needProvider(context);
@@ -365,16 +393,24 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                                       builder: (_) =>
                                           ProviderWorkerAvailabilityScreen(
                                         workerId: _meWorkerId!,
-                                        workerName: _meName ?? 'Me',
+                                        workerName: _meName ?? t.me_label,
                                       ),
                                     ),
                                   );
                                 },
                               ),
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: _Brand.ink,
+                                  side: BorderSide(
+                                      color: _Brand.steel.withOpacity(.4)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                                 icon:
                                     const Icon(Icons.design_services_outlined),
-                                label: const Text('My services'),
+                                label: Text(t.my_services),
                                 onPressed: () {
                                   if (widget.providerId == null) {
                                     _needProvider(context);
@@ -387,7 +423,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                                           ProviderWorkerServicesScreen(
                                         providerId: widget.providerId!,
                                         workerId: _meWorkerId!,
-                                        workerName: _meName ?? 'Me',
+                                        workerName: _meName ?? t.me_label,
                                       ),
                                     ),
                                   );
@@ -399,21 +435,29 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'You are currently removed from the team.',
-                                style: TextStyle(
+                              Text(
+                                t.removed_from_team_hint,
+                                style: const TextStyle(
                                     fontSize: 12, color: _Brand.subtle),
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
-                                height: 40,
+                                height: 44,
                                 child: FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: _Brand.dark,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                   onPressed:
                                       _busyReactivate ? null : _reactivateMe,
                                   icon: const Icon(Icons.play_arrow_rounded),
-                                  label: Text(_busyReactivate
-                                      ? 'Re-enabling…'
-                                      : 'Re-enable me'),
+                                  label: Text(
+                                    _busyReactivate
+                                        ? t.reenabling_ellipsis
+                                        : t.reenable_me,
+                                  ),
                                 ),
                               ),
                             ],
@@ -426,13 +470,18 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                 Card(
                   elevation: 0,
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: _Brand.steel.withOpacity(.25)),
+                  ),
+                  color: _Brand.ice.withOpacity(.5),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Work as staff',
-                            style: TextStyle(
+                        Text(t.work_as_staff_title,
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w800,
                                 color: _Brand.ink)),
                         const SizedBox(height: 10),
@@ -450,43 +499,68 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                           ],
                           onChanged: (v) =>
                               setState(() => _workerType = v ?? 'GENERAL'),
-                          decoration:
-                              const InputDecoration(labelText: 'Worker type'),
+                          decoration: InputDecoration(
+                            labelText: t.worker_type_label,
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: _status,
-                          items: const [
+                          items: [
                             DropdownMenuItem(
-                                value: 'AVAILABLE', child: Text('Available')),
+                                value: 'AVAILABLE',
+                                child: Text(t.worker_status_available)),
                             DropdownMenuItem(
                                 value: 'UNAVAILABLE',
-                                child: Text('Unavailable')),
+                                child: Text(t.worker_status_unavailable)),
                             DropdownMenuItem(
-                                value: 'ON_BREAK', child: Text('On break')),
+                                value: 'ON_BREAK',
+                                child: Text(t.worker_status_on_break)),
                             DropdownMenuItem(
-                                value: 'ON_LEAVE', child: Text('On leave')),
+                                value: 'ON_LEAVE',
+                                child: Text(t.worker_status_on_leave)),
                           ],
                           onChanged: (v) =>
                               setState(() => _status = v ?? 'AVAILABLE'),
-                          decoration: const InputDecoration(
-                              labelText: 'Initial status'),
+                          decoration: InputDecoration(
+                            labelText: t.initial_status_label,
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 44,
+                          height: 48,
+                          width: double.infinity,
                           child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _Brand.dark,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                             onPressed:
                                 _busyEnable ? null : _enableOwnerAsWorker,
-                            child: Text(_busyEnable
-                                ? 'Enabling…'
-                                : 'Enable me as a worker'),
+                            child: Text(
+                              _busyEnable
+                                  ? t.enabling_ellipsis
+                                  : t.enable_me_as_worker,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'You’ll be able to set your hours and assign services to yourself after enabling.',
-                          style: TextStyle(fontSize: 12, color: _Brand.subtle),
+                        Text(
+                          t.enable_hint_after,
+                          style: const TextStyle(
+                              fontSize: 12, color: _Brand.subtle),
                         ),
                       ],
                     ),
@@ -494,12 +568,11 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
                 ),
             ],
 
-            // ---------- Common manage tiles (visible to both owner & receptionist) ----------
+            // ---------- Common manage tiles ----------
             _Tile(
               icon: Icons.design_services_outlined,
-              title: t.provider_manage_services_title ?? 'Services',
-              subtitle: t.provider_manage_services_subtitle ??
-                  'Create, edit, and organize services',
+              title: t.provider_manage_services_title,
+              subtitle: t.provider_manage_services_subtitle,
               onTap: () {
                 if (widget.providerId == null) return _needProvider(context);
                 Navigator.push(
@@ -513,9 +586,8 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
             ),
             _Tile(
               icon: Icons.business_outlined,
-              title: t.provider_manage_business_title ?? 'Business info',
-              subtitle: t.provider_manage_business_subtitle ??
-                  'Name, contacts, address, about',
+              title: t.provider_manage_business_title,
+              subtitle: t.provider_manage_business_subtitle,
               onTap: () {
                 if (widget.providerId == null) return _needProvider(context);
                 Navigator.push(
@@ -529,9 +601,8 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
             ),
             _Tile(
               icon: Icons.group_outlined,
-              title: t.provider_manage_staff_title ?? 'Staff',
-              subtitle: t.provider_manage_staff_subtitle ??
-                  'Invite and manage workers',
+              title: t.provider_manage_staff_title,
+              subtitle: t.provider_manage_staff_subtitle,
               onTap: () {
                 if (widget.providerId == null) return _needProvider(context);
                 Navigator.push(
@@ -545,9 +616,8 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
             ),
             _Tile(
               icon: Icons.schedule_outlined,
-              title: t.provider_manage_hours_title ?? 'Working hours',
-              subtitle: t.provider_manage_hours_subtitle ??
-                  'Set business schedule and breaks',
+              title: t.provider_manage_hours_title,
+              subtitle: t.provider_manage_hours_subtitle,
               onTap: () {
                 if (widget.providerId == null) return _needProvider(context);
                 Navigator.push(
@@ -585,11 +655,19 @@ class _Tile extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: _Brand.steel.withOpacity(.25)),
+      ),
       child: ListTile(
-        leading: Icon(icon),
+        leading: CircleAvatar(
+          radius: 20,
+          backgroundColor: _Brand.sky.withOpacity(.25),
+          child: Icon(icon, color: _Brand.ink),
+        ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: (subtitle == null) ? null : Text(subtitle!),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const Icon(Icons.chevron_right, color: _Brand.ink),
         onTap: onTap,
       ),
     );
@@ -637,11 +715,10 @@ class _SkeletonCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [box(18), box(56), box(36)],
-        ),
+        child: Column(children: [box(18), box(56), box(36)]),
       ),
     );
   }

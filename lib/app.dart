@@ -23,7 +23,7 @@ class NavbatUzApp extends StatelessWidget {
       title: 'NavbatUz',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.indigo),
-      initialRoute: '/login',
+      initialRoute: '/onboarding',
       routes: {
         '/onboarding': (context) => const LanguageSelectionScreen(),
         '/login': (context) => const LoginScreen(),
