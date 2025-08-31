@@ -6,8 +6,9 @@ String _ensureHHmmss(String v) {
   // accepts "HH:mm" or "HH:mm:ss" and returns "HH:mm:ss"
   if (v.isEmpty) return v;
   final parts = v.split(':');
-  if (parts.length == 2)
+  if (parts.length == 2) {
     return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}:00';
+  }
   return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}:${parts[2].padLeft(2, '0')}';
 }
 

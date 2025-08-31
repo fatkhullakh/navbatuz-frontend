@@ -203,7 +203,7 @@ class _ProviderManageScreenState extends State<ProviderManageScreen> {
     if (_meWorkerId == null) return;
     setState(() => _busyReactivate = true);
     try {
-      await _dio.put('/workers/${_meWorkerId}/activate');
+      await _dio.put('/workers/$_meWorkerId/activate');
       await _loadMe();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

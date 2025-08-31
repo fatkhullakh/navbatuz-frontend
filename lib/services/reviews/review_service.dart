@@ -28,7 +28,7 @@ class ReviewService {
         queryParameters: {'page': page, 'size': size});
     return ((r.data as List?) ?? [])
         .cast<Map>()
-        .map((e) => Map<String, dynamic>.from(e as Map))
+        .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }
 
@@ -38,7 +38,7 @@ class ReviewService {
         queryParameters: {'page': page, 'size': size});
     return ((r.data as List?) ?? [])
         .cast<Map>()
-        .map((e) => Map<String, dynamic>.from(e as Map))
+        .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }
 }

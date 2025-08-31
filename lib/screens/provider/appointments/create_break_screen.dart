@@ -268,7 +268,7 @@ class _TimePicker5mDialogState extends State<_TimePicker5mDialog> {
   void initState() {
     super.initState();
     _hCtl = FixedExtentScrollController(initialItem: widget.initH.clamp(0, 23));
-    int initMIndex = (_mins.indexOf(widget.initM) == -1)
+    int initMIndex = (!_mins.contains(widget.initM))
         ? (_mins.indexWhere((v) => v >= widget.initM))
         : _mins.indexOf(widget.initM);
     if (initMIndex < 0) initMIndex = 0;

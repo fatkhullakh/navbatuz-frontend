@@ -577,12 +577,6 @@ abstract class AppLocalizations {
   /// **'Failed to load'**
   String get errorGeneric;
 
-  /// No description provided for @closed.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed'**
-  String get closed;
-
   /// No description provided for @dayMonday.
   ///
   /// In en, this message translates to:
@@ -1051,12 +1045,6 @@ abstract class AppLocalizations {
   /// **'Makeup studio'**
   String get cat_makeup_studio;
 
-  /// No description provided for @appointments_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Appointments'**
-  String get appointments_title;
-
   /// No description provided for @appointments_upcoming.
   ///
   /// In en, this message translates to:
@@ -1222,7 +1210,7 @@ abstract class AppLocalizations {
   /// No description provided for @services_title.
   ///
   /// In en, this message translates to:
-  /// **'Services'**
+  /// **'Services & Combo Services'**
   String get services_title;
 
   /// No description provided for @action_refresh.
@@ -1230,12 +1218,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get action_refresh;
-
-  /// No description provided for @action_add.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get action_add;
 
   /// No description provided for @search_services_hint.
   ///
@@ -1435,6 +1417,12 @@ abstract class AppLocalizations {
   /// **'Staff members'**
   String get staff_members;
 
+  /// No description provided for @action_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get action_add;
+
   /// No description provided for @invalid.
   ///
   /// In en, this message translates to:
@@ -1476,6 +1464,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get action_done;
+
+  /// No description provided for @closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closed;
 
   /// No description provided for @copy_monday_to_all.
   ///
@@ -2281,6 +2275,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
+  /// No description provided for @appointments_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get appointments_title;
+
   /// No description provided for @no_workers_selected.
   ///
   /// In en, this message translates to:
@@ -2406,6 +2406,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sun'**
   String get weekday_sun_short;
+
+  /// No description provided for @no_items.
+  ///
+  /// In en, this message translates to:
+  /// **'No items'**
+  String get no_items;
+
+  /// No description provided for @break_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get break_label;
+
+  /// No description provided for @common_guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get common_guest;
+
+  /// No description provided for @common_customer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get common_customer;
+
+  /// No description provided for @status_no_show.
+  ///
+  /// In en, this message translates to:
+  /// **'No-show'**
+  String get status_no_show;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

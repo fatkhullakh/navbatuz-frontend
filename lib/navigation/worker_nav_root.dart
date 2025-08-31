@@ -193,7 +193,7 @@ class _WorkerNavRootState extends State<WorkerNavRoot> {
 
 class _ComingSoon extends StatelessWidget {
   final String title;
-  const _ComingSoon({required this.title, super.key});
+  const _ComingSoon({required this.title});
   @override
   Widget build(BuildContext context) => Center(child: Text(title));
 }

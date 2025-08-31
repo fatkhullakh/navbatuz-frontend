@@ -249,9 +249,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorGeneric => 'Не удалось загрузить';
 
   @override
-  String get closed => 'Закрыто';
-
-  @override
   String get dayMonday => 'Понедельник';
 
   @override
@@ -490,9 +487,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cat_makeup_studio => 'Студия макияжа';
 
   @override
-  String get appointments_title => 'Записи';
-
-  @override
   String get appointments_upcoming => 'Ближайшие записи';
 
   @override
@@ -578,9 +572,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get action_refresh => 'Обновить';
-
-  @override
-  String get action_add => 'Добавить';
 
   @override
   String get search_services_hint => 'Поиск услуг…';
@@ -670,7 +661,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get action_delete => 'Удалить';
 
   @override
-  String get action_cancel => 'Отмена';
+  String get action_cancel => 'Отменить';
 
   @override
   String get confirm_delete_title => 'Удалить услугу?';
@@ -680,6 +671,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get staff_members => 'Сотрудники';
+
+  @override
+  String get action_add => 'Добавить';
 
   @override
   String get invalid => 'Некорректно';
@@ -701,6 +695,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get action_done => 'Готово';
+
+  @override
+  String get closed => 'Закрыто';
 
   @override
   String get copy_monday_to_all => 'Скопировать понедельник на все';
@@ -1107,13 +1104,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get language => 'Язык';
 
   @override
-  String get no_workers_selected => 'Нет выбранных сотрудников';
+  String get appointments_title => 'Записи';
+
+  @override
+  String get no_workers_selected => 'Сотрудники не выбраны';
 
   @override
   String get no_appointments => 'Нет записей';
 
   @override
-  String get new_appointment => 'Новая запись';
+  String get new_appointment => 'Добавить запись';
 
   @override
   String get worker => 'Сотрудник';
@@ -1168,4 +1168,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get weekday_sun_short => 'Вс';
+
+  @override
+  String get no_items => 'Нет записей';
+
+  @override
+  String get break_label => 'Перерыв';
+
+  @override
+  String get common_guest => 'Гость';
+
+  @override
+  String get common_customer => 'Клиент';
+
+  @override
+  String get status_no_show => 'Не пришёл';
 }

@@ -517,7 +517,16 @@
   "weekday_thu_short": "Pa",
   "weekday_fri_short": "Ju",
   "weekday_sat_short": "Sh",
-  "weekday_sun_short": "Ya"
+  "weekday_sun_short": "Ya",
+
+  "action_cancel": "Bekor qilish",
+  "common_service": "Xizmat",
+
+  "no_items": "Hech narsa yoʻq",
+  "break_label": "Tanaffus",
+  "common_guest": "Mehmon",
+  "common_customer": "Mijoz",
+  "status_no_show": "Kelmagan"
 
 
 }

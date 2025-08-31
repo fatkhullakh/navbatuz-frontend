@@ -8,7 +8,7 @@
 /// - If it starts with 00, we convert to '+'.
 /// - If there’s no country info, we prefix with +998 and keep the last 9 digits
 ///   (national significant number in UZ).
-library phone_utils;
+library;
 
 String normalizePhoneE164(String? raw, {String defaultCountry = 'UZ'}) {
   if (raw == null) return '';

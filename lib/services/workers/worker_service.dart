@@ -48,10 +48,11 @@ class WorkerDetails {
         (j['user'] is Map) ? Map<String, dynamic>.from(j['user']) : null;
 
     // Build display name robustly (name, fullName, user.name + user.surname)
-    String _buildName() {
+    String buildName() {
       final fullName = _asString(j['fullName']) ?? _asString(j['displayName']);
-      if (fullName != null && fullName.trim().isNotEmpty)
+      if (fullName != null && fullName.trim().isNotEmpty) {
         return fullName.trim();
+      }
 
       final nameTop = _asString(j['name']);
       final surnameTop = _asString(j['surname']);
@@ -101,7 +102,7 @@ class WorkerDetails {
 
     return WorkerDetails(
       id: _asString(j['id']) ?? '',
-      name: _buildName(),
+      name: buildName(),
       avatarUrl: normalizedAvatar,
       phone: phone,
       email: email,

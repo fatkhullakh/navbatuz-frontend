@@ -411,7 +411,7 @@ class StaffMember {
 
   /// Works for both list (WorkerResponse) and details (WorkerDetailsDto).
   factory StaffMember.fromWorkerJson(Map<String, dynamic> m) {
-    String? str(dynamic v) => v == null ? null : v.toString().trim();
+    String? str(dynamic v) => v?.toString().trim();
     double? toD(dynamic v) {
       if (v == null) return null;
       if (v is num) return v.toDouble();
@@ -460,13 +460,13 @@ class PlannedDay {
   PlannedDay(this.day, {this.start, this.end, this.bufferMinutes = 0});
 
   factory PlannedDay.fromJson(Map m) {
-    String _toHHmm(String s) {
+    String toHHmm(String s) {
       s = (s).toString();
       if (s.isEmpty) return '';
       return s.length >= 5 ? s.substring(0, 5) : s;
     }
 
-    int _parseBuf(dynamic v) {
+    int parseBuf(dynamic v) {
       if (v == null) return 0;
       if (v is num) return v.toInt();
       final s = v.toString(); // "PT15M" or "00:15:00"
@@ -483,9 +483,9 @@ class PlannedDay {
 
     return PlannedDay(
       (m['day'] ?? '').toString(),
-      start: _toHHmm(m['startTime'] ?? ''),
-      end: _toHHmm(m['endTime'] ?? ''),
-      bufferMinutes: _parseBuf(m['bufferBetweenAppointments']),
+      start: toHHmm(m['startTime'] ?? ''),
+      end: toHHmm(m['endTime'] ?? ''),
+      bufferMinutes: parseBuf(m['bufferBetweenAppointments']),
     );
   }
 
@@ -507,8 +507,8 @@ class ActualItem {
   ActualItem(this.id, this.date, this.start, this.end, this.bufferMinutes);
 
   factory ActualItem.fromJson(Map m) {
-    String _hhmm(String s) => s.length >= 5 ? s.substring(0, 5) : s;
-    int _buf(dynamic v) {
+    String hhmm(String s) => s.length >= 5 ? s.substring(0, 5) : s;
+    int buf(dynamic v) {
       if (v == null) return 0;
       if (v is num) return v.toInt();
       final s = v.toString();
@@ -525,9 +525,9 @@ class ActualItem {
     return ActualItem(
       int.tryParse('${m['id']}') ?? 0,
       DateTime.parse(m['date']),
-      _hhmm(m['startTime'] ?? ''),
-      _hhmm(m['endTime'] ?? ''),
-      _buf(m['bufferBetweenAppointments']),
+      hhmm(m['startTime'] ?? ''),
+      hhmm(m['endTime'] ?? ''),
+      buf(m['bufferBetweenAppointments']),
     );
   }
 }
@@ -541,12 +541,12 @@ class BreakItem {
   BreakItem(this.id, this.date, this.start, this.end);
 
   factory BreakItem.fromJson(Map m) {
-    String _hhmm(String s) => s.length >= 5 ? s.substring(0, 5) : s;
+    String hhmm(String s) => s.length >= 5 ? s.substring(0, 5) : s;
     return BreakItem(
       int.tryParse('${m['id']}') ?? 0,
       DateTime.parse(m['date']),
-      _hhmm(m['startTime'] ?? ''),
-      _hhmm(m['endTime'] ?? ''),
+      hhmm(m['startTime'] ?? ''),
+      hhmm(m['endTime'] ?? ''),
     );
   }
 }

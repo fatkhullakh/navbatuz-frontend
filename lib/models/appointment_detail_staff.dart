@@ -1,7 +1,5 @@
 // DTO for GET /appointments/{appointmentId}/staff
 
-import 'appointment_models.dart';
-
 class AppointmentDetailsStaff {
   final String id;
   final DateTime date;

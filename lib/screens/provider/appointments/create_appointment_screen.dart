@@ -269,7 +269,7 @@ class _CreateAppointmentScreenState extends State<CreateAppointmentScreen> {
               DropdownButtonFormField<String>(
                 value: _workerId,
                 decoration: const InputDecoration(labelText: 'Worker'),
-                items: workers!
+                items: workers
                     .map((w) => DropdownMenuItem(
                           value: w.id,
                           child: Text(w.displayName,

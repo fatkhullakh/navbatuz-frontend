@@ -21,14 +21,14 @@ class WorkerDetails {
   });
 
   factory WorkerDetails.fromJson(Map<String, dynamic> j) {
-    String? _providerId() {
+    String? providerId() {
       final p = j['provider'];
       if (p is Map && p['id'] != null) return p['id'].toString();
       if (j['providerId'] != null) return j['providerId'].toString();
       return null;
     }
 
-    String _name() {
+    String name() {
       if (j['name'] != null) return j['name'].toString();
       if (j['displayName'] != null) return j['displayName'].toString();
       final fn = (j['firstName'] ?? '').toString();
@@ -39,11 +39,11 @@ class WorkerDetails {
 
     return WorkerDetails(
       id: (j['id'] ?? j['workerId'] ?? '').toString(),
-      name: _name(),
+      name: name(),
       avatarUrl: (j['avatarUrl'] ?? j['photoUrl'])?.toString(),
       phone: (j['phoneNumber'] ?? j['phone'])?.toString(),
       email: j['email']?.toString(),
-      providerId: _providerId(),
+      providerId: providerId(),
       isActive: (j['isActive'] as bool?) ??
           (j['active'] as bool?) ??
           true, // default true

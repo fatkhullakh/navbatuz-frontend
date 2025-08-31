@@ -517,6 +517,30 @@
   "weekday_thu_short": "Чт",
   "weekday_fri_short": "Пт",
   "weekday_sat_short": "Сб",
-  "weekday_sun_short": "Вс"
+  "weekday_sun_short": "Вс",
+
+  "appointments_title": "Записи",
+  "today": "Сегодня",
+  "calendar_view": "Календарь",
+  "list_view": "Список",
+  "no_workers_selected": "Сотрудники не выбраны",
+  "new_appointment": "Добавить запись",
+  "add_break": "Добавить перерыв",
+  "action_cancel": "Отменить",
+  "common_service": "Услуга",
+
+  "weekday_mon_short": "Пн",
+  "weekday_tue_short": "Вт",
+  "weekday_wed_short": "Ср",
+  "weekday_thu_short": "Чт",
+  "weekday_fri_short": "Пт",
+  "weekday_sat_short": "Сб",
+  "weekday_sun_short": "Вс",
+
+  "no_items": "Нет записей",
+  "break_label": "Перерыв",
+  "common_guest": "Гость",
+  "common_customer": "Клиент",
+  "status_no_show": "Не пришёл"
 
 }

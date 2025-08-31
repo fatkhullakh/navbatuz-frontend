@@ -249,9 +249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Failed to load';
 
   @override
-  String get closed => 'Closed';
-
-  @override
   String get dayMonday => 'Monday';
 
   @override
@@ -490,9 +487,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cat_makeup_studio => 'Makeup studio';
 
   @override
-  String get appointments_title => 'Appointments';
-
-  @override
   String get appointments_upcoming => 'Upcoming Appointments';
 
   @override
@@ -574,13 +568,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_hours_hint => 'Weekly grid editor and exceptions';
 
   @override
-  String get services_title => 'Services';
+  String get services_title => 'Services & Combo Services';
 
   @override
   String get action_refresh => 'Refresh';
-
-  @override
-  String get action_add => 'Add';
 
   @override
   String get search_services_hint => 'Search services…';
@@ -682,6 +673,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staff_members => 'Staff members';
 
   @override
+  String get action_add => 'Add';
+
+  @override
   String get invalid => 'Invalid';
 
   @override
@@ -701,6 +695,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get action_done => 'Done';
+
+  @override
+  String get closed => 'Closed';
 
   @override
   String get copy_monday_to_all => 'Copy Monday to all';
@@ -1107,6 +1104,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
+  String get appointments_title => 'Appointments';
+
+  @override
   String get no_workers_selected => 'No workers selected';
 
   @override
@@ -1168,4 +1168,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weekday_sun_short => 'Sun';
+
+  @override
+  String get no_items => 'No items';
+
+  @override
+  String get break_label => 'Break';
+
+  @override
+  String get common_guest => 'Guest';
+
+  @override
+  String get common_customer => 'Customer';
+
+  @override
+  String get status_no_show => 'No-show';
 }

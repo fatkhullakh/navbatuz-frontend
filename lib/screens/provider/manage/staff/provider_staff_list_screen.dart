@@ -129,8 +129,10 @@ class _ProviderStaffListScreenState extends State<ProviderStaffListScreen>
                 .toLowerCase();
         if (!s.contains(_qWorkers.toLowerCase())) return false;
       }
-      if (_onlyAvailable && (m.isActive && m.status != WorkerStatus.AVAILABLE))
+      if (_onlyAvailable &&
+          (m.isActive && m.status != WorkerStatus.AVAILABLE)) {
         return false;
+      }
       return true;
     }).toList();
 

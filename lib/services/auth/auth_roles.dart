@@ -16,7 +16,9 @@ Set<AppRole> parseRoles(dynamic raw) {
   if (raw is String) {
     addFrom(raw);
   } else if (raw is List) {
-    for (final r in raw) addFrom(r.toString());
+    for (final r in raw) {
+      addFrom(r.toString());
+    }
   }
 
   if (out.isEmpty) out.add(AppRole.customer);

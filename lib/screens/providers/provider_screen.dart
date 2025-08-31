@@ -524,8 +524,7 @@ class _ReviewsApi {
     final list = (r.data as List?) ?? const [];
     return list
         .whereType<Map>()
-        .map((m) =>
-            _ProviderReviewItem.fromJson(Map<String, dynamic>.from(m as Map)))
+        .map((m) => _ProviderReviewItem.fromJson(Map<String, dynamic>.from(m)))
         .toList();
   }
 }
@@ -651,8 +650,7 @@ class _ReviewsTabState extends State<_ReviewsTab> {
                     if (avg != null) _starsRow(avg.round(), size: 20),
                     if (avg != null) const SizedBox(width: 10),
                     Text(
-                      (avg == null ? '—' : avg.toStringAsFixed(1)) +
-                          ' (${NumberFormat.compact().format(cnt)})',
+                      '${avg == null ? '—' : avg.toStringAsFixed(1)} (${NumberFormat.compact().format(cnt)})',
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: _Brand.ink,

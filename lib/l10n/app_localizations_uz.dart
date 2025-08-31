@@ -249,9 +249,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get errorGeneric => 'Yuklab bo‘lmadi';
 
   @override
-  String get closed => 'Yopiq';
-
-  @override
   String get dayMonday => 'Dushanba';
 
   @override
@@ -490,9 +487,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get cat_makeup_studio => 'Makiyaj studiyasi';
 
   @override
-  String get appointments_title => 'Qabullar';
-
-  @override
   String get appointments_upcoming => 'Yaqinlashayotgan uchrashuvlar';
 
   @override
@@ -578,9 +572,6 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get action_refresh => 'Yangilash';
-
-  @override
-  String get action_add => 'Qoʻshish';
 
   @override
   String get search_services_hint => 'Xizmatlarni qidirish…';
@@ -682,6 +673,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get staff_members => 'Xodimlar';
 
   @override
+  String get action_add => 'Qoʻshish';
+
+  @override
   String get invalid => 'Noto‘g‘ri';
 
   @override
@@ -701,6 +695,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get action_done => 'Tayyor';
+
+  @override
+  String get closed => 'Yopiq';
 
   @override
   String get copy_monday_to_all => 'Dushanba jadvalini barchasiga ko‘chirish';
@@ -987,7 +984,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get breaks_title => 'Tanaffuslar';
 
   @override
-  String get add_break => 'Tanaffus qo‘shish';
+  String get add_break => 'Tanaffus qoʻshish';
 
   @override
   String get select_date => 'Sana tanlang';
@@ -1107,6 +1104,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get language => 'Til';
 
   @override
+  String get appointments_title => 'Qabul vaqtlar';
+
+  @override
   String get no_workers_selected => 'Xodim tanlanmagan';
 
   @override
@@ -1168,4 +1168,19 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get weekday_sun_short => 'Ya';
+
+  @override
+  String get no_items => 'Hech narsa yoʻq';
+
+  @override
+  String get break_label => 'Tanaffus';
+
+  @override
+  String get common_guest => 'Mehmon';
+
+  @override
+  String get common_customer => 'Mijoz';
+
+  @override
+  String get status_no_show => 'Kelmagan';
 }

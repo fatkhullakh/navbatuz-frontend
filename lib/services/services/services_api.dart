@@ -15,7 +15,7 @@ class ServiceItem {
   });
 
   factory ServiceItem.fromJson(Map<String, dynamic> m) {
-    int _dur(dynamic v) {
+    int dur(dynamic v) {
       if (v == null) return 30;
       if (v is num) return v.toInt();
       final s = v.toString();
@@ -29,7 +29,7 @@ class ServiceItem {
       return int.tryParse(s) ?? 30;
     }
 
-    num? _price(dynamic v) {
+    num? price(dynamic v) {
       if (v == null) return null;
       if (v is num) return v;
       return num.tryParse(v.toString());
@@ -38,8 +38,8 @@ class ServiceItem {
     return ServiceItem(
       id: (m['id'] ?? '').toString(),
       name: (m['name'] ?? 'Service').toString(),
-      durationMinutes: _dur(m['duration'] ?? m['durationMinutes']),
-      price: _price(m['price']),
+      durationMinutes: dur(m['duration'] ?? m['durationMinutes']),
+      price: price(m['price']),
     );
   }
 }
