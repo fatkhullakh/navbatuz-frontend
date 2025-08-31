@@ -90,7 +90,6 @@
   "actionBook": "Book",
   "actionRetry": "Retry",
   "errorGeneric": "Failed to load",
-  "closed": "Closed",
 
   "dayMonday": "Monday",
   "dayTuesday": "Tuesday",
@@ -177,10 +176,8 @@
   "cat_physiotherapy_clinic": "Physiotherapy",
   "cat_makeup_studio": "Makeup studio",
 
-  "appointments_title": "Appointments",
   "appointments_upcoming": "Upcoming Appointments",
   "appointments_finished": "Finished Appointments",
-  "appointments_empty": "You don't have any appointments yet.",
   "appointment_action_cancel": "Cancel",
   "appointment_action_book_again": "Book again",
 
@@ -216,13 +213,10 @@
 
   "services_title": "Services & Combo Services",
   "action_refresh": "Refresh",
-  "action_add": "Add",
   "search_services_hint": "Search services…",
   "no_data": "No services yet",
-  "action_retry": "Retry",
 
   "service_create": "Create service",
-  "action_save": "Save",
   "main_details_required": "Main details (required)",
   "service_name": "Service name",
   "required": "Required",
@@ -256,13 +250,10 @@
   "confirm_delete_msg": "This action cannot be undone.",
   "staff_members": "Staff members",
 
-  "services_title": "Services",
   "action_refresh": "Refresh",
   "action_add": "Add",
   "search_services_hint": "Search services…",
   "no_data": "No services yet",
-  "action_retry": "Retry",
-  "action_save": "Save",
 
   "service_create": "Create service",
   "main_details_required": "Main details",
@@ -271,7 +262,6 @@
   "service_duration": "Duration",
   "service_description": "Description",
   "photos": "Photos",
-  "add_photo": "Add photo",
   "image_updated": "Image updated",
   "error_upload_image": "Upload failed",
   "image_removed": "Image removed",
@@ -322,9 +312,7 @@
   "location_permission_needed": "Location permission required",
   "apply": "Apply",
   "edit": "Edit",
-  "action_save": "Save",
   "action_cancel": "Cancel",
-  "action_retry": "Retry",
   "saved": "Saved",
   "image_updated": "Image updated",
   "error_upload_image": "Upload failed",
@@ -342,7 +330,6 @@
   "email": "Email",
   "phone": "Phone",
   "about": "About",
-  "action_save": "Save",
   "saved": "Saved",
   "required": "Required",
   "invalid_email": "Invalid email",
