@@ -31,11 +31,16 @@ class _ProviderSetPasswordScreenState extends State<ProviderSetPasswordScreen> {
 
   void _continue() {
     if (!_form.currentState!.validate()) return;
-    // Do NOT store password in OnboardingData. Send to backend later in auth flow if needed.
+
+    // Store password in OnboardingData so submitter uses exactly what user entered
+    final updated = widget.onboardingData.copyWith(
+      ownerPassword: _pwd.text.trim(),
+    );
+
     Navigator.pushNamed(
       context,
       '/onboarding/provider/category',
-      arguments: widget.onboardingData,
+      arguments: updated,
     );
   }
 
@@ -115,7 +120,7 @@ class _ProviderSetPasswordScreenState extends State<ProviderSetPasswordScreen> {
                 ),
               ),
               validator: (v) {
-                if (v != _pwd.text) {
+                if ((v ?? '') != _pwd.text) {
                   return _t('Passwords do not match', 'Пароли не совпадают',
                       'Parollar mos kelmayapti');
                 }

@@ -16,17 +16,6 @@ class _OnboardingCongratsScreenState extends State<OnboardingCongratsScreen> {
   bool _busy = false;
   String? _error;
 
-  String _genTempPassword() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#';
-    int seed = DateTime.now().microsecondsSinceEpoch % 9973;
-    final b = StringBuffer();
-    for (int i = 0; i < 10; i++) {
-      seed = (seed * 131 + i) % chars.length;
-      b.write(chars[seed]);
-    }
-    return b.toString();
-  }
-
   Future<void> _finalize() async {
     setState(() {
       _busy = true;
@@ -36,14 +25,14 @@ class _OnboardingCongratsScreenState extends State<OnboardingCongratsScreen> {
     try {
       OnboardingData d = widget.onboardingData;
 
-      // Hard defaults for language/country/role
+      // safe defaults
       d = d.copyWith(
-        languageCode: (d.languageCode ?? 'en').toLowerCase(),
+        languageCode: (d.languageCode ?? 'ru').toLowerCase(),
         countryIso2: (d.countryIso2 ?? 'UZ').toUpperCase(),
         role: 'OWNER',
       );
 
-      // Merge owner-worker payload (from previous screen) so DOB+gender are present even if not a worker
+      // pull merged data passed as route arguments (if any)
       final args =
           (ModalRoute.of(context)?.settings.arguments as Map?) ?? const {};
       final ownerWorker = args['ownerWorker'] as Map<String, dynamic>?;
@@ -63,13 +52,16 @@ class _OnboardingCongratsScreenState extends State<OnboardingCongratsScreen> {
           ownerDateOfBirth:
               d.ownerDateOfBirth ?? ownerWorker['dob']?.toString(),
           ownerGender: d.ownerGender ?? ownerWorker['gender']?.toString(),
+          ownerAlsoWorker: d.ownerAlsoWorker ?? true,
+          ownerWorkerWeeklyHours: d.ownerWorkerWeeklyHours ?? d.weeklyHours,
         );
       }
 
-      // Fallbacks for missing owner fields
+      // Basic fallbacks for name/email/phone
       String ownerName = (d.ownerName ?? '').trim();
       String ownerSurname = (d.ownerSurname ?? '').trim();
       String ownerEmail = (d.ownerEmail ?? '').trim();
+      String? ownerPhone = (d.ownerPhoneE164 ?? '').trim();
 
       if (ownerName.isEmpty || ownerSurname.isEmpty) {
         final bn = (d.businessName ?? '').trim();
@@ -88,23 +80,36 @@ class _OnboardingCongratsScreenState extends State<OnboardingCongratsScreen> {
         ownerEmail = d.businessEmail!.trim();
       }
 
+      String _composeE164(String? dial, String? local) {
+        final dcode = (dial ?? '').trim();
+        final localDigits = (local ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+        if (localDigits.isEmpty) return '';
+        final pref =
+            dcode.isEmpty ? '+' : (dcode.startsWith('+') ? dcode : '+$dcode');
+        return (pref + localDigits).replaceAll(RegExp(r'[^0-9\+]'), '');
+      }
+
+      if ((ownerPhone).isEmpty) {
+        ownerPhone =
+            _composeE164(d.businessPhoneDialCode, d.businessPhoneNumber);
+      }
+
+      // IMPORTANT: do NOT override password here — use exactly what was set on Set Password screen
+      if ((d.ownerPassword ?? '').trim().isEmpty) {
+        throw StateError('Password is missing. Please set a password.');
+      }
+
       d = d.copyWith(
         ownerName: ownerName,
         ownerSurname: ownerSurname,
         ownerEmail: ownerEmail,
+        ownerPhoneE164: ownerPhone.isEmpty ? null : ownerPhone,
       );
 
-      // Ensure password (>= 6) but don't overwrite a set one
-      if ((d.ownerPassword ?? '').trim().length < 6) {
-        d = d.copyWith(ownerPassword: _genTempPassword());
-      }
-
-      // Submit the whole flow
       final result = await OnboardingSubmitter().submitAll(d);
 
       if (!mounted) return;
 
-      // Navigate to provider home with the created provider id
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/providers',
@@ -116,9 +121,7 @@ class _OnboardingCongratsScreenState extends State<OnboardingCongratsScreen> {
         _error = e.toString();
       });
     } finally {
-      if (mounted) {
-        setState(() => _busy = false);
-      }
+      if (mounted) setState(() => _busy = false);
     }
   }
 

@@ -19,14 +19,13 @@ class OnboardingSubmitter {
   final Dio _dio = ApiService.client;
 
   Future<OnboardingSubmitResult> submitAll(OnboardingData d) async {
-    // Normalize explicit defaults
     d = d.copyWith(
       languageCode: (d.languageCode ?? 'en').toLowerCase(),
       countryIso2: (d.countryIso2 ?? 'UZ').toUpperCase(),
       role: (d.role ?? 'OWNER').toUpperCase(),
     );
 
-    // --- A) Register OWNER (include DOB & gender) ---
+    /* A) register owner */
     final ownerPhone = _composeOwnerPhone(d);
     final regBody = <String, dynamic>{
       'name': (d.ownerName ?? '').trim(),
@@ -34,22 +33,20 @@ class OnboardingSubmitter {
       'email': (d.ownerEmail ?? '').trim(),
       'phoneNumber': ownerPhone,
       'password': (d.ownerPassword ?? '').trim(),
-      'language': d.languageCode?.toUpperCase(), // EN | RU | UZ (backend style)
+      'language': d.languageCode?.toUpperCase(),
       'country': d.countryIso2,
       'role': 'OWNER',
-      'dateOfBirth': d.ownerDateOfBirth, // YYYY-MM-DD
-      'gender': d.ownerGender, // MALE|FEMALE|OTHER
+      'dateOfBirth': d.ownerDateOfBirth,
+      'gender': d.ownerGender,
     }..removeWhere((_, v) => v == null || (v is String && v.trim().isEmpty));
 
-    if ((regBody['password'] as String?)?.length != null &&
-        (regBody['password'] as String).length < 6) {
+    if ((regBody['password'] as String).length < 6) {
       throw StateError('Owner password must be at least 6 chars');
     }
-    if (regBody['name'] == null ||
-        regBody['surname'] == null ||
-        regBody['email'] == null ||
-        regBody['phoneNumber'] == null) {
-      throw StateError('Owner registration data is incomplete');
+    for (final k in ['name', 'surname', 'email', 'phoneNumber']) {
+      if (!regBody.containsKey(k)) {
+        throw StateError('Owner registration data is incomplete');
+      }
     }
 
     final regRes = await _dio.post('/auth/register', data: regBody);
@@ -57,69 +54,50 @@ class OnboardingSubmitter {
         (regRes.data is Map ? regRes.data['token'] : null)?.toString() ?? '';
     final String ownerUserId =
         (regRes.data is Map ? regRes.data['userId'] : null)?.toString() ?? '';
-
     if (token.isEmpty || ownerUserId.isEmpty) {
       throw StateError('Register failed: token/userId missing');
     }
 
-    // set token immediately so subsequent calls are authorized
     await ApiService.setToken(token);
     await ApiService.setUserId(ownerUserId);
 
-    // --- B) Login (optional but mirrors your logs; will refresh token if needed) ---
-    try {
-      final login = await _dio.post('/auth/login', data: {
-        'email': (d.ownerEmail ?? '').trim(),
-        'password': (d.ownerPassword ?? '').trim(),
-      });
-      final String t2 =
-          (login.data is Map ? login.data['token'] : null)?.toString() ?? '';
-      if (t2.isNotEmpty) await ApiService.setToken(t2);
-    } catch (_) {
-      // Ignore if login fails; you already have a token from /auth/register
-    }
-
-    // --- C) Create provider ---
+    /* B) provider */
     final providerId = await _createProvider(ownerUserId, d);
 
-    // --- D) Location ---
+    /* C) location & hours */
     await _updateLocation(providerId, d);
 
-    // --- E) Business hours ---
     final hours = _mapWeeklyHours(d.weeklyHours);
     if (hours.isNotEmpty) {
       await _dio.put('/providers/$providerId/business-hours', data: hours);
     }
 
-    // --- F) Owner-as-worker (optional) ---
+    /* D) owner as worker — runs ONLY if the flag is true */
     bool ownerWorkerCreated = false;
     String? workerId;
     if (d.ownerAlsoWorker == true) {
-      final resp = await _dio.post(
-        '/providers/$providerId/owner-as-worker',
-        data: {
-          if ((d.ownerWorkerType ?? '').trim().isNotEmpty)
-            'workerType': d.ownerWorkerType!.trim().toUpperCase(),
-          'status': 'AVAILABLE',
-          'isActive': true,
-        },
-      );
+      final body = <String, dynamic>{
+        'user': ownerUserId,
+        'provider': providerId,
+        if ((d.ownerWorkerType ?? '').trim().isNotEmpty)
+          'workerType': d.ownerWorkerType!.trim().toUpperCase(),
+      };
+
+      final resp = await _dio.post('/workers', data: body);
       ownerWorkerCreated = resp.statusCode == 200 || resp.statusCode == 201;
-      // Worker id may be same as user id (MapsId); try to read it
       workerId = (resp.data is Map && resp.data['id'] != null)
           ? resp.data['id'].toString()
-          : ownerUserId;
+          : null;
 
-      // Planned availability mirrored from business weeklyHours
       final planned =
           _mapPlannedAvailability(d.ownerWorkerWeeklyHours ?? d.weeklyHours);
-      if (planned.isNotEmpty && workerId != null && workerId.isNotEmpty) {
+      if (workerId != null && workerId.isNotEmpty && planned.isNotEmpty) {
         await _dio.post('/workers/availability/planned/$workerId',
             data: planned);
       }
     }
 
-    // --- G) Services (attach to worker if created) ---
+    /* E) services (attach to worker if created) */
     for (final s in d.services) {
       await _dio.post('/services',
           data: {
@@ -137,17 +115,14 @@ class OnboardingSubmitter {
     }
 
     return OnboardingSubmitResult(
-      token:
-          (await ApiService.client.options.headers['Authorization'] as String?)
-                  ?.replaceFirst('Bearer ', '') ??
-              token,
+      token: token,
       ownerUserId: ownerUserId,
       providerId: providerId,
       ownerWorkerCreated: ownerWorkerCreated,
     );
   }
 
-  /* ---------------- Provider ---------------- */
+  /* -------- provider -------- */
 
   Future<String> _createProvider(String ownerId, OnboardingData d) async {
     final phone =
@@ -173,7 +148,7 @@ class OnboardingSubmitter {
     return id;
   }
 
-  /* ---------------- Location ---------------- */
+  /* -------- location -------- */
 
   Future<void> _updateLocation(String providerId, OnboardingData d) async {
     String _firstNonEmpty(List<String?> xs) => xs
@@ -206,7 +181,7 @@ class OnboardingSubmitter {
     await _dio.put('/providers/$providerId/location', data: body);
   }
 
-  /* ---------------- Hours helpers ---------------- */
+  /* -------- hours helpers -------- */
 
   List<Map<String, dynamic>> _mapWeeklyHours(Map<String, String>? weekly) {
     if (weekly == null || weekly.isEmpty) return const [];
@@ -251,7 +226,7 @@ class OnboardingSubmitter {
     return out;
   }
 
-  /* ---------------- Misc utils ---------------- */
+  /* -------- utils -------- */
 
   String? _composeOwnerPhone(OnboardingData d) {
     final explicit = (d.ownerPhoneE164 ?? '').trim();
