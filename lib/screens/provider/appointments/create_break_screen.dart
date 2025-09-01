@@ -183,7 +183,7 @@ class _CreateBreakScreenState extends State<CreateBreakScreen> {
                     filled: true,
                     fillColor: _kIce.withOpacity(.45),
                   ),
-                  items: workers!
+                  items: workers
                       .map((w) => DropdownMenuItem(
                             value: w.id,
                             child: Text(w.displayName,

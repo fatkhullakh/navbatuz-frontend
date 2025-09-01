@@ -368,7 +368,6 @@ class _ServiceCard extends StatelessWidget {
     required this.onMenu,
     required this.onToggle,
     required this.t,
-    super.key,
   });
 
   @override

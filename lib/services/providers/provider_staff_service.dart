@@ -415,7 +415,7 @@ class StaffMember {
     }
 
     // Recursively search for first non-empty avatar-like field
-    String? _findAvatarUrl(dynamic node) {
+    String? findAvatarUrl(dynamic node) {
       if (node == null) return null;
 
       if (node is Map) {
@@ -442,7 +442,7 @@ class StaffMember {
         const nestedKeys = ['user', 'profile', 'account', 'owner', 'data'];
         for (final k in nestedKeys) {
           final v = node[k];
-          final found = _findAvatarUrl(v);
+          final found = findAvatarUrl(v);
           if (found != null && found.isNotEmpty) return found;
         }
 
@@ -459,7 +459,7 @@ class StaffMember {
       return null;
     }
 
-    final rawAvatar = _findAvatarUrl(m);
+    final rawAvatar = findAvatarUrl(m);
     final normalizedAvatar = rawAvatar == null
         ? null
         : (ApiService.normalizeMediaUrl(rawAvatar) ?? rawAvatar);

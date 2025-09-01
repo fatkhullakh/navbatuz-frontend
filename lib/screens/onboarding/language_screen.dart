@@ -1,31 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/locale_notifier.dart';
 import '../../models/onboarding_data.dart';
 import 'country_screen.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
   const LanguageSelectionScreen({super.key});
 
-  void goToNext(BuildContext context, String language) {
-    final onboardingData = OnboardingData(language: language);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CountrySelectionScreen(onboardingData: onboardingData),
-      ),
-    );
+  Future<void> _setLangAndGo(
+    BuildContext context, {
+    required String langCode, // 'en' | 'ru' | 'uz'
+    required String
+        displayLang, // localized label for the next screen if needed
+  }) async {
+    // 1) Persist & notify the app
+    await context.read<LocaleNotifier>().setLocaleCode(langCode);
+
+    // 2) Seed onboarding with chosen language
+    final data = OnboardingData(languageCode: langCode);
+
+    // 3) Navigate to Country selection (which will render in this language)
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CountrySelectionScreen(onboardingData: data),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final languages = [
-      {'label': 'O‘zbek', 'icon': Icons.translate},
-      {'label': 'Русский', 'icon': Icons.language},
-      {'label': 'English', 'icon': Icons.public},
+    // These labels are static on this screen (user hasn't picked a language yet)
+    const languages = [
+      _LangOpt(code: 'uz', label: 'O‘zbek', icon: Icons.translate),
+      _LangOpt(code: 'ru', label: 'Русский', icon: Icons.language),
+      _LangOpt(code: 'en', label: 'English', icon: Icons.public),
     ];
 
     return Scaffold(
       backgroundColor: _Brand.surfaceSoft,
-      appBar: _StepAppBar(stepLabel: 'Step 1 of 5', progress: 0.2),
+      appBar: const _StepAppBar(stepLabel: 'Step 1 of 5', progress: 0.20),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -35,14 +52,19 @@ class LanguageSelectionScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const _Sub('You can change language later in Settings.'),
             const SizedBox(height: 24),
-            ...languages.map((lang) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _OptionCard(
-                    title: lang['label'] as String,
-                    icon: lang['icon'] as IconData,
-                    onTap: () => goToNext(context, lang['label'] as String),
+            for (final l in languages)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _OptionCard(
+                  title: l.label,
+                  icon: l.icon,
+                  onTap: () => _setLangAndGo(
+                    context,
+                    langCode: l.code,
+                    displayLang: l.label,
                   ),
-                )),
+                ),
+              ),
           ],
         ),
       ),
@@ -50,7 +72,15 @@ class LanguageSelectionScreen extends StatelessWidget {
   }
 }
 
-/* ----------------------------- UI Helpers ------------------------------ */
+/* ---------------- UI bits ---------------- */
+
+class _LangOpt {
+  final String code;
+  final String label;
+  final IconData icon;
+  const _LangOpt({required this.code, required this.label, required this.icon});
+}
+
 class _Brand {
   static const primary = Color(0xFF6A89A7);
   static const accent = Color(0xFF88BDF2);
@@ -95,11 +125,12 @@ class _OptionCard extends StatelessWidget {
   final String? subtitle;
   final IconData icon;
   final VoidCallback onTap;
-  const _OptionCard(
-      {required this.title,
-      required this.icon,
-      required this.onTap,
-      this.subtitle});
+  const _OptionCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,9 +154,8 @@ class _OptionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: _Brand.accentSoft,
                   borderRadius: BorderRadius.circular(12),
-                  //border: const BorderSide(color: _Brand.border),
                 ),
-                child: const Icon(Icons.language, color: _Brand.primary),
+                child: Icon(icon, color: _Brand.primary),
               ),
               const SizedBox(width: 12),
               Expanded(

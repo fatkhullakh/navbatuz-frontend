@@ -1,169 +1,104 @@
+// lib/screens/onboarding/role_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/onboarding_data.dart';
+import 'onboarding_ui.dart';
+import 'provider/business_type_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   final OnboardingData onboardingData;
   const RoleSelectionScreen({super.key, required this.onboardingData});
 
-  void finishOnboarding(BuildContext context, String role) {
-    onboardingData.role = role;
+  void _goCustomer(BuildContext context) {
+    onboardingData.role = 'CUSTOMER';
     Navigator.pushNamed(context, '/register', arguments: onboardingData);
+  }
+
+  void _goWorker(BuildContext context) {
+    onboardingData.role = 'WORKER';
+    Navigator.pushNamed(context, '/login', arguments: {'fromOnboarding': true});
+  }
+
+  void _goProvider(BuildContext context) {
+    onboardingData.role = 'OWNER';
+    Navigator.pushNamed(
+      context,
+      '/onboarding/provider/email',
+      arguments: onboardingData,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final lang = onboardingData.languageCode ?? 'en';
     return Scaffold(
-      backgroundColor: _Brand.surfaceSoft,
-      appBar: _StepAppBar(stepLabel: 'Step 5 of 5', progress: 1.0),
+      backgroundColor: Brand.surfaceSoft,
+      appBar: StepAppBar(
+        stepLabel: tr(lang, 'Step 5 of 5', 'Шаг 5 из 5', '5-bosqich / 5'),
+        progress: 1.0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const _H1('Who are you?'),
+            H1(tr(lang, 'Who are you?', 'Кто вы?', 'Siz kimsiz?')),
             const SizedBox(height: 8),
-            const _Sub('We’ll tailor the app based on your role.'),
+            Sub(tr(
+              lang,
+              'We’ll tailor the app based on your role.',
+              'Мы настроим приложение под вашу роль.',
+              'Ilovani rolingizga moslaymiz.',
+            )),
             const SizedBox(height: 24),
-            _RoleCard(
-              color: _Brand.primary,
+
+            // Customer
+            OptionCard(
               icon: Icons.person,
-              title: "I'm a Customer",
-              subtitle:
-                  'Book appointments with salons, clinics, gyms, and more.',
-              onTap: () => finishOnboarding(context, 'CUSTOMER'),
+              title: tr(lang, "I'm a Customer", 'Я — клиент', 'Men mijozman'),
+              subtitle: tr(
+                lang,
+                'Book appointments with salons, clinics, gyms, and more.',
+                'Записывайтесь в салоны, клиники, фитнес и др.',
+                'Salon, klinika, fitnes va boshqalarga yoziling.',
+              ),
+              onTap: () => _goCustomer(context),
             ),
             const SizedBox(height: 14),
-            _RoleCard(
-              color: Colors.deepOrange,
+
+            // Provider
+            OptionCard(
               icon: Icons.storefront,
-              title: "I'm a Service Provider",
-              subtitle:
-                  'Manage schedule, staff, and bookings for your business.',
-              onTap: () => finishOnboarding(context, 'PROVIDER_OWNER'),
+              iconBg: Colors.orange.withOpacity(.15),
+              iconColor: Colors.deepOrange,
+              title: tr(lang, "I'm a Service Provider", 'Я — владелец бизнеса',
+                  'Men xizmat ko‘rsatuvchiman'),
+              subtitle: tr(
+                lang,
+                'Manage schedule, staff, and bookings for your business.',
+                'Управляйте расписанием, персоналом и записями.',
+                'Jadval, xodimlar va bronlarni boshqaring.',
+              ),
+              onTap: () => _goProvider(context),
+            ),
+            const SizedBox(height: 14),
+
+            // Worker
+            OptionCard(
+              icon: Icons.badge_outlined,
+              iconBg: Colors.teal.withOpacity(.15),
+              iconColor: Colors.teal,
+              title: tr(lang, "I'm a Worker", 'Я — сотрудник', 'Men xodimman'),
+              subtitle: tr(
+                lang,
+                'Sign in with credentials your employer sent you.',
+                'Войдите по данным, отправленным работодателем.',
+                'Ish beruvchingiz yuborgan ma’lumotlar bilan kiring.',
+              ),
+              onTap: () => _goWorker(context),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-/* ----------------------------- UI Helpers ------------------------------ */
-class _Brand {
-  static const primary = Color(0xFF6A89A7);
-  static const accentSoft = Color(0xFFBDDDFC);
-  static const ink = Color(0xFF384959);
-  static const border = Color(0xFFE6ECF2);
-  static const subtle = Color(0xFF7C8B9B);
-  static const surfaceSoft = Color(0xFFF6F9FC);
-}
-
-class _RoleCard extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  const _RoleCard({
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: _Brand.border),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(.15),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _Brand.border),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: _Brand.ink)),
-                    const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: const TextStyle(color: _Brand.subtle)),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: _Brand.subtle),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StepAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String stepLabel;
-  final double progress;
-  const _StepAppBar({required this.stepLabel, required this.progress});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      centerTitle: true,
-      title: Text(stepLabel,
-          style: const TextStyle(color: _Brand.subtle, fontSize: 16)),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(4),
-        child: LinearProgressIndicator(
-          value: progress,
-          backgroundColor: _Brand.border,
-          valueColor: const AlwaysStoppedAnimation<Color>(_Brand.primary),
-          minHeight: 4,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 4);
-}
-
-class _H1 extends StatelessWidget {
-  final String text;
-  const _H1(this.text);
-  @override
-  Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(
-          fontSize: 24, fontWeight: FontWeight.w800, color: _Brand.ink));
-}
-
-class _Sub extends StatelessWidget {
-  final String text;
-  const _Sub(this.text);
-  @override
-  Widget build(BuildContext context) =>
-      Text(text, style: const TextStyle(fontSize: 14, color: _Brand.subtle));
 }
