@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/appointments/appointments_screen.dart';
+import 'package:frontend/screens/providers/provider_screen.dart';
+import 'package:frontend/screens/providers/providers_list_screen.dart';
+import 'package:frontend/screens/search/search_screen.dart';
+import 'package:frontend/screens/search/service_search_screen.dart';
+import 'package:frontend/screens/search/universal_search_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'core/locale_notifier.dart';
@@ -73,6 +79,23 @@ class MyApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/register': (_) => const RegisterScreen(),
         '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
+        '/search': (_) => const SearchScreen(),
+        '/search-services': (_) => const SearchScreen(),
+        '/providers-list': (context) {
+          final args =
+              (ModalRoute.of(context)!.settings.arguments as Map?) ?? const {};
+          final filter = args['filter']?.toString();
+          final categoryId = args['categoryId']?.toString();
+          return ProvidersListScreen(filter: filter, categoryId: categoryId);
+        },
+        '/provider': (context) {
+          final id = ModalRoute.of(context)!.settings.arguments as String;
+          return ProviderScreen(providerId: id);
+        },
+
+// Other flows you navigate to
+        '/customer-appointments': (_) => const AppointmentsScreen(),
+// '/test-customer-home': (_) => FoodAppHomeScreen1(), // if used
 
         // Providers root (→ ProviderNavRoot)
         '/providers': (context) {

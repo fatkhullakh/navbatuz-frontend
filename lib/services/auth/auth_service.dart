@@ -7,6 +7,10 @@ import '../api_service.dart';
 class AuthService {
   final Dio _dio = DioClient.build();
 
+  Future<String?> currentToken() async {
+    return ApiService.getToken();
+  }
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     final res = await _dio.post('/auth/login', data: {
       'email': email,

@@ -1,4 +1,3 @@
-// lib/screens/onboarding/provider/owner_worker_setup_screen.dart
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -30,13 +29,13 @@ class _OwnerWorkerInfoScreenState extends State<OwnerWorkerInfoScreen> {
   static const _genders = ['MALE', 'FEMALE', 'OTHER'];
   String? _gender; // 'MALE' | 'FEMALE' | 'OTHER'
 
-  // is this owner also a worker?
+  // IMPORTANT: default to **false** so we never create a worker by accident
   bool get _asWorker {
     final args =
         (ModalRoute.of(context)?.settings.arguments as Map?) ?? const {};
     final v = args['asWorker'];
     if (v is bool) return v;
-    return true; // default behavior matches old flow
+    return false; // ← default NO
   }
 
   // country code (drop-down on the left)
@@ -252,8 +251,9 @@ class _OwnerWorkerInfoScreenState extends State<OwnerWorkerInfoScreen> {
     final s = (v ?? '').trim();
     if (s.isEmpty) return tr('Required', 'Обязательно', 'Majburiy');
     final ok = RegExp(r'^\S+@\S+\.\S+$').hasMatch(s);
-    if (!ok)
+    if (!ok) {
       return tr('Invalid email', 'Некорректный email', 'Noto‘g‘ri email');
+    }
     if (_checkingEmail) return tr('Checking…', 'Проверка…', 'Tekshirilmoqda…');
     if (_emailExists) {
       return tr(
@@ -364,6 +364,7 @@ class _OwnerWorkerInfoScreenState extends State<OwnerWorkerInfoScreen> {
     if (!_form.currentState!.validate()) return;
     if (_emailExists || _phoneExists) return;
 
+    // prepare payload (you keep this if another screen needs it)
     final workerPayload = {
       'firstName': _firstName.text.trim(),
       'lastName': _lastName.text.trim(),
@@ -373,17 +374,33 @@ class _OwnerWorkerInfoScreenState extends State<OwnerWorkerInfoScreen> {
       'phoneLocal': _phone.text.trim(),
       'phoneE164': e164,
       'dob': _dob.text, // YYYY-MM-DD
-      'gender': _gender, // <-- add this
+      'gender': _gender,
       'type': _workerType,
     };
+
+    // persist the decision (+ only keep worker-specific fields when YES)
+    final updatedOnboarding = widget.onboardingData.copyWith(
+      ownerAlsoWorker: _asWorker, // ← authoritative switch
+      ownerWorkerType: _asWorker ? _workerType : null,
+      ownerWorkerWeeklyHours:
+          _asWorker ? widget.onboardingData.weeklyHours : null,
+
+      // also persist owner identity/contact to use during registration
+      ownerName: _firstName.text.trim(),
+      ownerSurname: _lastName.text.trim(),
+      ownerEmail: email,
+      ownerPhoneE164: e164,
+      ownerDateOfBirth: _dob.text.isEmpty ? null : _dob.text,
+      ownerGender: _gender,
+    );
 
     Navigator.pushNamed(
       context,
       '/onboarding/provider/congrats',
       arguments: {
-        'onboarding': widget.onboardingData,
-        'ownerWorker': workerPayload,
-        'asWorker': _asWorker, // carry decision forward
+        'onboarding': updatedOnboarding,
+        'ownerWorker': workerPayload, // used by YES path; harmless for NO
+        'asWorker': _asWorker,
       },
     );
   }
@@ -553,7 +570,7 @@ class _OwnerWorkerInfoScreenState extends State<OwnerWorkerInfoScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Worker type – only required/shown when they are also a worker
+              // Worker type – only shown/required when they ARE a worker
               if (_asWorker)
                 DropdownButtonFormField<String>(
                   value: _workerType,

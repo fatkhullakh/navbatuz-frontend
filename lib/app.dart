@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/search/search_screen.dart';
 
 import 'models/onboarding_data.dart';
 import 'screens/onboarding/language_screen.dart';
@@ -92,8 +93,8 @@ class NavbatUzApp extends StatelessWidget {
           final categoryId = args['categoryId']?.toString();
           return ProvidersListScreen(filter: filter, categoryId: categoryId);
         },
-        '/search': (context) => const UniversalSearchScreen(),
-        '/search-services': (context) => const ServiceSearchScreen(),
+        '/search': (context) => const SearchScreen(),
+        '/search-services': (context) => const SearchScreen(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {

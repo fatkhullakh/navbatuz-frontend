@@ -90,6 +90,10 @@ class ApiService {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
 
+  static Future<String?> getToken() async {
+    return _storage.read(key: 'jwt_token');
+  }
+
   static Future<void> clearToken() async {
     await setToken(null);
     await _storage.delete(key: 'user_role');

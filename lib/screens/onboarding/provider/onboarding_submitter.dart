@@ -72,7 +72,7 @@ class OnboardingSubmitter {
       await _dio.put('/providers/$providerId/business-hours', data: hours);
     }
 
-    /* D) owner as worker — runs ONLY if the flag is true */
+    /* D) owner as worker — ONLY if ownerAlsoWorker == true */
     bool ownerWorkerCreated = false;
     String? workerId;
     if (d.ownerAlsoWorker == true) {
@@ -97,7 +97,7 @@ class OnboardingSubmitter {
       }
     }
 
-    /* E) services (attach to worker if created) */
+    /* E) services — attach to worker only if it exists */
     for (final s in d.services) {
       await _dio.post('/services',
           data: {
