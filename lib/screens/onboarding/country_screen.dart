@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/onboarding/city_selection_screen.dart';
 import '../../models/onboarding_data.dart';
+import 'onboarding_ui.dart';
 import 'city_screen.dart';
 
 class CountrySelectionScreen extends StatefulWidget {
@@ -12,23 +14,71 @@ class CountrySelectionScreen extends StatefulWidget {
 
 class _CountrySelectionScreenState extends State<CountrySelectionScreen> {
   final _search = TextEditingController();
+
+  String get lang => widget.onboardingData.languageCode ?? 'en';
+
+  // ISO-2 code + localized labels + emoji flag
   final _countries = const [
-    'Uzbekistan',
-    'Kazakhstan',
-    'Kyrgyzstan',
-    'Russia',
-    'Tajikistan',
-    'Turkmenistan',
+    {
+      'code': 'UZ',
+      'flag': '🇺🇿',
+      'en': 'Uzbekistan',
+      'ru': 'Узбекистан',
+      'uz': 'O‘zbekiston',
+    },
+    {
+      'code': 'KZ',
+      'flag': '🇰🇿',
+      'en': 'Kazakhstan',
+      'ru': 'Казахстан',
+      'uz': 'Qozog‘iston',
+    },
+    {
+      'code': 'KG',
+      'flag': '🇰🇬',
+      'en': 'Kyrgyzstan',
+      'ru': 'Киргизия',
+      'uz': 'Qirg‘iziston',
+    },
+    {
+      'code': 'RU',
+      'flag': '🇷🇺',
+      'en': 'Russia',
+      'ru': 'Россия',
+      'uz': 'Rossiya',
+    },
+    {
+      'code': 'TJ',
+      'flag': '🇹🇯',
+      'en': 'Tajikistan',
+      'ru': 'Таджикистан',
+      'uz': 'Tojikiston',
+    },
+    {
+      'code': 'TM',
+      'flag': '🇹🇲',
+      'en': 'Turkmenistan',
+      'ru': 'Туркменистан',
+      'uz': 'Turkmaniston',
+    },
   ];
 
-  List<String> get _filtered {
+  List<Map<String, String>> get _filtered {
     final q = _search.text.trim().toLowerCase();
-    if (q.isEmpty) return _countries;
-    return _countries.where((c) => c.toLowerCase().contains(q)).toList();
+    final labelKey = lang == 'ru' ? 'ru' : (lang == 'uz' ? 'uz' : 'en');
+    final list = _countries
+        .map((e) => e.map((k, v) => MapEntry(k, v.toString())))
+        .toList();
+    if (q.isEmpty) return list;
+    return list
+        .where((c) => (c[labelKey] ?? '').toLowerCase().contains(q))
+        .toList();
   }
 
-  void goToNext(String country) {
-    widget.onboardingData.country = country;
+  void _pick(Map<String, String> item) {
+    widget.onboardingData
+      ..countryIso2 = item['code'] // save ISO-2
+      ..countryNameEn = item['en']; // save English label for DB
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -44,25 +94,52 @@ class _CountrySelectionScreenState extends State<CountrySelectionScreen> {
     super.dispose();
   }
 
+  InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
+        labelText: label,
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Brand.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Brand.primary, width: 1.5),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _Brand.surfaceSoft,
-      appBar: _StepAppBar(stepLabel: 'Step 2 of 5', progress: 0.4),
+      backgroundColor: Brand.surfaceSoft,
+      appBar: StepAppBar(
+        stepLabel: tr(lang, 'Step 2 of 5', 'Шаг 2 из 5', '2-bosqich / 5'),
+        progress: 0.4,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const _H1('Select your country'),
+            H1(tr(lang, 'Select your country', 'Выберите страну',
+                'Mamlakatni tanlang')),
             const SizedBox(height: 8),
-            const _Sub('This helps us show the right providers and currency.'),
+            Sub(tr(
+                lang,
+                'Helps us show the right currency and providers.',
+                'Поможет показать правильную валюту и поставщиков.',
+                'To‘g‘ri valyuta va provayderlarni ko‘rsatadi.')),
             const SizedBox(height: 16),
             TextField(
               controller: _search,
               onChanged: (_) => setState(() {}),
-              decoration:
-                  _dec('Search country', suffix: const Icon(Icons.search)),
+              decoration: _dec(
+                tr(lang, 'Search country', 'Поиск страны', 'Mamlakat qidirish'),
+                suffix: const Icon(Icons.search),
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -70,11 +147,13 @@ class _CountrySelectionScreenState extends State<CountrySelectionScreen> {
                 itemCount: _filtered.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, i) {
-                  final country = _filtered[i];
-                  return _OptionCard(
-                    title: country,
+                  final item = _filtered[i];
+                  final label =
+                      item[lang == 'ru' ? 'ru' : (lang == 'uz' ? 'uz' : 'en')]!;
+                  return OptionCard(
+                    title: '${item['flag']}  $label',
                     icon: Icons.flag_outlined,
-                    onTap: () => goToNext(country),
+                    onTap: () => _pick(item),
                   );
                 },
               ),
@@ -84,139 +163,4 @@ class _CountrySelectionScreenState extends State<CountrySelectionScreen> {
       ),
     );
   }
-}
-
-/* ----------------------------- UI Helpers ------------------------------ */
-class _Brand {
-  static const primary = Color(0xFF6A89A7);
-  static const accentSoft = Color(0xFFBDDDFC);
-  static const ink = Color(0xFF384959);
-  static const border = Color(0xFFE6ECF2);
-  static const subtle = Color(0xFF7C8B9B);
-  static const surfaceSoft = Color(0xFFF6F9FC);
-}
-
-class _StepAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String stepLabel;
-  final double progress;
-  const _StepAppBar({required this.stepLabel, required this.progress});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      centerTitle: true,
-      title: Text(stepLabel,
-          style: const TextStyle(color: _Brand.subtle, fontSize: 16)),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(4),
-        child: LinearProgressIndicator(
-          value: progress,
-          backgroundColor: _Brand.border,
-          valueColor: const AlwaysStoppedAnimation<Color>(_Brand.primary),
-          minHeight: 4,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 4);
-}
-
-InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
-      labelText: label,
-      suffixIcon: suffix,
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _Brand.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _Brand.primary, width: 1.5),
-      ),
-    );
-
-class _OptionCard extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-  const _OptionCard(
-      {required this.title,
-      required this.icon,
-      required this.onTap,
-      this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: _Brand.border),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _Brand.accentSoft,
-                  borderRadius: BorderRadius.circular(12),
-                  //border: const BorderSide(color: _Brand.border),
-                ),
-                child: const Icon(Icons.flag_outlined, color: _Brand.primary),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            color: _Brand.ink,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16)),
-                    if ((subtitle ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(subtitle!,
-                          style: const TextStyle(color: _Brand.subtle)),
-                    ],
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: _Brand.subtle),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _H1 extends StatelessWidget {
-  final String text;
-  const _H1(this.text);
-  @override
-  Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(
-          fontSize: 24, fontWeight: FontWeight.w800, color: _Brand.ink));
-}
-
-class _Sub extends StatelessWidget {
-  final String text;
-  const _Sub(this.text);
-  @override
-  Widget build(BuildContext context) =>
-      Text(text, style: const TextStyle(fontSize: 14, color: _Brand.subtle));
 }

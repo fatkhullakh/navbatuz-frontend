@@ -424,13 +424,14 @@ class _ProviderBusinessHoursScreenState
         style: FilledButton.styleFrom(backgroundColor: _Brand.primary),
       ),
       switchTheme: SwitchThemeData(
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected))
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return _Brand.primarySoft;
+          }
           return _Brand.muted;
         }),
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) return _Brand.primary;
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return _Brand.primary;
           return _Brand.subtle;
         }),
       ),
