@@ -574,8 +574,9 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                     child: FilterChip(
                       avatar: Icon(Icons.person_outline,
                           size: 16,
-                          color:
-                              sel ? Colors.white : kStormDark.withOpacity(.85)),
+                          color: sel
+                              ? Colors.white
+                              : kStormMuted.withOpacity(.85)),
                       label: Text(
                         w.displayName,
                         overflow: TextOverflow.ellipsis,
@@ -585,7 +586,7 @@ class _StaffAppointmentsScreenState extends State<StaffAppointmentsScreen> {
                         ),
                       ),
                       selected: sel,
-                      selectedColor: kStormDark,
+                      selectedColor: kStormMuted,
                       backgroundColor: Colors.white,
                       side: BorderSide(
                           color:

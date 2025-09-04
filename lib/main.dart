@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/appointments/appointments_screen.dart';
+import 'package:frontend/screens/auth/customer_set_password_screen.dart';
 import 'package:frontend/screens/providers/provider_screen.dart';
 import 'package:frontend/screens/providers/providers_list_screen.dart';
 import 'package:frontend/screens/search/search_screen.dart';
@@ -77,7 +78,14 @@ class MyApp extends StatelessWidget {
 
         // Auth
         '/login': (_) => const LoginScreen(),
-        '/register': (_) => const RegisterScreen(),
+        '/register': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return RegisterScreen(onboardingData: data);
+        },
+        '/auth/set-password': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return CustomerSetPasswordScreen(onboardingData: data);
+        },
         '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
         '/search': (_) => const SearchScreen(),
         '/search-services': (_) => const SearchScreen(),

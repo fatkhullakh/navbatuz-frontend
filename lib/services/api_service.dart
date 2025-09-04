@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -9,7 +9,12 @@ class ApiService {
   static final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl(),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Navbatuz-Mobile-App/1.0.0 (Flutter)',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+      },
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ),
@@ -31,20 +36,43 @@ class ApiService {
           handler.next(e);
         },
       ),
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        requestHeader: false,
-        responseHeader: false,
-      ),
+      // Only log in debug mode to avoid performance issues in production
+      if (kDebugMode)
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+          requestHeader: false,
+          responseHeader: false,
+        ),
     ]);
 
   static Dio get client => _dio;
 
   static String _baseUrl() {
-    if (kIsWeb) return 'http://localhost:8080/api';
-    if (Platform.isAndroid) return 'http://10.0.2.2:8080/api';
-    return 'http://localhost:8080/api';
+    // Production URL for your deployed API
+    const String prodUrl = 'https://api.birzum.app/api';
+
+    // Development URLs (only used when local server is running)
+    const String devUrlWeb = 'http://localhost:8080/api';
+    const String devUrlAndroid = 'http://10.0.2.2:8080/api';
+    const String devUrlIOS = 'http://localhost:8080/api';
+
+    // FOR NOW: Always use production URL to test deployment
+    // TODO: Change this back to conditional logic when you need local development
+    return prodUrl;
+
+    // Uncomment below when you want to use local development again:
+    /*
+    // Use production URL in release mode
+    if (!kDebugMode) {
+      return prodUrl;
+    }
+
+    // Debug mode - use localhost
+    if (kIsWeb) return devUrlWeb;
+    if (Platform.isAndroid) return devUrlAndroid;
+    return devUrlIOS;
+    */
   }
 
   static String get origin {
@@ -59,9 +87,16 @@ class ApiService {
     final o = Uri.parse(origin);
     if (isAbs) {
       final u = Uri.parse(url);
-      if (u.host == 'localhost' ||
-          u.host == '127.0.0.1' ||
-          (!Platform.isAndroid && u.host == '10.0.2.2')) {
+      // In production, don't normalize production URLs
+      if (!kDebugMode &&
+          (u.host == 'api.birzum.app' || u.host == 'birzum.app')) {
+        return url;
+      }
+      // In debug mode, normalize localhost URLs
+      if (kDebugMode &&
+          (u.host == 'localhost' ||
+              u.host == '127.0.0.1' ||
+              (!Platform.isAndroid && u.host == '10.0.2.2'))) {
         return Uri(
           scheme: o.scheme,
           host: o.host,
@@ -155,6 +190,17 @@ class ApiService {
       }
     }
     return null;
+  }
+
+  // ----- Environment info (for debugging) -----
+  static Map<String, dynamic> getEnvironmentInfo() {
+    return {
+      'baseUrl': _dio.options.baseUrl,
+      'isDebugMode': kDebugMode,
+      'isWeb': kIsWeb,
+      'platform': kIsWeb ? 'web' : Platform.operatingSystem,
+      'origin': origin,
+    };
   }
 
   // ----- Auth endpoints -----

@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
+import '../../models/onboarding_data.dart';
 import '../../services/api_service.dart';
 import '../../services/providers/provider_resolver_service.dart';
 import '../../services/workers/workers_api.dart';
@@ -13,6 +14,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+/* ---------------------------- Brand ---------------------------- */
 class _Brand {
   static const primary = Color(0xFF6A89A7);
   static const accentSoft = Color(0xFFBDDDFC);
@@ -29,6 +31,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   bool _showPassword = false;
   final storage = const FlutterSecureStorage();
+
+  // --- i18n helpers (read active app locale) ---
+  String get lang {
+    final lc = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (lc == 'ru' || lc == 'uz') return lc;
+    return 'en';
+  }
+
+  String tr(String en, String ru, String uz) =>
+      lang == 'ru' ? ru : (lang == 'uz' ? uz : en);
 
   InputDecoration _dec(String label, {Widget? suffix}) => InputDecoration(
         labelText: label,
@@ -100,13 +112,19 @@ class _LoginScreenState extends State<LoginScreen> {
               await ProviderResolverService().resolveMyProviderId();
           if (!mounted) return;
           Navigator.of(context).pushNamedAndRemoveUntil(
-            '/providers', (_) => false,
-            arguments: providerId, // non-null now
+            '/providers',
+            (_) => false,
+            arguments: providerId,
           );
-        } catch (e) {
+        } catch (_) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ваш аккаунт не привязан к филиалу')),
+            SnackBar(
+              content: Text(tr(
+                  'Your account is not linked to a branch',
+                  'Ваш аккаунт не привязан к филиалу',
+                  'Hisobingiz filialga ulangan emas')),
+            ),
           );
         }
         return;
@@ -119,17 +137,32 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       final code = dioErr.response?.statusCode;
       final message = (code == 401 || code == 403)
-          ? 'Invalid email or password.'
-          : 'Login failed. Try again.';
+          ? tr('Invalid email or password.', 'Неверный email или пароль.',
+              'Email yoki parol noto‘g‘ri.')
+          : tr(
+              'Login failed. Try again.',
+              'Не удалось войти. Повторите попытку.',
+              'Kirish muvaffaqiyatsiz. Qaytadan urinib ko‘ring.');
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Login failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr('Login failed: $e', 'Ошибка входа: $e', 'Kirish xatosi: $e'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _goRegister() {
+    // Register flow expects OnboardingData (for language threading)
+    final data = OnboardingData(languageCode: lang);
+    Navigator.pushNamed(context, '/register', arguments: data);
   }
 
   @override
@@ -146,77 +179,164 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    "NavbatUz Login",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: _Brand.ink,
+                  // Branding header card
+                  Material(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: _Brand.border),
                     ),
-                    textAlign: TextAlign.center,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 48,
+                            width: 48,
+                            decoration: BoxDecoration(
+                              color: _Brand.accentSoft,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.lock_outline,
+                                color: _Brand.primary),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tr('Welcome back', 'С возвращением',
+                                      'Qaytganingiz bilan'),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: _Brand.ink,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  tr(
+                                      'Sign in to continue',
+                                      'Войдите, чтобы продолжить',
+                                      'Davom etish uchun kiring'),
+                                  style: const TextStyle(color: _Brand.subtle),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
+
+                  // Email
                   TextFormField(
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _dec("Email"),
+                    decoration: _dec(tr('Email', 'Email', 'Email')),
                     validator: (v) {
-                      if ((v ?? '').trim().isEmpty) return "Enter email";
+                      if ((v ?? '').trim().isEmpty) {
+                        return tr(
+                            'Enter email', 'Введите email', 'Email kiriting');
+                      }
                       final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
                           .hasMatch(v!.trim());
-                      return ok ? null : 'Invalid email';
+                      return ok
+                          ? null
+                          : tr('Invalid email', 'Некорректный email',
+                              'Noto‘g‘ri email');
                     },
                   ),
                   const SizedBox(height: 12),
+
+                  // Password
                   TextFormField(
                     controller: _password,
                     decoration: _dec(
-                      "Password",
+                      tr('Password', 'Пароль', 'Parol'),
                       suffix: IconButton(
-                        icon: Icon(_showPassword
-                            ? Icons.visibility_off
-                            : Icons.visibility),
+                        icon: Icon(
+                          _showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
                         onPressed: () =>
                             setState(() => _showPassword = !_showPassword),
                       ),
                     ),
                     obscureText: !_showPassword,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Enter password" : null,
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? tr('Enter password', 'Введите пароль',
+                            'Parol kiriting')
+                        : null,
                   ),
                   const SizedBox(height: 20),
+
+                  // Login button
                   SizedBox(
-                    height: 48,
+                    height: 50,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: _Brand.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(14)),
                       ),
                       onPressed: _loading ? null : _handleLogin,
                       child: _loading
                           ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text("Login"),
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(tr('Login', 'Войти', 'Kirish')),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: _loading
-                        ? null
-                        : () => Navigator.pushNamed(context, '/register'),
-                    child: const Text("Don't have an account? Register"),
-                  ),
-                  TextButton(
-                    onPressed: _loading
-                        ? null
-                        : () =>
-                            Navigator.pushNamed(context, '/forgot-password'),
-                    child: const Text("Forgot password?"),
-                  ),
+
+                  // Links
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: _loading ? null : _goRegister,
+                          child: Text(
+                            tr(
+                                "Don't have an account? Register",
+                                'Нет аккаунта? Зарегистрируйтесь',
+                                'Hisob yo‘qmi? Ro‘yxatdan o‘ting'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _loading
+                                ? null
+                                : () => Navigator.pushNamed(
+                                    context, '/forgot-password'),
+                            child: Text(
+                              tr('Forgot password?', 'Забыли пароль?',
+                                  'Parol esdan chiqdimi?'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),

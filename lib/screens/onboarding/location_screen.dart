@@ -146,110 +146,119 @@ class _LocationScreenState extends State<LocationScreen> {
     return Scaffold(
       backgroundColor: _Brand.surfaceSoft,
       appBar: _StepAppBar(stepLabel: _stepLabel, progress: 0.8),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _H1(_title),
-            const SizedBox(height: 8),
-            _Sub(_subtitle),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            // let it scroll if content > screen
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _H1(_title),
+                    const SizedBox(height: 8),
+                    _Sub(_subtitle),
 
-            const SizedBox(height: 24),
-            const _Illustration(),
-            const SizedBox(height: 20),
+                    const SizedBox(height: 24),
+                    const _Illustration(),
+                    const SizedBox(height: 20),
 
-            // Primary CTA: Share my location (appealing)
-            SizedBox(
-              height: 52,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: _Brand.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: _pickOnMapFlow, // picker handles permission & GPS
-                icon: const Icon(Icons.my_location),
-                label: Text(
-                  _sharePrimary,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Secondary: Pick on map
-            SizedBox(
-              height: 48,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  side: const BorderSide(color: _Brand.border),
-                ),
-                onPressed: _pickOnMapFlow,
-                icon: const Icon(Icons.location_on_outlined),
-                label: Text(_pickOnMap),
-              ),
-            ),
-
-            // Selected coordinates pill (if any)
-            if (hasPin) ...[
-              const SizedBox(height: 14),
-              _CoordPill(
-                label: selectedCoords(_lat!, _lng!),
-                editLabel: _editPin,
-                onEdit: _pickOnMapFlow,
-              ),
-            ],
-
-            const Spacer(),
-
-            // Continue button appears ONLY after a location is set
-            if (hasPin)
-              SizedBox(
-                height: 52,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _Brand.ink,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    // Share location
+                    SizedBox(
+                      height: 52,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _Brand.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: _pickOnMapFlow,
+                        icon: const Icon(Icons.my_location),
+                        label: Text(
+                          _sharePrimary,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
                     ),
-                  ),
-                  onPressed: _goNext,
-                  child: Text(
-                    _continue,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
 
-            // Tiny, low-emphasis Skip link (discourage skipping)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Align(
-                alignment: Alignment.center,
-                child: Opacity(
-                  opacity: 0.6,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      foregroundColor: _Brand.subtle,
-                      textStyle: const TextStyle(fontSize: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    const SizedBox(height: 10),
+
+                    // Pick on map
+                    SizedBox(
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          side: const BorderSide(color: _Brand.border),
+                        ),
+                        onPressed: _pickOnMapFlow,
+                        icon: const Icon(Icons.location_on_outlined),
+                        label: Text(_pickOnMap),
+                      ),
                     ),
-                    onPressed: _goNext,
-                    child: Text(_skip),
-                  ),
+
+                    // Selected coordinates
+                    if (hasPin) ...[
+                      const SizedBox(height: 14),
+                      _CoordPill(
+                        label: selectedCoords(_lat!, _lng!),
+                        editLabel: _editPin,
+                        onEdit: _pickOnMapFlow,
+                      ),
+                    ],
+
+                    const Spacer(), // now safe because height is bounded by ConstrainedBox
+
+                    if (hasPin)
+                      SizedBox(
+                        height: 52,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: _Brand.ink,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: _goNext,
+                          child: Text(
+                            _continue,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Opacity(
+                          opacity: 0.6,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: _Brand.subtle,
+                              textStyle: const TextStyle(fontSize: 12),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            onPressed: _goNext,
+                            child: Text(_skip),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

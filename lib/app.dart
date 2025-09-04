@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/auth/customer_set_password_screen.dart';
 import 'package:frontend/screens/search/search_screen.dart';
 
 import 'models/onboarding_data.dart';
@@ -54,7 +55,14 @@ class NavbatUzApp extends StatelessWidget {
       routes: {
         '/onboarding': (context) => const LanguageSelectionScreen(),
         '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
+        '/register': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return RegisterScreen(onboardingData: data);
+        },
+        '/auth/set-password': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return CustomerSetPasswordScreen(onboardingData: data);
+        },
         '/forgot-password': (context) => const ForgotPasswordRequestScreen(),
 
         '/customers': (context) => const NavRoot(),
