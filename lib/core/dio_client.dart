@@ -1,0 +1,51 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class DioClient {
+  static final _storage = FlutterSecureStorage(); // <-- fixed
+
+  static Dio build() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl(),
+        headers: {'Content-Type': 'application/json'},
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
+      ),
+    );
+
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await _storage.read(key: 'jwt_token');
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        handler.next(options);
+      },
+      onError: (err, handler) async {
+        if (err.response?.statusCode == 401) {
+          await _storage.delete(key: 'jwt_token');
+          await _storage.delete(key: 'user_role');
+        }
+        handler.next(err);
+      },
+    ));
+
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      requestHeader: false,
+      responseHeader: false,
+    ));
+
+    return dio;
+  }
+
+  static String _baseUrl() {
+    if (kIsWeb) return 'https://api.birzum.app/api';
+    if (Platform.isAndroid) return 'https://api.birzum.app/api';
+    return 'https://api.birzum.app/api';
+  }
+}

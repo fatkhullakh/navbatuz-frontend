@@ -1,126 +1,232 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/appointments/appointments_screen.dart';
+import 'package:frontend/screens/auth/customer_set_password_screen.dart';
+import 'package:frontend/screens/providers/provider_screen.dart';
+import 'package:frontend/screens/providers/providers_list_screen.dart';
+import 'package:frontend/screens/search/search_screen.dart';
+import 'package:frontend/screens/search/service_search_screen.dart';
+import 'package:frontend/screens/search/universal_search_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'core/locale_notifier.dart';
+import 'l10n/app_localizations.dart';
+
+// Base shells/screens
+import 'navigation/nav_root.dart';
+import 'navigation/provider_nav_root.dart';
+import 'navigation/worker_nav_root.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
+import 'screens/auth/forgot_password_request_screen.dart';
+
+// Onboarding flow
+import 'models/onboarding_data.dart';
+import 'screens/onboarding/language_screen.dart';
+import 'screens/onboarding/provider/business_type_screen.dart';
+import 'screens/onboarding/provider/provider_about_screen.dart';
+import 'screens/onboarding/provider/provider_location_screen.dart';
+import 'screens/onboarding/provider/business_hours_screen.dart';
+import 'screens/onboarding/provider/services_manage_screen.dart';
+import 'screens/onboarding/provider/service_add_screen.dart';
+import 'screens/onboarding/provider/business_address_screen.dart';
+import 'screens/onboarding/provider/team_size_screen.dart';
+import 'screens/onboarding/provider/provider_email_screen.dart';
+import 'screens/onboarding/provider/provider_password_screen.dart';
+import 'screens/onboarding/provider/owner_worker_question_screen.dart';
+import 'screens/onboarding/provider/owner_worker_setup_screen.dart';
+import 'screens/onboarding/provider/congrats_screen.dart';
+
+OnboardingData _extractOnboarding(Object? arg) {
+  if (arg is OnboardingData) return arg;
+  if (arg is Map && arg['onboarding'] is OnboardingData) {
+    return arg['onboarding'] as OnboardingData;
+  }
+  throw ArgumentError(
+      'Expected OnboardingData or {onboarding: OnboardingData}');
+}
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => LocaleNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final ln = context.watch<LocaleNotifier>();
+
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 20, 128, 53)),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+      debugShowCheckedModeBanner: false,
+      title: 'NavbatUz',
+      locale: ln.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: ThemeData(useMaterial3: true),
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const LanguageSelectionScreen(),
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+        // Customers root
+        '/customers': (_) => const NavRoot(),
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+        // Auth
+        '/login': (_) => const LoginScreen(),
+        '/register': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return RegisterScreen(onboardingData: data);
+        },
+        '/auth/set-password': (ctx) {
+          final data = ModalRoute.of(ctx)!.settings.arguments as OnboardingData;
+          return CustomerSetPasswordScreen(onboardingData: data);
+        },
+        '/forgot-password': (_) => const ForgotPasswordRequestScreen(),
+        '/search': (_) => const SearchScreen(),
+        '/search-services': (_) => const SearchScreen(),
+        '/providers-list': (context) {
+          final args =
+              (ModalRoute.of(context)!.settings.arguments as Map?) ?? const {};
+          final filter = args['filter']?.toString();
+          final categoryId = args['categoryId']?.toString();
+          return ProvidersListScreen(filter: filter, categoryId: categoryId);
+        },
+        '/provider': (context) {
+          final id = ModalRoute.of(context)!.settings.arguments as String;
+          return ProviderScreen(providerId: id);
+        },
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+// Other flows you navigate to
+        '/customer-appointments': (_) => const AppointmentsScreen(),
+// '/test-customer-home': (_) => FoodAppHomeScreen1(), // if used
 
-  final String title;
+        // Providers root (→ ProviderNavRoot)
+        '/providers': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          String? providerId;
+          if (args is String) {
+            providerId = args;
+          } else if (args is Map && args['providerId'] is String) {
+            providerId = args['providerId'] as String;
+          }
+          return ProviderNavRoot(providerId: providerId);
+        },
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        // Workers root
+        '/workers': (context) {
+          final args =
+              (ModalRoute.of(context)!.settings.arguments as Map?) ?? const {};
+          final workerId = (args['workerId'] ?? '') as String;
+          return WorkerNavRoot(workerId: workerId);
+        },
+      },
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/onboarding/provider/category':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ProviderCategoryScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/about':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ProviderAboutScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/location':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ProviderBusinessLocationScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/hours':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => BusinessHoursScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/services':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ServicesManageScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/service/add':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ServiceAddScreen(
+                lang: (settings.arguments as String?) ?? 'en',
+              ),
+            );
+          case '/onboarding/provider/address':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => BusinessAddressScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/team-size':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => TeamSizeScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/email':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ProviderEmailScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/set-password':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => ProviderSetPasswordScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/owner-worker':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OwnerWorkerQuestionScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/owner-setup':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OwnerWorkerInfoScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+          case '/onboarding/provider/congrats':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OnboardingCongratsScreen(
+                onboardingData: _extractOnboarding(settings.arguments),
+              ),
+            );
+        }
+        return null;
+      },
+      onUnknownRoute: (settings) => MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Routing error')),
+          body: Center(child: Text('Unknown route: ${settings.name}')),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
