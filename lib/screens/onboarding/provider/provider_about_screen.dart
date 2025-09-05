@@ -22,6 +22,8 @@ class _ProviderAboutScreenState extends State<ProviderAboutScreen> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
 
+  static const int _DESC_MAX = 2000;
+
   /// ISO2, dial, localLen
   static const List<(String iso, String dial, int len)> _codes = [
     ('UZ', '+998', 9),
@@ -268,11 +270,25 @@ class _ProviderAboutScreenState extends State<ProviderAboutScreen> {
               // Description (optional)
               TextFormField(
                 controller: _desc,
-                maxLines: 3,
+                maxLines: 4,
+                maxLength: _DESC_MAX,
+                inputFormatters: [LengthLimitingTextInputFormatter(_DESC_MAX)],
                 decoration: _dec(
                   _t('Description (optional)', 'Описание (необязательно)',
                       'Tavsif (ixtiyoriy)'),
-                ),
+                ).copyWith(
+                    helperText: _t('Max $_DESC_MAX characters',
+                        'Макс $_DESC_MAX символов', 'Maks $_DESC_MAX belgi')),
+                validator: (v) {
+                  final s = (v ?? '').trim();
+                  if (s.length > _DESC_MAX) {
+                    return _t(
+                        'Too long (max $_DESC_MAX)',
+                        'Слишком длинно (макс $_DESC_MAX)',
+                        'Juda uzun (maks $_DESC_MAX)');
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
 
